@@ -8,6 +8,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Arrays;
 
+// To be changed to floor
+
 public class SimpleClient {
 
 	DatagramPacket sendPacket, receivePacket; //instantiates packets and socket

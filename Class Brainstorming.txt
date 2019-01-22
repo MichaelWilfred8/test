@@ -1,0 +1,70 @@
+Elevator
+Attributes:
+- list of elevator buttons(int[])(array of Floor?)(remove probably)
+- list of elevator lamps (lit when button pressed)(boolean[])
+- elevator motor (motorState: enum(up, down, off))
+- elevator door (doorOpen: boolean)(doorState: enum(open, closed))
+- sendReceiveSocket: datagramSocket
+- sendPacket: datagramPacket
+- receivePacket: datagramPacket
+
+- next floor to visit (store queue here or in scheduler?)
+Methods:
+
+
+
+Floor
+Attributes:
+- up/down floor buttons (floorButtons[2]: boolean)
+- Request Direction lamps (reqDirectionLamps[2]: boolean) (floorLamp?)
+- Elevator Direction lamps (elevDirectionLamps[2]: boolean)
+- Arrival Sensors (elevatorArrived: boolean)
+
+Methods:
+
+
+
+
+Button
+Attributes:
+
+
+Scheduler
+Attributes:
+- list of requests
+- minFloor: static final int
+- maxFloor: static final int
+- sendSocket: DatagramSocket
+- receiveSocket: DatagramSocket
+- sendPacket: DatagramPacket
+- receivePacket: DatagramPacket
+
+
+Two lists? one for going up, other for going down?
+List of queues?
+
+Methods:
+
+
+
+
+ElevatorInputPacket (extend DatagramPacket?)
+Attributes:
++ Time packet was sent (format hh:mm:ss:mmm)(what built in format to use?) (do we want dates too?)
++ floor request was made from (floor: int)
++ Floor button that was pressed (floorButton: enum(up, down))
++ car button that was pressed (carButton: int(floor number))
+
+two main formats:
+from elevator car: time, floorRequest, carButton, NULL
+from floor panel: time, floorRequest, NULL, floorButton
+
+
+Methods:
+getTime(): time
+getFloor(): int
+getFloorButton(): enum(up, down)
+getCarButton(): int
+
+
+

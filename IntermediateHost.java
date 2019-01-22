@@ -8,6 +8,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Arrays;
 
+// To be changed to Scheduler??
+
 public class IntermediateHost {
 
 	DatagramPacket sendPacket, receivePacket;
