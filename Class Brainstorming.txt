@@ -4,12 +4,16 @@ Attributes:
 - list of elevator lamps (lit when button pressed)(boolean[])
 - elevator motor (motorState: enum(up, down, off))
 - elevator door (doorOpen: boolean)(doorState: enum(open, closed))
+- currentFloor: int
 - sendReceiveSocket: datagramSocket
 - sendPacket: datagramPacket
 - receivePacket: datagramPacket
 
 - next floor to visit (store queue here or in scheduler?)
 Methods:
+
+
+
 
 
 
@@ -50,7 +54,7 @@ Methods:
 
 ElevatorInputPacket (extend DatagramPacket?)
 Attributes:
-+ Time packet was sent (format hh:mm:ss:mmm)(what built in format to use?) (do we want dates too?)
++ Time packet was sent (format hh:mm:ss:SSS)(what built in format to use?) (do we want dates too?)
 + floor request was made from (floor: int)
 + Floor button that was pressed (floorButton: enum(up, down))
 + car button that was pressed (carButton: int(floor number))
