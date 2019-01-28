@@ -1,7 +1,7 @@
 
 public enum FloorButtonDirection {
-	UP(1),  
-	DOWN(0);
+	DOWN(0),
+	UP(1);
 	
 	private int value;
 	
@@ -11,5 +11,13 @@ public enum FloorButtonDirection {
 	
 	public int getValue(){
 		return this.value;
+	}
+	
+	public String toString(){
+		if (this.value == 0){
+			return "DOWN";
+		} else {
+			return "UP";
+		}
 	}
 }

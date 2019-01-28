@@ -3,6 +3,9 @@ import java.time.format.DateTimeFormatter;
 import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
 
+
+// TODO: Make Elevator Input Packet an extension of DatagramPacket
+
 public class ElevatorInputPacket {
 	
 	private LocalDateTime timeStamp;			// Timestamp for when request was sent
@@ -29,6 +32,27 @@ public class ElevatorInputPacket {
 		this.floor = floor;
 		this.floorButton = floorButton;
 	}
+	
+	// Constructor for Elevator Input Packet from a byte array
+	public ElevatorInputPacket(byte[] b){
+		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);	// create a ByteBuffer to parse the byte array
+		buf.put(b);													// put all bytes from array into new buffer
+		
+		buf.flip();		// flip buffer to read data properly
+		// create an empty string from byte buffer
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < TIMESTAMP_STRING_LENGTH; ++i){
+			sb.append(buf.getChar());	// append each character from the timestamp bytes to the stringbuilder
+		}
+		
+		this.timeStamp = LocalDateTime.parse(sb.toString(), TIME_FORMAT);	// set the timeString to the string from the byte buffer
+		
+		this.floor = buf.getInt();										// get floor number from the ByteBuffer
+		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
+		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
+	}
+	
 	
 	// TODO: finish this method
 	// return the time stamp as a string
@@ -125,19 +149,26 @@ public class ElevatorInputPacket {
 		
 		this.timeStamp = LocalDateTime.parse(sb.toString(), TIME_FORMAT);	// set the timeString to the string from the byte buffer
 		
-		this.floor = buf.getInt();
-		this.floorButton = buf.getInt();
-		this.carButton = buf.getInt();
-		
-		
+		this.floor = buf.getInt();										// get floor number from the ByteBuffer
+		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
+		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
 	}
 	
-	// TODO: create function that prints the information in the packet to the console
+	
 	public void printElevatorPacket(){
-		
+		System.out.println("Time Stamp: " + this.getTimeStampString());
+		System.out.println("Floor: " + this.getFloor());
+		System.out.println("Floor Button Direction: " + this.getFloorButton().toString());
+		System.out.println("Car Button: " + this.getCarButton());
 	}
 	
 	public static void main(String args[]){
+		ElevatorInputPacket p1 = new ElevatorInputPacket(3, FloorButtonDirection.UP, 7);
 		
+		p1.printElevatorPacket();
+		
+		ElevatorInputPacket p2 = new ElevatorInputPacket(p1.toBytes());
+		
+		p2.printElevatorPacket();
 	}
 }
