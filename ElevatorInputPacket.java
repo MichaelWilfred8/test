@@ -12,6 +12,7 @@ public class ElevatorInputPacket {
 	
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");	// Format for the timestamp. Uses a 24 hour clock (hour is 0-23)
 	private static final int BYTE_ARRAY_LENGTH = 100;
+	private static final int TIMESTAMP_STRING_LENGTH = 12;
 	
 	
 	// Constructor for ElevatorInputPacket where the timestamp is inputted (Remove this function?)
@@ -91,12 +92,16 @@ public class ElevatorInputPacket {
 	public byte[] toBytes(){
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);
 		
-		//buf.put(this.getTimeStampString().getBytes());	// add time stamp string as bytes to the byte buffer
+		buf.put(this.getTimeStampString().getBytes());	// add time stamp string as bytes to the byte buffer
 		
-		buf.putInt(this.timeStamp.getHour()); 		// add hour from time stamp as bytes to the byte buffer
-		buf.putInt(this.timeStamp.getMinute());		// add minute from time stamp as bytes to the byte buffer
-		buf.putInt(this.timeStamp.getSecond());		// add second from time stamp as bytes to the byte buffer
-		buf.putInt(this.timeStamp.getNano());		// add nanosecond from time stamp as bytes to the byte buffer
+		/* Code for adding the time stamp as individual characters to the buffer
+		 * 
+		 * buf.putInt(this.timeStamp.getHour()); 		// add hour from time stamp as bytes to the byte buffer
+		 * buf.putInt(this.timeStamp.getMinute());		// add minute from time stamp as bytes to the byte buffer
+		 * buf.putInt(this.timeStamp.getSecond());		// add second from time stamp as bytes to the byte buffer
+		 * buf.putInt(this.timeStamp.getNano());		// add nanosecond from time stamp as bytes to the byte buffer
+		 */
+		
 		
 		buf.putInt(this.floor);	// add floor number to byte buffer
 		
@@ -111,7 +116,18 @@ public class ElevatorInputPacket {
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);
 		buf.put(b);	// put all bytes from array into new buffer
 		
-		this.timeStamp.
+		// create an emptystring from byte buffer
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < TIMESTAMP_STRING_LENGTH; ++i){
+			sb.append(buf.getChar());	// append each character from the timestamp bytes to the stringbuilder
+		}
+		
+		this.timeStamp = LocalDateTime.parse(sb.toString(), TIME_FORMAT);	// set the timeString to the string from the byte buffer
+		
+		this.floor = buf.getInt();
+		this.floorButton = buf.getInt();
+		this.carButton = buf.getInt();
 		
 		
 	}
