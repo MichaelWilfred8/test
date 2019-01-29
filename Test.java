@@ -35,7 +35,7 @@ public class Test{
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
 		BufferedReader fileReader = null;//instantiate file reader	
-		final String DELIMITER = ",";//Delimiter used in CSV file
+		final String DELIMITER = " ";//Delimiter used in CSV file
 		try{
 			String line = "";//build string into line
 
