@@ -76,7 +76,6 @@ public class Floor {
 			System.exit(1);
 		}
 		
-		
 		//print details of outgoing packet
 		System.out.println("Client: Sending packet:");
 		System.out.println("To host: " + sendPacket.getAddress());
@@ -85,6 +84,12 @@ public class Floor {
 		System.out.println("Length: " + len);
 		System.out.println("Containing: ");
 		System.out.println("(Bytes)" + Arrays.toString(sendPacket.getData()) + "\n");
+	}
+	
+	public void newRequest(String[] request) {
+		TimeStamp ts = new TimeStamp (request[0]);
+		byte[][]time = ts.toBytes();
+		
 	}
 
 	/**
