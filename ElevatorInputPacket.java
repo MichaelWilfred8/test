@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 
 public class ElevatorInputPacket {
 	
-	private LocalDateTime timeStamp;			// Timestamp for when request was sent
+	private TimeStamp timeStamp;				// Timestamp for when request was sent
 	private int floor;							// Floor where request originated from
 	private FloorButtonDirection floorButton;	// Button pressed on Floor (up or down)
 	private int carButton; 						// Floor Button pressed by passenger in elevator
@@ -19,7 +19,7 @@ public class ElevatorInputPacket {
 	
 	
 	// Constructor for ElevatorInputPacket where the timestamp is inputted (Remove this function?)
-	public ElevatorInputPacket(LocalDateTime timeStamp, int floor, FloorButtonDirection floorButton, int carButton){
+	public ElevatorInputPacket(TimeStamp timeStamp, int floor, FloorButtonDirection floorButton, int carButton){
 		this.timeStamp = timeStamp;
 		this.floor = floor;
 		this.floorButton = floorButton;
@@ -28,7 +28,7 @@ public class ElevatorInputPacket {
 	
 	// Constructor for ElevatorInputPacket where no timestamp is given
 	public ElevatorInputPacket(int floor, FloorButtonDirection floorButton, int carButton){
-		this.timeStamp = LocalDateTime.now();		// set timestamp to the current time
+		this.timeStamp = new TimeStamp(LocalDateTime.now().format(TIME_FORMAT));		// set timestamp to the current time
 		this.floor = floor;
 		this.floorButton = floorButton;
 	}
@@ -36,9 +36,15 @@ public class ElevatorInputPacket {
 	// Constructor for Elevator Input Packet from a byte array
 	public ElevatorInputPacket(byte[] b){
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);	// create a ByteBuffer to parse the byte array
-		buf.put(b);													// put all bytes from array into new buffer
+		buf.wrap(b);													// put all bytes from array into new buffer
 		
 		buf.flip();		// flip buffer to read data properly
+		
+		
+		this.floor = buf.getInt();										// get floor number from the ByteBuffer
+		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
+		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
+		
 		// create an empty string from byte buffer
 		StringBuilder sb = new StringBuilder();
 		
@@ -46,22 +52,20 @@ public class ElevatorInputPacket {
 			sb.append(buf.getChar());	// append each character from the timestamp bytes to the stringbuilder
 		}
 		
-		this.timeStamp = LocalDateTime.parse(sb.toString(), TIME_FORMAT);	// set the timeString to the string from the byte buffer
+		System.out.println("buffer string: " + sb.toString());
 		
-		this.floor = buf.getInt();										// get floor number from the ByteBuffer
-		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
-		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
+		this.timeStamp = new TimeStamp(sb.toString());					// set the timeString to the string from the byte buffer
 	}
 	
 	
-	// TODO: finish this method
+	// TODO: remove this method from the class and change all references to the TimeStamp object
 	// return the time stamp as a string
 	public String getTimeStampString(){
-		return this.timeStamp.format(TIME_FORMAT);
+		return this.timeStamp.toString();
 	}
 
 
-	public LocalDateTime getTimeStamp() {
+	public TimeStamp getTimeStamp() {
 		return timeStamp;
 	}
 
@@ -133,25 +137,9 @@ public class ElevatorInputPacket {
 		
 		buf.putInt(this.carButton);		// add car button to byte buffer
 		
+		buf.flip();	// flip buffer to allow for reading appropriately
+		
 		return buf.array();		// return the byte buffer as an array
-	}
-	
-	public void fromBytes(byte[] b){
-		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);
-		buf.put(b);	// put all bytes from array into new buffer
-		
-		// create an emptystring from byte buffer
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < TIMESTAMP_STRING_LENGTH; ++i){
-			sb.append(buf.getChar());	// append each character from the timestamp bytes to the stringbuilder
-		}
-		
-		this.timeStamp = LocalDateTime.parse(sb.toString(), TIME_FORMAT);	// set the timeString to the string from the byte buffer
-		
-		this.floor = buf.getInt();										// get floor number from the ByteBuffer
-		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
-		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
 	}
 	
 	
