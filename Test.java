@@ -23,7 +23,7 @@ public class Test
             //Create the file reader
             fileReader = new BufferedReader(new FileReader(fileToParse));
             
-             int a=0;
+             int counter=0;
              
              String passenger="";
             //Read the file line by line
@@ -37,19 +37,19 @@ public class Test
                
                     //Print all tokens
                 for(String t : tokens) {
-                	if(a==4)
+                	if(counter==4)
                 	{
                 		Test test = new Test();
-                		a=0;
+                		counter=0;
                 		test.sendReceive(passenger);
                 		passenger="";
                 	}
                 	passenger+=t;
-                	System.out.println(a+":"+passenger+" "+t.length());
-                	a++;
+                	
+                	counter++;
                 }
                 Test test = new Test();
-        		a=0;
+        		counter=0;
         		test.sendReceive(passenger);
         		passenger="";
                 
@@ -72,7 +72,7 @@ public class Test
 	
 	public void sendReceive(String passenger) throws IOException
 	{
-		System.out.println(passenger);
+		
 		byte[] pass = passenger.getBytes();
 		
 		DatagramSocket toserver;
