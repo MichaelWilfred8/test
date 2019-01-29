@@ -10,64 +10,63 @@ import java.util.Arrays;
 
 
 public class Test{
-	
 
-	public void runTest() {
-		String fileToParse = "/test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
-		String [] tests = getFile(fileToParse); //test strings from .csv
-		System.out.println(Arrays.toString(tests));
+	Floor [] floors;//list of floors within the building
+	Scheduler scheduler;//Scheduler of 
+
+	Test(){
+		scheduler = new Scheduler();//instantiate Scheduler
+		floors = new Floor[scheduler.getTopFloor()];
+		for(int i=0;i<scheduler.getTopFloor();i++) {
+			floors[i] = new Floor(scheduler, i+1);
+		}
 	}
 
-	public String[] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
-		
-		ArrayList<String> testLines = new ArrayList<>(11);
+	public void runTest() {
+		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
+		String [][] testLines = getFile(fileToParse); //test strings from .csv
+		for (int i=0; i<testLines.length;i++) {
+			System.out.println(Arrays.toString(testLines[i]));
+		}
+	}
 
-		BufferedReader fileReader = null;		
+	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
+
+		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
+
+		BufferedReader fileReader = null;//instantiate file reader	
 		final String DELIMITER = ",";//Delimiter used in CSV file
 		try{
-			String line = "";
+			String line = "";//build string into line
 
 			fileReader = new BufferedReader(new FileReader(fileName));//Create the file reader
 
-			int counter=0;
-
-			String passenger="";
-
-
 			while ((line = fileReader.readLine()) != null){//Read the file line by line
-
 				//Get all tokens available in line
-				String[] tokens = line.split(DELIMITER);
-
-				//Print all tokens
-				for(String t : tokens){
-					if(counter==4){
-						Test test = new Test();
-						counter=0;
-						testLines.add(passenger);
-						passenger="";
-					}
-					passenger+=t;
-
-					counter++;
-				}
-				Test test = new Test();
-				counter=0;
-				testLines.add(passenger);
-				passenger="";
-
+				String[] tokens = line.split(DELIMITER);//create an array of strings, represents the line of file
+				inputLines.add(tokens);//add to the list of lines
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally{
 			try {
-				fileReader.close();
+				fileReader.close();//close BufferedReader
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		String[] returnString = testLines.toArray(new String[testLines.size()]);
+		
+		String[][] returnString = new String[inputLines.size()][];//2D array of strings, first dimension is number of lines within the input file, second is details of the line
+		for (int i = 0; i < returnString.length; i++) {//copy the lengths of each internal array to the 1st dimension
+			returnString[i] = new String[inputLines.get(i).length];
+		}
+		for(int i=0; i<inputLines.size(); i++){
+			for (int j = 0; j < inputLines.get(i).length; j++) {//copy contents of ArrayList to array
+				returnString[i][j] = inputLines.get(i)[j];
+			}
+		}
+		
 		return returnString;
 
 	}
@@ -88,8 +87,10 @@ public class Test{
 		toserver.close();
 
 	}
-	
+
 	public static void main(String[] args) {
+		Test t = new Test();
+		t.runTest();
 
 	}
 }

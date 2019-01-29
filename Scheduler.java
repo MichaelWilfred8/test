@@ -1,22 +1,16 @@
-// SimpleEchoServer.java
-// This class is the server side of a simple echo server based on
-// UDP/IP. The server receives from a client a packet containing a character
-// string, then echoes the string back to the client.
-// Last edited January 9th, 2016
 
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
 
-// To be changed to Scheduler??
-
 public class Scheduler {
 
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendRecieveSocket, receiveSocket;
+	
+	private static final int MAX_FLOOR = 10;
 
-	public Scheduler()
-	{
+	public Scheduler(){//TODO:make it a singleton?
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			//used to send and receive packets
@@ -32,6 +26,12 @@ public class Scheduler {
 			se.printStackTrace();
 			System.exit(1);
 		} 
+	}
+	/**
+	 * @return Top Level of building
+	 */
+	public int getTopFloor() {
+		return MAX_FLOOR;
 	}
 
 	public void receiveAndForward(){
@@ -163,10 +163,5 @@ public class Scheduler {
 
 	}
 
-	public static void main( String args[] )
-	{
-		Scheduler c = new Scheduler();
-		c.receiveAndForward();
-	}
 }
 

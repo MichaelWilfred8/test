@@ -21,7 +21,7 @@ public class Floor {
 		this.scheduler = scheduler;
 		this.floorNumber = floorNumber;
 
-		if (floorNumber == this.scheduler.getMaxFloor()) {//if the floor is the top floor
+		if (floorNumber == this.scheduler.getTopFloor()) {//if the floor is the top floor
 			floorButtons = new FloorButton[1];//create an array of size one
 			floorButtons[0] = new FloorButton(FloorButtonDirection.DOWN);//only button on the floor will to go down
 		}else if (floorNumber == 1) {//if the floor is the bottom floor
