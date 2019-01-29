@@ -12,7 +12,7 @@ public class Test
 	public static void main(String[] args)
     {
         //Input file which needs to be parsed
-        String fileToParse = "/Users/michaelwilfred/Desktop/test.csv";
+        String fileToParse = "/*.csv"; //change * to the path of the csv file
         BufferedReader fileReader = null;
          
         //Delimiter used in CSV file
