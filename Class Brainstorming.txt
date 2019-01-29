@@ -8,14 +8,9 @@ Attributes:
 - sendReceiveSocket: datagramSocket
 - sendPacket: datagramPacket
 - receivePacket: datagramPacket
-
 - next floor to visit (store queue here or in scheduler?)
+
 Methods:
-
-
-
-
-
 
 Floor
 Attributes:
@@ -26,12 +21,8 @@ Attributes:
 
 Methods:
 
-
-
-
 Button
 Attributes:
-
 
 Scheduler
 Attributes:
@@ -62,7 +53,6 @@ Attributes:
 two main formats:
 from elevator car: time, floorRequest, carButton, NULL
 from floor panel: time, floorRequest, NULL, floorButton
-
 
 Methods:
 getTime(): time

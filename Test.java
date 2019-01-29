@@ -26,7 +26,12 @@ public class Test{
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		for (int i=0; i<testLines.length;i++) {
-			System.out.println(Arrays.toString(testLines[i]));
+			for (int j=0;j<floors.length;j++) {
+				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
+					floors[j].newRequest(testLines[i]);
+				}
+			}
+			
 		}
 	}
 
@@ -35,7 +40,7 @@ public class Test{
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
 		BufferedReader fileReader = null;//instantiate file reader	
-		final String DELIMITER = ",";//Delimiter used in CSV file
+		final String DELIMITER = " ";//Delimiter used in CSV file
 		try{
 			String line = "";//build string into line
 
@@ -68,23 +73,6 @@ public class Test{
 		}
 		
 		return returnString;
-
-	}
-
-	public void sendReceive(String passenger) throws IOException{
-
-		byte[] pass = passenger.getBytes();
-
-		DatagramSocket toserver;
-		toserver = new DatagramSocket();
-		InetAddress intserver = InetAddress.getByName("localhost");
-		int intserverSocket = 33;
-
-		//Creates a Datagram packet sending the request in bytes, with the length of the request array(beginning), to address localhost, and using port 69
-		DatagramPacket send = new DatagramPacket(pass,pass.length,intserver,intserverSocket);
-		toserver.send(send);
-		System.out.println("Sending the following to the Server: " +new String(send.getData()));
-		toserver.close();
 
 	}
 
