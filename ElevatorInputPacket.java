@@ -14,8 +14,17 @@ public class ElevatorInputPacket {
 	private int carButton; 						// Floor Button pressed by passenger in elevator
 	
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");	// Format for the timestamp. Uses a 24 hour clock (hour is 0-23)
-	private static final int BYTE_ARRAY_LENGTH = 100;
+	private static final int BYTE_ARRAY_LENGTH = 28;
 	private static final int TIMESTAMP_STRING_LENGTH = 12;
+	
+	private static final int HOURS_INDEX = 0;
+	private static final int MINUTES_INDEX = 4;
+	private static final int SECONDS_INDEX = 8;
+	private static final int MILLISECONDS_INDEX = 12;
+	private static final int FLOOR_INDEX = 16;
+	private static final int FLOOR_BUTTON_INDEX = 20;
+	private static final int CAR_BUTTON_INDEX = 24;
+	
 	
 	
 	// Constructor for ElevatorInputPacket where the timestamp is inputted (Remove this function?)
@@ -31,30 +40,18 @@ public class ElevatorInputPacket {
 		this.timeStamp = new TimeStamp(LocalDateTime.now().format(TIME_FORMAT));		// set timestamp to the current time
 		this.floor = floor;
 		this.floorButton = floorButton;
+		this.carButton = carButton;
 	}
 	
 	// Constructor for Elevator Input Packet from a byte array
 	public ElevatorInputPacket(byte[] b){
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);	// create a ByteBuffer to parse the byte array
-		buf.wrap(b);													// put all bytes from array into new buffer
+		buf.put(b);													// put all bytes from array into new buffer
 		
-		buf.flip();		// flip buffer to read data properly
-		
-		
-		this.floor = buf.getInt();										// get floor number from the ByteBuffer
-		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
-		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
-		
-		// create an empty string from byte buffer
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < TIMESTAMP_STRING_LENGTH; ++i){
-			sb.append(buf.getChar());	// append each character from the timestamp bytes to the stringbuilder
-		}
-		
-		System.out.println("buffer string: " + sb.toString());
-		
-		this.timeStamp = new TimeStamp(sb.toString());					// set the timeString to the string from the byte buffer
+		this.timeStamp = new TimeStamp(buf.getInt(HOURS_INDEX), buf.getInt(MINUTES_INDEX), buf.getInt(SECONDS_INDEX), buf.getInt(MILLISECONDS_INDEX));		// get time stamp from the buffer, reading each integer
+		this.floor = buf.getInt(FLOOR_INDEX);		// get floor number from the ByteBuffer
+		this.floorButton = FloorButtonDirection.values()[buf.getInt(FLOOR_BUTTON_INDEX)];		// get the value of the floor button direction from the bytebuffer
+		this.carButton = buf.getInt(CAR_BUTTON_INDEX);		// get the value of the car button from the ByteBuffer
 	}
 	
 	
@@ -120,21 +117,19 @@ public class ElevatorInputPacket {
 	public byte[] toBytes(){
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);
 		
-		buf.put(this.getTimeStampString().getBytes());	// add time stamp string as bytes to the byte buffer
+		buf.put(this.timeStamp.getBytes()); // add timestamp object as bytes to the byte buffer
 		
-		/* Code for adding the time stamp as individual characters to the buffer
-		 * 
-		 * buf.putInt(this.timeStamp.getHour()); 		// add hour from time stamp as bytes to the byte buffer
-		 * buf.putInt(this.timeStamp.getMinute());		// add minute from time stamp as bytes to the byte buffer
-		 * buf.putInt(this.timeStamp.getSecond());		// add second from time stamp as bytes to the byte buffer
-		 * buf.putInt(this.timeStamp.getNano());		// add nanosecond from time stamp as bytes to the byte buffer
+		// TODO: Use this code below to add bytes to the timestamp to reduce coupling?
+		/*
+		buf.putInt(this.timeStamp.getHours()); 			// add hour from time stamp as bytes to the byte buffer
+		buf.putInt(this.timeStamp.getMinutes());		// add minute from time stamp as bytes to the byte buffer
+		buf.putInt(this.timeStamp.getSeconds());		// add second from time stamp as bytes to the byte buffer
+		buf.putInt(this.timeStamp.getMilliseconds());	// add nanosecond from time stamp as bytes to the byte buffer
 		 */
 		
 		
 		buf.putInt(this.floor);	// add floor number to byte buffer
-		
 		buf.putInt(this.floorButton.ordinal()); // add floor button to byte buffer
-		
 		buf.putInt(this.carButton);		// add car button to byte buffer
 		
 		buf.flip();	// flip buffer to allow for reading appropriately
@@ -155,7 +150,9 @@ public class ElevatorInputPacket {
 		
 		p1.printElevatorPacket();
 		
-		ElevatorInputPacket p2 = new ElevatorInputPacket(p1.toBytes());
+		byte[] b = p1.toBytes();
+		
+		ElevatorInputPacket p2 = new ElevatorInputPacket(b);
 		
 		p2.printElevatorPacket();
 	}
