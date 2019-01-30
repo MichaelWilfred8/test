@@ -72,3 +72,60 @@ getCarButton(): int
 
 
 
+ElevatorInputPacket
+Attributes:
+- timeStamp : TimeStamp
+- floor: int
+- floorButton : FloorButtonDirection
+- carButton: int
+- TIME_FORMAT : DateTimeFormatter
+# BYTE_ARRAY_LENGTH : int
++ HOURS_INDEX : int
++ MINUTES_INDEX : int
++ SECONDS_INDEX : int
++ MILLISECONDS_INDEX : int
++ FLOOR_INDEX : int
++ FLOOR_BUTTON_INDEX : int
++ CAR_BUTTON_INDEX : int
+
+Methods:
++ ElevatorInputPacket(timeStamp : TimeStamp, floor : int, floorButton : FloorButtonDirection, carButton : int)
++ ElevatorInputPacket(floor : int, floorButton : FloorButtonDirection, carButton : int)
++ ElevatorInputPacket(b : byte[])
++ getTimeStamp : TimeStamp
++ getFloor : int
++ getFloorButton : FloorButtonDirection
++ getCarButton : int
++ getBytes : byte[]
++ equals(obj : Object) : int
++ toString : String
++ main(args[] : String) : void
+
+
+ElevatorDatagramPacket
+Attributes:
+packet : DatagramPacket
+
+Methods:
++ ElevatorDatagramPacket(p : DatagramPacket)
++ ElevatorDatagramPacket(timeStamp : TimeStamp, floor : int, floorButton : FloorButtonDirection, carButton : int, address : InetAddress, port: int)
++ ElevatorDatagramPacket(p : ElevatorInputPacket, address : InetAddress, port: int)
++ ElevatorDatagramPacket(buf : byte[], address : InetAddress, port: int)
++ ElevatorDatagramPacket(timeStamp : TimeStamp, floor : int, floorButton : FloorButtonDirection, carButton : int, address : SocketAddress)
++ ElevatorDatagramPacket(p : ElevatorInputPacket, address : SocketAddress)
++ ElevatorDatagramPacket(buf : byte[], address : SocketAddress)
++ ElevatorDatagramPacket(buf : byte[], length : int)
++ ElevatorDatagramPacket(buf : byte[])
++ getPacket : DatagramPacket
++ getAddress : InetAddress
++ getData : byte[]
++ getLength : int
++ getOffset : int
++ getPort : int
++ getSocketAddress : SocketAddress
++ setAddress(iaddr : InetAddress) : void
++ setData(buf : byte[]) : void
++ setData(buf : byte[], offset : int, length : int) : void
++ setPort(iport : int) : void
++ setSocketAddress(address : SocketAddress) : void
+

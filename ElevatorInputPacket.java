@@ -3,12 +3,8 @@ import java.time.format.DateTimeFormatter;
 import java.nio.ByteBuffer;
 
 
-/*
- * ElevatorInputPacket contains all the information needed by the scheduler to determine information about the request it was sent
- * 
- */
 /**
- * @author craig
+ * @author Craig Worthington
  *
  */
 public class ElevatorInputPacket {
@@ -121,7 +117,7 @@ public class ElevatorInputPacket {
 	
 	/**
 	 * Creates a byte array containing the values of all the fields in the class
-	 * Byte array format: Timestamp (Hour, minutes, seconds, milliseconds)(all int), floor(int), floorButton(int), carButton(int)
+	 * Byte array format: TimeStamp (Hour, minutes, seconds, milliseconds)(all int), floor(int), floorButton(int), carButton(int)
 	 * @return Byte array 
 	 */
 	public byte[] getBytes(){
@@ -145,17 +141,6 @@ public class ElevatorInputPacket {
 		buf.flip();	// flip buffer to allow for reading appropriately
 		
 		return buf.array();		// return the byte buffer as an array
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + carButton;
-		result = prime * result + floor;
-		result = prime * result + ((floorButton == null) ? 0 : floorButton.hashCode());
-		result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
-		return result;
 	}
 
 

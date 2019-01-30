@@ -13,14 +13,14 @@ public class Scheduler {
 	public Scheduler(){//TODO:make it a singleton?
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine
-			//used to send and receive packets
+			// used to send and receive packets
 			sendRecieveSocket = new DatagramSocket();
 
 
 			// Construct a datagram socket and bind it to port 23 on the local host machine.
-			//used to receive packets
+			// used to receive packets
 			receiveSocket = new DatagramSocket(23);
-			receiveSocket.setSoTimeout(10000);//set intermediate host receive socket to timeout after 10seconds of no input
+			receiveSocket.setSoTimeout(10000);	//set intermediate host receive socket to timeout after 10 seconds of no input
 
 		} catch (SocketException se) {
 			se.printStackTrace();

@@ -123,10 +123,4 @@ public class TimeStamp {
 	}
 	
 	// TODO: add isBefore and isAfter methods?
-	
-	public static void main(String[] args){
-		TimeStamp ts = new TimeStamp("03:45:01:123");
-		
-		System.out.println("Timestamp = " + ts.toString());
-	}
 }
