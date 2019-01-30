@@ -2,11 +2,7 @@ import java.io.BufferedReader;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class Test{
@@ -26,6 +22,7 @@ public class Test{
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		for (int i=0; i<testLines.length;i++) {
+			//System.out.println(Arrays.toString(testLines[i]));
 			for (int j=0;j<floors.length;j++) {
 				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
 					floors[j].newRequest(testLines[i]);
