@@ -8,3 +8,5 @@
 /FloorButtonDirection.class
 /TimeStamp.class
 /ElevatorDatagramPacket.class
+/ElevatorStatus.class
+/Direction.class

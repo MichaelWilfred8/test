@@ -1,6 +1,7 @@
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Scheduler {
@@ -9,6 +10,10 @@ public class Scheduler {
 	DatagramSocket sendRecieveSocket, receiveSocket;
 	
 	private static final int MAX_FLOOR = 10;
+	private static final int MIN_FLOOR = 1;
+	
+	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
+	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
 
 	public Scheduler(){//TODO:make it a singleton?
 		try {
@@ -25,8 +30,13 @@ public class Scheduler {
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
-		} 
+		}
+		
+		upRequests = new ArrayList<Integer>();
+		downRequests = new ArrayList<Integer>();
 	}
+	
+	
 	/**
 	 * @return Top Level of building
 	 */

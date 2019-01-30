@@ -97,7 +97,7 @@ public class ElevatorDatagramPacket extends ElevatorInputPacket{
 		return this.packet.getLength();
 	}
 	
-	// TODO: fix this function to return the actual offset
+	// TODO: fix this function to return the actual offset? or remove entirely
 	public int getOffset(){
 		return 1;
 	}
