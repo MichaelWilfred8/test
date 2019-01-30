@@ -1,4 +1,3 @@
-package ElevatorClass;
 // This is elevator class, it will keep running and act like server
 // The logic is following
 // 1. waiting a packet contain floor number
@@ -6,7 +5,6 @@ package ElevatorClass;
 // 3. send a packet back contains [OK/fail, DestinationFloorNum]
 // 4. run the motor logic 
 // 5. once currentFloor = DestinationFloor, send a [OK/fail] packet
-
 
 import java.io.*;
 import java.net.*;
