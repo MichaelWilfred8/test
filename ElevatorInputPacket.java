@@ -2,6 +2,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.nio.ByteBuffer;
 
+
+/*
+ * ElevatorInputPacket contains all the information needed by the scheduler to determine information about the request it was sent
+ * 
+ */
+/**
+ * @author craig
+ *
+ */
 public class ElevatorInputPacket {
 	
 	private TimeStamp timeStamp;				// Timestamp for when request was sent
@@ -11,21 +20,27 @@ public class ElevatorInputPacket {
 	
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");	// String format of the time stamp. Uses a 24 hour clock (hour is 0-23)
 	protected static final int BYTE_ARRAY_LENGTH = 28;	// Length of the byte array needed to transmit all information in an ElevatorInputPacket
-	private static final int TIMESTAMP_STRING_LENGTH = 12;	// TODO: remove this?
 	
-	private static final int HOURS_INDEX = 0;
-	private static final int MINUTES_INDEX = 4;
-	private static final int SECONDS_INDEX = 8;
-	private static final int MILLISECONDS_INDEX = 12;
-	private static final int FLOOR_INDEX = 16;
-	private static final int FLOOR_BUTTON_INDEX = 20;
-	private static final int CAR_BUTTON_INDEX = 24;
+	/*
+	 * Below are the indexes of each element in the byte array created by the ElevatorInputPacket
+	 */
+	public static final int HOURS_INDEX = 0;
+	public static final int MINUTES_INDEX = 4;
+	public static final int SECONDS_INDEX = 8;
+	public static final int MILLISECONDS_INDEX = 12;
+	public static final int FLOOR_INDEX = 16;
+	public static final int FLOOR_BUTTON_INDEX = 20;
+	public static final int CAR_BUTTON_INDEX = 24;
 	
 	
-	// TODO: create constructor that mimics constructors for DatagramPacket?
-	
-	
-	// Constructor for ElevatorInputPacket where the timestamp is inputted (Remove this function?)
+	/**
+	 * Constructor for ElevatorInputPacket. Each element of the ElevatorInputPacket is entered separately
+	 * 
+	 * @param timeStamp: 	TimeStamp object of when request was created
+	 * @param floor:		Floor where request originated from
+	 * @param floorButton: 	Value of button that was pressed on the floor (i.e. up or down)
+	 * @param carButton:	Value of button that was pressed inside the elevator car (i.e. floor that passenger wishes to travel to)
+	 */
 	public ElevatorInputPacket(TimeStamp timeStamp, int floor, FloorButtonDirection floorButton, int carButton){
 		this.timeStamp = timeStamp;
 		this.floor = floor;
@@ -33,7 +48,14 @@ public class ElevatorInputPacket {
 		this.carButton = carButton;
 	}
 	
-	// Constructor for ElevatorInputPacket where no timestamp is given
+	
+	/**
+	 * Constructor for ElevatorInputPacket where no timestamp is given. Automatically generates its own timestamp based on current system time
+	 * 
+	 * @param floor:		Floor where request originated from
+	 * @param floorButton: 	Value of button that was pressed on the floor (i.e. up or down)
+	 * @param carButton:	Value of button that was pressed inside the elevator car (i.e. floor that passenger wishes to travel to)
+	 */
 	public ElevatorInputPacket(int floor, FloorButtonDirection floorButton, int carButton){
 		this.timeStamp = new TimeStamp(LocalDateTime.now().format(TIME_FORMAT));		// set timestamp to the current time
 		this.floor = floor;
@@ -41,7 +63,12 @@ public class ElevatorInputPacket {
 		this.carButton = carButton;
 	}
 	
-	// Constructor for Elevator Input Packet from a byte array
+	
+	/**
+	 * Constructor for ElevatorInputPacket where a byte array containing all relevant information is given. 
+	 * 
+	 * @param b:	Byte array containing all information needed to create the ElevatorInputPacket
+	 */
 	public ElevatorInputPacket(byte[] b){
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);	// create a ByteBuffer to parse the byte array
 		buf.put(b);													// put all bytes from array into new buffer
@@ -51,26 +78,52 @@ public class ElevatorInputPacket {
 		this.floorButton = FloorButtonDirection.values()[buf.getInt(FLOOR_BUTTON_INDEX)];		// get the value of the floor button direction from the bytebuffer
 		this.carButton = buf.getInt(CAR_BUTTON_INDEX);		// get the value of the car button from the ByteBuffer
 	}
-
+	
+	
+	/**
+	 * 
+	 * @return TimeStamp of when request was sent (format HH:mm:ss:SSS)
+	 */
 	public TimeStamp getTimeStamp() {
 		return this.timeStamp;
 	}
-
+	
+	
+	/**
+	 * 
+	 * @return Floor where request was sent from
+	 */
 	public int getFloor() {
 		return this.floor;
 	}
-
+	
+	
+	/**
+	 * 
+	 * @return Direction of button pressed on floor (i.e. up/down)
+	 */
 	public FloorButtonDirection getFloorButton() {
 		return this.floorButton;
 	}
-
+	
+	
+	/**
+	 * 
+	 * @return floor button that was selected in the elevator
+	 */
 	public int getCarButton() {
 		return this.carButton;
 	}
 	
 	// TODO: add toString, hashCode, equals
 	
-	// Create a byte array for the Elevator input packet
+	
+	
+	/**
+	 * Creates a byte array containing the values of all the fields in the class
+	 * Byte array format: Timestamp (Hour, minutes, seconds, milliseconds)(all int), floor(int), floorButton(int), carButton(int)
+	 * @return Byte array 
+	 */
 	public byte[] getBytes(){
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);
 		
@@ -94,23 +147,55 @@ public class ElevatorInputPacket {
 		return buf.array();		// return the byte buffer as an array
 	}
 	
-	
-	public void printElevatorPacket(){
-		System.out.println("Time Stamp: " + this.timeStamp.toString());
-		System.out.println("Floor: " + this.getFloor());
-		System.out.println("Floor Button Direction: " + this.getFloorButton().toString());
-		System.out.println("Car Button: " + this.getCarButton());
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + carButton;
+		result = prime * result + floor;
+		result = prime * result + ((floorButton == null) ? 0 : floorButton.hashCode());
+		result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ElevatorInputPacket other = (ElevatorInputPacket) obj;
+		if (carButton != other.carButton)
+			return false;
+		if (floor != other.floor)
+			return false;
+		if (floorButton != other.floorButton)
+			return false;
+		if (timeStamp == null) {
+			if (other.timeStamp != null)
+				return false;
+		} else if (!timeStamp.equals(other.timeStamp))
+			return false;
+		return true;
+	}
+
+
+	@Override
+	public String toString() {
+		return "ElevatorInputPacket [timeStamp=" + timeStamp + ", floor=" + floor + ", floorButton=" + floorButton
+				+ ", carButton=" + carButton + "]";
 	}
 	
 	public static void main(String args[]){
 		ElevatorInputPacket p1 = new ElevatorInputPacket(3, FloorButtonDirection.UP, 7);
 		
-		p1.printElevatorPacket();
+		System.out.println(p1.toString());
 		
-		byte[] b = p1.getBytes();
+		ElevatorInputPacket p2 = new ElevatorInputPacket(p1.getBytes());
 		
-		ElevatorInputPacket p2 = new ElevatorInputPacket(b);
-		
-		p2.printElevatorPacket();
+		System.out.println(p2.toString());
 	}
 }
