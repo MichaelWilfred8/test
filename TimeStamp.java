@@ -26,6 +26,7 @@ public class TimeStamp {
 		this.milliseconds = Integer.parseInt(timeStamp.substring(9, 12));
 	}
 	
+	// TODO: Decide about removing this constructor
 	// Constructor for TimeStamp Class. Takes a byte array in H,m,s,S format and converts it to a timestamp object
 	public TimeStamp(byte[] timeStamp){
 		ByteBuffer buf = ByteBuffer.allocate(16);
