@@ -4,6 +4,9 @@
 // string, then echoes the string back to the client.
 // Last edited January 9th, 2016
 
+
+// To be changed to elevator
+
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;

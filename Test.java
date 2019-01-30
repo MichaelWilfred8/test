@@ -1,88 +1,80 @@
-package ElevatorClass;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 
 
-import java.io.*;
-import java.net.*;
+public class Test{
 
+	Floor [] floors;//list of floors within the building
+	Scheduler scheduler;//Scheduler of 
 
-public class Test {
-
-	DatagramPacket sendPacket, receivePacket, EchoPacket;
-	DatagramSocket sendSocket, receiveSocket, EchoSocket ;
-
-	public Test()
-	{
-	   try {
-
-	      sendSocket = new DatagramSocket();
-
-	   } catch (SocketException se) {
-	      se.printStackTrace();
-	      System.exit(1);
-	   } 
+	Test(){
+		scheduler = new Scheduler();//instantiate Scheduler
+		floors = new Floor[scheduler.getTopFloor()];
+		for(int i=0;i<scheduler.getTopFloor();i++) {
+			floors[i] = new Floor(scheduler, i+1);
+		}
 	}
-	
-	public void receiveAndForward() throws InterruptedException, UnknownHostException
-	{
-	   // Construct a DatagramPacket for receiving packets
-	   byte data[] = {5};
-	   
-	   //send to server
 
-	   sendPacket = new DatagramPacket(data, data.length,
-			   InetAddress.getLocalHost(),69);
-
-	   System.out.println( "scheduler: send command from 5th floor");
-
-	   // Send the datagram packet to the Elevator via the send socket. 
-	   try {
-	      sendSocket.send(sendPacket);
-	   } catch (IOException e) {
-	      e.printStackTrace();
-	      System.exit(1);
-	   }
-
-	   
-	   
-	   //Receive done packet from server
-	   byte data1[] = new byte[100];
-	   EchoPacket = new DatagramPacket(data1,data1.length);
-	      try {
-	          // Block until a datagram is received via sendReceiveSocket.  
-	    	  
-	    	  sendSocket.receive( EchoPacket);
-	       } catch(IOException e) {
-	          e.printStackTrace();
-	          System.exit(1);
-	       }
-	   System.out.println("Waiting for echo packet from ELevator"); // so we know we're waiting
-	   System.out.println("Scheduler: echo Packet received from Elevator");
-	   System.out.print("Containing: " );
-	   String stringData = EchoPacket.getData().toString();
-	   System.out.println(stringData);	   
+	public void runTest() {
+		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
+		String [][] testLines = getFile(fileToParse); //test strings from .csv
+		for (int i=0; i<testLines.length;i++) {
+			//System.out.println(Arrays.toString(testLines[i]));
+			for (int j=0;j<floors.length;j++) {
+				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
+					floors[j].newRequest(testLines[i]);
+				}
+			}
+			
+		}
 	}
-	
 
-	public String GetString(byte[] bytes)
-	{
-	// Form a String from the byte array.
-	String file_string = "";
+	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
 
-    for(int i = 2; i < bytes.length; i++)
-    {
-        file_string += (char)bytes[i];
-    }
+		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
-    return file_string;    
+		BufferedReader fileReader = null;//instantiate file reader	
+		final String DELIMITER = " ";//Delimiter used in CSV file
+		try{
+			String line = "";//build string into line
+
+			fileReader = new BufferedReader(new FileReader(fileName));//Create the file reader
+
+			while ((line = fileReader.readLine()) != null){//Read the file line by line
+				//Get all tokens available in line
+				String[] tokens = line.split(DELIMITER);//create an array of strings, represents the line of file
+				inputLines.add(tokens);//add to the list of lines
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			try {
+				fileReader.close();//close BufferedReader
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		String[][] returnString = new String[inputLines.size()][];//2D array of strings, first dimension is number of lines within the input file, second is details of the line
+		for (int i = 0; i < returnString.length; i++) {//copy the lengths of each internal array to the 1st dimension
+			returnString[i] = new String[inputLines.get(i).length];
+		}
+		for(int i=0; i<inputLines.size(); i++){
+			for (int j = 0; j < inputLines.get(i).length; j++) {//copy contents of ArrayList to array
+				returnString[i][j] = inputLines.get(i)[j];
+			}
+		}
+		
+		return returnString;
+
 	}
-	
 
-	public static void main( String args[] ) throws InterruptedException, UnknownHostException
-	{
+	public static void main(String[] args) {
+		Test t = new Test();
+		t.runTest();
 
-		Test c = new Test();
-		c.receiveAndForward();
-
-	
 	}
 }
