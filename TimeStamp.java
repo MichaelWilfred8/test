@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer;
 
 /*
  * Timestamp class for the elevator input packet.
@@ -74,6 +75,34 @@ public class TimeStamp {
 		if (seconds != other.seconds)
 			return false;
 		return true;
+	}
+	
+	/**
+	 * Converts object into 2D byte array
+	 * @return 2D byte array (4X4) containing TimeStamp parameters as bytes
+	 */
+	public byte[] toBytes(){
+		byte [] hourBytes = ByteBuffer.allocate(4).putInt(hours).array();
+		byte [] minBytes = ByteBuffer.allocate(4).putInt(minutes).array();
+		byte [] secBytes = ByteBuffer.allocate(4).putInt(seconds).array();
+		byte [] milliBytes = ByteBuffer.allocate(4).putInt(milliseconds).array();
+		
+		byte [] timestampBytes = {hourBytes[3],minBytes[3],secBytes[3],milliBytes[3]};
+	    return timestampBytes;
+	}
+	
+	/**
+	 * 
+	 * @param timeBytes array of array of time bytes, 4 arrays one for each time parameter
+	 * @return timestamp containing array numbers
+	 */
+	public static TimeStamp bytesToTimeStamp(byte[] timeBytes) {
+		int newHours = timeBytes[0];
+		int newMin = timeBytes[1];
+		int newSec = timeBytes[2];
+		int newMilli = timeBytes[3];
+		TimeStamp returnStamp = new TimeStamp(newHours, newMin, newSec, newMilli);
+		return returnStamp;
 	}
 	
 	// TODO: add isBefore and isAfter methods?
