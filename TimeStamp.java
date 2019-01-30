@@ -1,5 +1,4 @@
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /*
  * Timestamp class for the elevator input packet.
@@ -82,13 +81,13 @@ public class TimeStamp {
 	 * Converts object into 2D byte array
 	 * @return 2D byte array (4X4) containing TimeStamp parameters as bytes
 	 */
-	public byte[][] toBytes(){
+	public byte[] toBytes(){
 		byte [] hourBytes = ByteBuffer.allocate(4).putInt(hours).array();
 		byte [] minBytes = ByteBuffer.allocate(4).putInt(minutes).array();
 		byte [] secBytes = ByteBuffer.allocate(4).putInt(seconds).array();
 		byte [] milliBytes = ByteBuffer.allocate(4).putInt(milliseconds).array();
 		
-		byte [][] timestampBytes = {hourBytes,minBytes,secBytes,milliBytes};
+		byte [] timestampBytes = {hourBytes[3],minBytes[3],secBytes[3],milliBytes[3]};
 	    return timestampBytes;
 	}
 	
@@ -97,15 +96,11 @@ public class TimeStamp {
 	 * @param timeBytes array of array of time bytes, 4 arrays one for each time parameter
 	 * @return timestamp containing array numbers
 	 */
-	public static TimeStamp bytesToTimeStamp(byte[][] timeBytes) {
-		int[] returnInt = new int[timeBytes.length];
-		for (int i=0; i<timeBytes.length;i++) {
-			returnInt[i] =  timeBytes [i][3];
-		}
-		int newHours = returnInt[0];
-		int newMin = returnInt[1];
-		int newSec = returnInt[2];
-		int newMilli = returnInt[3];
+	public static TimeStamp bytesToTimeStamp(byte[] timeBytes) {
+		int newHours = timeBytes[0];
+		int newMin = timeBytes[1];
+		int newSec = timeBytes[2];
+		int newMilli = timeBytes[3];
 		TimeStamp returnStamp = new TimeStamp(newHours, newMin, newSec, newMilli);
 		return returnStamp;
 	}
