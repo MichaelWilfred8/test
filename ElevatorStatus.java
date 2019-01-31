@@ -18,12 +18,12 @@ public class ElevatorStatus {
 	private int position;						// floor that elevator is at or was last at
 	private Direction tripDir;					// direction that the elevator is travelling / will be traveling on this trip
 	private SortedSet<Integer> floorsToVisit;	// Sorted Set of floors for this elevator to visit. 
+	private int nextDestination;				// Floor for this elevator to visit next
 	private MotorState motorState;				// state of the elevator motor (up, down, off)
 	private DoorState doorState;				// state that the elevator door is (open/closed)
 	private boolean[] floorButtonLights;		// boolean array containing the state of the lights of all the floor buttons in the elevator. Array is indexed from zero so the light for floor 3 is stored at floorButtonLight[2] 
 	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
 	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
-	
 	
 	/**
 	 * Constructor for ElevatorStatus class
@@ -185,6 +185,25 @@ public class ElevatorStatus {
 	}
 	
 	
+
+	/**
+	 * @return the nextDestination
+	 */
+	public int getNextDestination() {
+		return nextDestination;
+	}
+
+
+
+	/**
+	 * @param nextDestination the nextDestination to set
+	 */
+	public void setNextDestination(int nextDestination) {
+		this.nextDestination = nextDestination;
+	}
+
+
+
 	//TODO: Determine if this function should be in the elevatorStatus class or in the scheduler class!
 	/**
 	 * Determines the next floor for this elevator to visit. Will try to find the nearest floor in the direction of the trip the

@@ -4,6 +4,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import Enums.Direction;
 import Enums.DoorState;
 import Enums.MotorState;
 
