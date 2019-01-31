@@ -108,7 +108,7 @@ public class Floor {
 	 */
 	public void newRequest(String[] request) {
 		TimeStamp ts = new TimeStamp (request[0]);//create a new timestamp from the request string
-		byte[] time = ts.toBytes();//get the bytes of the timestamp
+		byte[] time = ts.getBytes();//get the bytes of the timestamp
 		byte[] message = createMessage(time, Arrays.copyOfRange(request,2,3));
 		requests[requestInsert] = Integer.parseInt(request[3]);
 		System.out.println(requests[requestInsert]);

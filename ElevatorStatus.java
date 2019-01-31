@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 public class ElevatorStatus {
 	private int position;	// floor that elevator is at or was last at
-	private FloorButtonDirection dir;	// direction that elevator is traveling in
+	private Direction dir;	// direction that elevator is traveling in
 	private ArrayList<Integer> floorsToVisit; // list of floors for the elevator to visit next
 	
 	public ElevatorStatus(int floor){
 		this.position = floor;
-		this.dir = FloorButtonDirection.UP;
+		this.dir = Direction.UP;
 		this.floorsToVisit = new ArrayList<Integer>();
 	}
 	

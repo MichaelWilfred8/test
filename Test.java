@@ -26,7 +26,7 @@ public class Test{
 					floors[j].newRequest(testLines[i]);
 				}
 			}
-			
+
 		}
 	}
 
@@ -56,7 +56,7 @@ public class Test{
 				e.printStackTrace();
 			}
 		}
-		
+
 		String[][] returnString = new String[inputLines.size()][];//2D array of strings, first dimension is number of lines within the input file, second is details of the line
 		for (int i = 0; i < returnString.length; i++) {//copy the lengths of each internal array to the 1st dimension
 			returnString[i] = new String[inputLines.get(i).length];
@@ -66,31 +66,12 @@ public class Test{
 				returnString[i][j] = inputLines.get(i)[j];
 			}
 		}
-		
+
 		return returnString;
 
 	}
 
-<<<<<<< HEAD
-=======
-	public void sendReceive(String passenger) throws IOException{
 
-		byte[] pass = passenger.getBytes();
-
-		DatagramSocket toserver;
-		toserver = new DatagramSocket();
-		InetAddress intserver = InetAddress.getByName("localhost");
-		int intserverSocket = 33;
-
-		// Creates a Datagram packet sending the request in bytes, with the length of the request array(beginning), to address localhost, and using port 69
-		DatagramPacket send = new DatagramPacket(pass,pass.length,intserver,intserverSocket);
-		toserver.send(send);
-		System.out.println("Sending the following to the Server: " +new String(send.getData()));
-		toserver.close();
-
-	}
-
->>>>>>> Modifying-ElevatorInputPacket
 	public static void main(String[] args) {
 		Test t = new Test();
 		t.runTest();

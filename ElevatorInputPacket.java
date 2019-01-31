@@ -37,7 +37,7 @@ public class ElevatorInputPacket {
 	 * @param floorButton: 	Value of button that was pressed on the floor (i.e. up or down)
 	 * @param carButton:	Value of button that was pressed inside the elevator car (i.e. floor that passenger wishes to travel to)
 	 */
-	public ElevatorInputPacket(TimeStamp timeStamp, int floor, FloorButtonDirection floorButton, int carButton){
+	public ElevatorInputPacket(TimeStamp timeStamp, int floor, Direction floorButton, int carButton){
 		this.timeStamp = timeStamp;
 		this.floor = floor;
 		this.floorButton = floorButton;
@@ -52,7 +52,7 @@ public class ElevatorInputPacket {
 	 * @param floorButton: 	Value of button that was pressed on the floor (i.e. up or down)
 	 * @param carButton:	Value of button that was pressed inside the elevator car (i.e. floor that passenger wishes to travel to)
 	 */
-	public ElevatorInputPacket(int floor, FloorButtonDirection floorButton, int carButton){
+	public ElevatorInputPacket(int floor, Direction floorButton, int carButton){
 		this.timeStamp = new TimeStamp(LocalDateTime.now().format(TIME_FORMAT));		// set timestamp to the current time
 		this.floor = floor;
 		this.floorButton = floorButton;
@@ -71,7 +71,7 @@ public class ElevatorInputPacket {
 
 		this.timeStamp = new TimeStamp(buf.getInt(HOURS_INDEX), buf.getInt(MINUTES_INDEX), buf.getInt(SECONDS_INDEX), buf.getInt(MILLISECONDS_INDEX));		// get time stamp from the buffer, reading each integer
 		this.floor = buf.getInt(FLOOR_INDEX);		// get floor number from the ByteBuffer
-		this.floorButton = FloorButtonDirection.values()[buf.getInt(FLOOR_BUTTON_INDEX)];		// get the value of the floor button direction from the bytebuffer
+		this.floorButton = Direction.values()[buf.getInt(FLOOR_BUTTON_INDEX)];		// get the value of the floor button direction from the bytebuffer
 		this.carButton = buf.getInt(CAR_BUTTON_INDEX);		// get the value of the car button from the ByteBuffer
 	}
 
@@ -98,7 +98,7 @@ public class ElevatorInputPacket {
 	 *
 	 * @return Direction of button pressed on floor (i.e. up/down)
 	 */
-	public FloorButtonDirection getFloorButton() {
+	public Direction getFloorButton() {
 		return this.floorButton;
 	}
 
