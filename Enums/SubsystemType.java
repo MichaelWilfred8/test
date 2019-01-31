@@ -40,6 +40,12 @@ public enum SubsystemType {
 		}
 	}
 	
+	
+	/**	
+	 * Generates a byte value for the enum
+	 * 
+	 * @return	The byte value for this enum
+	 */
 	public byte getByte(){
 		switch(this.value) {
 			case 7:
@@ -58,6 +64,34 @@ public enum SubsystemType {
 				return 0x01;
 			default:
 				return 0x00;
+		}
+	}
+
+
+	/**
+	 * Converts a given byte value into an Enum of the same value
+	 * 
+	 * @param b	the byte to be converted
+	 * @return a SubSystemType enum that matches the byte parameter
+	 */
+	public SubsystemType convertFromByte(byte b){
+		switch(b){
+			case 0x07:
+				return MOTOR;
+			case 0x06:
+				return DOOR;
+			case 0x05:
+				return CARLAMP;
+			case 0x04:
+				return FLOORLAMP;
+			case 0x03:
+				return LOCATION;
+			case 0x02:
+				return INPUT;
+			case 0x01:
+				return REQUEST;
+			default:
+				return null;
 		}
 	}
 }

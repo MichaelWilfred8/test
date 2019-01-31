@@ -32,4 +32,22 @@ public enum Direction {
 				return (byte) 0xFF; //TODO: edit this case to return a null different value?
 		}
 	}
+	
+	
+	/**
+	 * Converts a given byte value into an Enum of the same value
+	 * 
+	 * @param b	the byte to be converted
+	 * @return a Direction enum that matches the byte parameter
+	 */
+	public Direction convertFromByte(byte b){
+		switch(b){
+			case 0x01:
+				return UP;
+			case 0x00:
+				return DOWN;
+			default:
+				return null;
+		}
+	}
 }

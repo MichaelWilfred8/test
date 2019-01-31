@@ -18,6 +18,11 @@ public class DataPacket {
 	SubsystemType subSystem;
 	byte[] status;
 	
+	private static final int ORIGIN_INDEX = 0;
+	private static final int ID_INDEX = 1;
+	private static final int SUBSYSTEM_INDEX = 2;
+	private static final int STATUS_INDEX = 3;
+	
 	
 	/**
 	 * Constructor for DataPacket object
@@ -32,6 +37,19 @@ public class DataPacket {
 		this.id = id;
 		this.subSystem = subSystem;
 		this.status = status;
+	}
+	
+	
+	
+	/**
+	 * Constructor for DataPacket object that fills each field based the byte array given as a parameter
+	 * @param b		Byte array that follows the DataPacket getBytes format
+	 */
+	public DataPacket(byte[] b){
+		this.origin = (OriginType) b[ORIGIN_INDEX];
+		this.id = b[ID_INDEX];
+		this.subSystem = b[SUBSYSTEM_INDEX];
+		this.status = b; // TODO: fix this
 	}
 	
 	

@@ -26,7 +26,11 @@ public enum MotorState {
 		}
 	}
 	
-	
+	/**	
+	 * Generates a byte value for the enum
+	 * 
+	 * @return	The byte value for this enum
+	 */
 	public byte getByte(){
 		switch(this.value) {
 			case 1:
@@ -36,7 +40,27 @@ public enum MotorState {
 			case -1:
 				return (byte) 0xFF;
 			default:
-				return 0x00; //TODO: edit this case
+				return (Byte) null; //TODO: edit this case
+		}
+	}
+	
+	
+	/**
+	 * Converts a given byte value into an Enum of the same value
+	 * 
+	 * @param b	the byte to be converted
+	 * @return a MotorState enum that matches the byte parameter
+	 */
+	public MotorState convertFromByte(byte b){
+		switch(b){
+			case 0x01:
+				return UP;
+			case 0x00:
+				return OFF;
+			case (byte) 0xFF:
+				return DOWN;
+			default:
+				return null;
 		}
 	}
 }
