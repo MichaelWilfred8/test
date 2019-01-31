@@ -45,7 +45,7 @@ public enum FloorButtonDirection {
 	 * @param b	the byte to be converted
 	 * @return a FloorButtonDirection enum that matches the byte parameter
 	 */
-	public FloorButtonDirection convertFromByte(byte b){
+	public static FloorButtonDirection convertFromByte(byte b){
 		switch(b){
 			case 0x01:
 				return UP;

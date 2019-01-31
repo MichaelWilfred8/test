@@ -51,7 +51,7 @@ public enum OriginType {
 	 * @param b	the byte to be converted
 	 * @return an OriginType enum that matches the byte parameter
 	 */
-	public OriginType convertFromByte(byte b){
+	public static OriginType convertFromByte(byte b){
 		switch(b){
 			case 0x03:
 				return ELEVATOR;

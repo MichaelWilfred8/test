@@ -74,7 +74,7 @@ public enum SubsystemType {
 	 * @param b	the byte to be converted
 	 * @return a SubSystemType enum that matches the byte parameter
 	 */
-	public SubsystemType convertFromByte(byte b){
+	public static SubsystemType convertFromByte(byte b){
 		switch(b){
 			case 0x07:
 				return MOTOR;

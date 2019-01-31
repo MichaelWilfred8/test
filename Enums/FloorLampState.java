@@ -44,7 +44,7 @@ public enum FloorLampState {
 	 * @param b	the byte to be converted
 	 * @return a FloorLampState enum that matches the byte parameter
 	 */
-	public FloorLampState convertFromByte(byte b){
+	public static FloorLampState convertFromByte(byte b){
 		switch(b){
 			case 0x01:
 				return UP;

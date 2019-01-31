@@ -51,7 +51,7 @@ public enum MotorState {
 	 * @param b	the byte to be converted
 	 * @return a MotorState enum that matches the byte parameter
 	 */
-	public MotorState convertFromByte(byte b){
+	public static MotorState convertFromByte(byte b){
 		switch(b){
 			case 0x01:
 				return UP;

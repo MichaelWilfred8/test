@@ -40,7 +40,7 @@ public enum Direction {
 	 * @param b	the byte to be converted
 	 * @return a Direction enum that matches the byte parameter
 	 */
-	public Direction convertFromByte(byte b){
+	public static Direction convertFromByte(byte b){
 		switch(b){
 			case 0x01:
 				return UP;
