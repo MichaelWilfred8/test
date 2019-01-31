@@ -185,9 +185,11 @@ public class ElevatorStatus {
 	}
 	
 	
-	
+	//TODO: Determine if this function should be in the elevatorStatus class or in the scheduler class!
 	/**
-	 * Determines the next floor for this elevator to visit
+	 * Determines the next floor for this elevator to visit. Will try to find the nearest floor in the direction of the trip the
+	 * elevator is currently taking. If no floors can be found in its current direction, or it has reached either end of the shaft
+	 * then change the direction of the elevator.
 	 * 
 	 * @return The next floor for this elevator to visit
 	 */
@@ -197,7 +199,7 @@ public class ElevatorStatus {
 			if (!this.floorsToVisit.isEmpty()){		// if the list of floors for this elevator to visit is empty
 				return this.position;				// return the current position of the elevator so it remains on this floor
 			} else {								// if the elevator has another floor to visit
-				this.tripDir = Direction.DOWN;		// set the current trip direction to down
+				this.setTripDir(Direction.DOWN);		// set the current trip direction to down
 				
 				int tempFloor = this.floorsToVisit.last();	// set a temporary value to the highest value in the set
 				this.floorsToVisit.remove(tempFloor);		// remove the highest value from the set
@@ -208,7 +210,7 @@ public class ElevatorStatus {
 			if (!this.floorsToVisit.isEmpty()){					// if the list of floors for this elevator to visit is empty
 				return this.position;							// return the current position of the elevator so it remains on this floor
 			} else {											// if the elevator has another floor to visit
-				this.tripDir = Direction.UP;					// set the current trip direction to up
+				this.setTripDir(Direction.UP);					// set the current trip direction to up
 				
 				int tempFloor = this.floorsToVisit.first();		// set a temporary value to the lowest value in the set
 				this.floorsToVisit.remove(tempFloor);			// remove the lowest value from the set
@@ -233,6 +235,22 @@ public class ElevatorStatus {
 					return tempFloor;
 				}
 			}
+			
+			// If there are no more floors to visit above the elevator's current floor then find the nearest floor below the elevator
+			// iterate through all the floors in the list to find the nearest floor to visit below the current floor
+			for(int i = tempFloorArray.length; i >= 0; --i){
+				if (tempFloorArray[i] < this.position){
+					
+					this.setTripDir(Direction.UP); 			// Change direction to down
+					
+					int tempFloor = tempFloorArray[i];		// get nearest floor from the floor array
+					this.floorsToVisit.remove(tempFloor);	// remove that floor from the floor list
+					
+					return tempFloor;						// return the floor
+				}
+			}
+			
+			
 		} else if (this.tripDir == Direction.DOWN){
 			// TODO: find more efficient way of looking through the sorted set
 			Integer[] tempFloorArray =  new Integer[this.floorsToVisit.size()];
@@ -248,6 +266,20 @@ public class ElevatorStatus {
 					return tempFloor;
 				}
 			}
+			
+			// if there are no requests below this current floor then search for the nearest request above
+			// iterate through all the floors in the list to find the nearest floor to visit above the current floor
+			for(int i = 0; i < tempFloorArray.length; ++i){
+				if (tempFloorArray[i] > this.position){
+					
+					this.setTripDir(Direction.UP); 			// Change direction to up
+					
+					int tempFloor = tempFloorArray[i];		// get nearest floor from the floor array
+					this.floorsToVisit.remove(tempFloor);	// remove that floor from the floor list
+					
+					return tempFloor;						// return the floor
+				}
+			}
 		} 
 		
 		return this.position;	// if a new floor cannot be determined then stay on this floor
@@ -261,6 +293,12 @@ public class ElevatorStatus {
 		return "ElevatorStatus [position=" + position + ", tripDir=" + tripDir + ", floorsToVisit=" + floorsToVisit
 				+ ", motorState=" + motorState + ", doorState=" + doorState + ", floorButtonLights="
 				+ Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR + ", MAX_FLOOR=" + MAX_FLOOR + "]";
+	}
+	
+	public static void main(String args[]){
+		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7);
+		
+		System.out.println(e.toString());
 	}
 	
 }
