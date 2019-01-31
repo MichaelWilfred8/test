@@ -1,6 +1,5 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
 
 
@@ -10,7 +9,7 @@ public class ElevatorInputPacket {
 	
 	private TimeStamp timeStamp;				// Timestamp for when request was sent
 	private int floor;							// Floor where request originated from
-	private FloorButtonDirection floorButton;	// Button pressed on Floor (up or down)
+	private Direction floorButton;	// Button pressed on Floor (up or down)
 	private int carButton; 						// Floor Button pressed by passenger in elevator
 	
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");	// Format for the timestamp. Uses a 24 hour clock (hour is 0-23)
@@ -19,7 +18,7 @@ public class ElevatorInputPacket {
 	
 	
 	// Constructor for ElevatorInputPacket where the timestamp is inputted (Remove this function?)
-	public ElevatorInputPacket(TimeStamp timeStamp, int floor, FloorButtonDirection floorButton, int carButton){
+	public ElevatorInputPacket(TimeStamp timeStamp, int floor, Direction floorButton, int carButton){
 		this.timeStamp = timeStamp;
 		this.floor = floor;
 		this.floorButton = floorButton;
@@ -27,7 +26,7 @@ public class ElevatorInputPacket {
 	
 	
 	// Constructor for ElevatorInputPacket where no timestamp is given
-	public ElevatorInputPacket(int floor, FloorButtonDirection floorButton, int carButton){
+	public ElevatorInputPacket(int floor, Direction floorButton, int carButton){
 		this.timeStamp = new TimeStamp(LocalDateTime.now().format(TIME_FORMAT));		// set timestamp to the current time
 		this.floor = floor;
 		this.floorButton = floorButton;
@@ -42,7 +41,7 @@ public class ElevatorInputPacket {
 		
 		
 		this.floor = buf.getInt();										// get floor number from the ByteBuffer
-		this.floorButton = FloorButtonDirection.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
+		this.floorButton = Direction.values()[buf.getInt()];	// get the value of the floor button direction from the bytebuffer
 		this.carButton = buf.getInt();									// get the value of the car button from the ByteBuffer
 		
 		// create an empty string from byte buffer
@@ -73,7 +72,7 @@ public class ElevatorInputPacket {
 		return floor;
 	}
 
-	public FloorButtonDirection getFloorButton() {
+	public Direction getFloorButton() {
 		return floorButton;
 	}
 
@@ -151,7 +150,7 @@ public class ElevatorInputPacket {
 	}
 	
 	public static void main(String args[]){
-		ElevatorInputPacket p1 = new ElevatorInputPacket(3, FloorButtonDirection.UP, 7);
+		ElevatorInputPacket p1 = new ElevatorInputPacket(3, Direction.UP, 7);
 		
 		p1.printElevatorPacket();
 		
