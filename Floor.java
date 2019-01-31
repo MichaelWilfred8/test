@@ -8,16 +8,21 @@ import java.util.Arrays;
 
 public class Floor {
 
-	private Scheduler scheduler;
-	private int floorNumber;
-	private FloorButton[] floorButtons;
+	private Scheduler scheduler;//the scheduler with which the floor will communicate 
+	private int floorNumber;//floor number, unique id
+	private FloorButton[] floorButtons;//list of buttons on floor
+	private FloorLamp[] floorLamps;//list of lamps on floor
+	private int[] requests;//list of requests
+	private int requestInsert = 0;//where to insert in list of requests
+
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
 	DatagramSocket sendReceiveSocket;
-	
+
+
+
 	//TODO:Create toggleable lamps
 	//TODO:Create floor request list
-	//TODO:C
 
 	public Floor(Scheduler scheduler, int floorNumber){
 		try {
@@ -25,26 +30,35 @@ public class Floor {
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
-		
+
 		this.scheduler = scheduler;
 		this.floorNumber = floorNumber;
 
 		if (floorNumber == this.scheduler.getTopFloor()) {//if the floor is the top floor
-			floorButtons = new FloorButton[1];//create an array of size one
-			floorButtons[0] = new FloorButton(FloorButtonDirection.DOWN);//only button on the floor will to go down
+			floorButtons = new FloorButton[1];//create arrays of size one
+			floorLamps = new FloorLamp[1];
+			floorButtons[0] = new FloorButton(Direction.DOWN);//only button on the floor will to go down
+			floorLamps[0] = new FloorLamp(Direction.DOWN);//only light on floor will point down
 		}else if (floorNumber == 1) {//if the floor is the bottom floor
-			floorButtons = new FloorButton[1];//create an array of size one
-			floorButtons[0] = new FloorButton(FloorButtonDirection.UP);//only button on the floor will be to go up
+			floorButtons = new FloorButton[1];//create arrays of size one
+			floorLamps = new FloorLamp[1];
+			floorButtons[0] = new FloorButton(Direction.UP);//only button on the floor will be to go up
+			floorLamps[0] = new FloorLamp(Direction.UP);//only lamp on floor will point up
 		}else {
-			floorButtons = new FloorButton[2];//create an array of size two
-			floorButtons[0] = new FloorButton(FloorButtonDirection.DOWN);//create an up button
-			floorButtons[1] = new FloorButton(FloorButtonDirection.UP);//create a down button
+			floorButtons = new FloorButton[2];//create arrays of size two
+			floorLamps = new FloorLamp[2];
+			floorButtons[0] = new FloorButton(Direction.DOWN);//create an up button
+			floorButtons[1] = new FloorButton(Direction.UP);//create a down button
+			floorLamps[0] = new FloorLamp(Direction.DOWN);
+			floorLamps[1] = new FloorLamp(Direction.UP);
 		}
+
+		requests = new int[scheduler.getTopFloor()];//can only have as many requests as there are floors
 	}
 
 	/**
 	 * @param time The time request was initiated in bytes [Hours,Minutes,Seconds,Milliseconds]
-	 * @param direction The direction requester would like to travel and destination floor
+	 * @param direction The direction requester would like to travel
 	 * @return byte array to be sent within a DatagramPacket via DatagramSocket
 	 */
 	public byte[] createMessage(byte[] time, String[] direction) {
@@ -57,21 +71,12 @@ public class Floor {
 		}else directionCode=-1;//invalid request, should never happen
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
-		try {
-			for (int i=0;i<time.length;i++) {//write each time parameter
-				output.write(time[i]);
-			}
-			output.write(floorNumber);//write the floor number
-			if (directionCode!=-1) {//if the direction code is not invalid
-				output.write(directionCode);
-			}else {//else throw an exception
-				throw new Exception("Invalid Direction Code");
-			}
-			output.write(Integer.parseInt(direction[1]));//write destination floor
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
+		for (int i=0;i<time.length;i++) {//write each time parameter
+			output.write(time[i]);
+		}
+		output.write(floorNumber);//write the floor number
+		if (directionCode!=-1) {//if the direction code is not invalid
+			output.write(directionCode);
 		}
 		returnBytes = output.toByteArray();//creates single byte array to be sent
 		//System.out.println(Arrays.toString(returnBytes));
@@ -100,13 +105,15 @@ public class Floor {
 
 	/**
 	 * Create a request to be sent to the scheduler
-	 * @param request String containing request information (time, floor, direction, destination)
+	 * @param request String containing request information (time, floor, direction)
 	 */
 	public void newRequest(String[] request) {
 		TimeStamp ts = new TimeStamp (request[0]);//create a new timestamp from the request string
 		byte[] time = ts.toBytes();//get the bytes of the timestamp
-		byte[] message = createMessage(time, Arrays.copyOfRange(request,2,4));
-		
+		byte[] message = createMessage(time, Arrays.copyOfRange(request,2,3));
+		requests[requestInsert] = Integer.parseInt(request[3]);
+		System.out.println(requests[requestInsert]);
+		requestInsert++;
 		sendAndReceive(message);
 
 	}
@@ -117,6 +124,14 @@ public class Floor {
 	 */
 	public FloorButton[] getFloorButtons() {
 		return floorButtons;
+	}
+
+	/**
+	 * 
+	 * @return List of Floor Lamps
+	 */
+	public FloorLamp[] getFloorLamps() {
+		return floorLamps;
 	}
 
 	/**
