@@ -119,7 +119,7 @@ public class Floor {
 	 * 
 	 * @return Floor Number
 	 */
-	public int getFloorNumber() {//getter for floor number
+	public int getFloorNumber() {	//getter for floor number
 		return floorNumber;
 	}
 

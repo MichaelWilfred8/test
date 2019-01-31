@@ -26,6 +26,18 @@ public class TimeStamp {
 		this.milliseconds = Integer.parseInt(timeStamp.substring(9, 12));
 	}
 	
+	// TODO: Decide about removing this constructor
+	// Constructor for TimeStamp Class. Takes a byte array in H,m,s,S format and converts it to a timestamp object
+	public TimeStamp(byte[] timeStamp){
+		ByteBuffer buf = ByteBuffer.allocate(16);
+		buf.put(timeStamp);
+		
+		this.hours = buf.getInt(0);
+		this.minutes = buf.getInt(4);
+		this.seconds = buf.getInt(8);
+		this.milliseconds = buf.getInt(12);
+	}
+	
 	public int getHours() {
 		return hours;
 	}
@@ -41,6 +53,26 @@ public class TimeStamp {
 	public int getMilliseconds() {
 		return milliseconds;
 	}
+
+	public void setHours(int hours) {
+		this.hours = hours;
+	}
+
+
+	public void setMinutes(int minutes) {
+		this.minutes = minutes;
+	}
+
+
+	public void setSeconds(int seconds) {
+		this.seconds = seconds;
+	}
+
+
+	public void setMilliseconds(int milliseconds) {
+		this.milliseconds = milliseconds;
+	}
+
 
 	public String toString(){
 		return String.format("%02d:%02d:%02d:%03d", this.hours, this.minutes, this.seconds, this.milliseconds);
@@ -107,9 +139,17 @@ public class TimeStamp {
 	
 	// TODO: add isBefore and isAfter methods?
 	
-	public static void main(String[] args){
-		TimeStamp ts = new TimeStamp("03:45:01:123");
+	// Return a byte array that represents the timestamp object
+	public byte[] getBytes(){
+		ByteBuffer buf = ByteBuffer.allocate(16);
+		buf.putInt(this.getHours());
+		buf.putInt(this.getMinutes());
+		buf.putInt(this.getSeconds());
+		buf.putInt(this.getMilliseconds());
+		buf.flip();
 		
-		System.out.println("Timestamp = " + ts.toString());
+		return buf.array();
 	}
+	
+	// TODO: add isBefore and isAfter methods?
 }

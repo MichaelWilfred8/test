@@ -72,6 +72,23 @@ public class Test{
 
 	}
 
+	public void sendReceive(String passenger) throws IOException{
+
+		byte[] pass = passenger.getBytes();
+
+		DatagramSocket toserver;
+		toserver = new DatagramSocket();
+		InetAddress intserver = InetAddress.getByName("localhost");
+		int intserverSocket = 33;
+
+		// Creates a Datagram packet sending the request in bytes, with the length of the request array(beginning), to address localhost, and using port 69
+		DatagramPacket send = new DatagramPacket(pass,pass.length,intserver,intserverSocket);
+		toserver.send(send);
+		System.out.println("Sending the following to the Server: " +new String(send.getData()));
+		toserver.close();
+
+	}
+
 	public static void main(String[] args) {
 		Test t = new Test();
 		t.runTest();
