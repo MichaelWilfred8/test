@@ -1,9 +1,9 @@
 
 public class FloorButton extends Button {
 	
-	private FloorButtonDirection direction;//direction of the button
+	private Direction direction;//direction of the button
 	
-	FloorButton(FloorButtonDirection direction){
+	FloorButton(Direction direction){
 		state = false;//instantiate button to false
 		this.direction = direction;//instantiate direction as input direction
 	}
@@ -12,7 +12,7 @@ public class FloorButton extends Button {
 	 * 
 	 * @return direction of the button
 	 */
-	public FloorButtonDirection getDirection() {//getter for direction
+	public Direction getDirection() {//getter for direction
 		return direction;
 	}
 	
