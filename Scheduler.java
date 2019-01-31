@@ -4,10 +4,15 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import Enums.DoorState;
+import Enums.MotorState;
+
 public class Scheduler {
 
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendRecieveSocket, receiveSocket;
+	
+	private ElevatorStatus carStatus;	// Information about the status of an elevator car
 	
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
@@ -26,15 +31,17 @@ public class Scheduler {
 			// used to receive packets
 			receiveSocket = new DatagramSocket(23);
 			receiveSocket.setSoTimeout(10000);	//set intermediate host receive socket to timeout after 10 seconds of no input
-
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
 		}
 		
-		upRequests = new ArrayList<Integer>();
-		downRequests = new ArrayList<Integer>();
+		this.upRequests = new ArrayList<Integer>();
+		this.downRequests = new ArrayList<Integer>();
+		
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 	}
+	
 	
 	
 	/**
@@ -171,6 +178,15 @@ public class Scheduler {
 		sendRecieveSocket.close();
 		receiveSocket.close();
 
+	}
+	
+	
+	
+	/**
+	 * @param p	DataPacket request from the floor. Parse the request and assign the request to the appropriate elevator
+	 */
+	private void addRequest(DataPacket p){
+		
 	}
 
 }
