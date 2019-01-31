@@ -1,12 +1,12 @@
 package Enums;
 
-public enum FloorButtonDirection {
+public enum Direction {
 	DOWN(0),
 	UP(1);
 	
 	private int value;
 	
-	private FloorButtonDirection (int value){
+	private Direction (int value){
 		this.value = value;
 	}
 	
