@@ -2,6 +2,8 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 
+import Enums.FloorButtonDirection;
+
 
 /*
  * ElevatorDatagramPacket class. Extends ElevatorInputPacket class and is used to mimic 

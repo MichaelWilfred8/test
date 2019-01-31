@@ -1,11 +1,12 @@
+package Enums;
 
-public enum FloorButtonDirection {
-	DOWN(0),
-	UP(1);
+public enum FloorLampState {
+	UP(1),
+	DOWN(0);
 	
 	private int value;
 	
-	private FloorButtonDirection (int value){
+	private FloorLampState (int value){
 		this.value = value;
 	}
 	
@@ -14,10 +15,10 @@ public enum FloorButtonDirection {
 	}
 	
 	public String toString(){
-		if (this.value == 0){
-			return "DOWN";
-		} else {
+		if (this.value == 1){
 			return "UP";
+		} else  {
+			return "DOWN";
 		}
 	}
 }

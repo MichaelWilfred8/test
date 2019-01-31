@@ -1,3 +1,4 @@
+package Enums;
 
 public enum DoorState {
 	OPEN(1),

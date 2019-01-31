@@ -6,6 +6,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Arrays;
 
+import Enums.FloorButtonDirection;
+
 public class Floor {
 
 	private Scheduler scheduler;

@@ -1,3 +1,4 @@
+package Enums;
 
 public enum MotorState {
 	UP(1),

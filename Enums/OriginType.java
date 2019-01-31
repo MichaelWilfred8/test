@@ -1,3 +1,4 @@
+package Enums;
 
 public enum OriginType {
 	ELEVATOR(3),

@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import Enums.FloorButtonDirection;
+
 // Class for the scheduler to hold information about the elevator and its current position
 
 public class ElevatorStatus {

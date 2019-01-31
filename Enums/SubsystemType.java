@@ -1,3 +1,4 @@
+package Enums;
 
 public enum SubsystemType {
 	MOTOR(7),

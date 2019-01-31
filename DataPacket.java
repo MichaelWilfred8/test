@@ -1,5 +1,7 @@
 import java.nio.ByteBuffer;
 
+import Enums.*;
+
 /**
  * DataPacket object for sending information between subsystems. Includes the source of the message (elevator, floor, or scheduler),
  * the id of the source (i.e. car 2, floor 7, etc), the subsystem within the object that the message is addressing (i.e. the motor 
