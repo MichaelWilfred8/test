@@ -19,11 +19,6 @@ public class Floor {
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
 	DatagramSocket sendReceiveSocket;
 
-
-
-	//TODO:Create toggleable lamps
-	//TODO:Create floor request list
-
 	public Floor(Scheduler scheduler, int floorNumber){
 		try {
 			sendReceiveSocket = new DatagramSocket();
@@ -83,6 +78,10 @@ public class Floor {
 		return returnBytes;
 	}
 
+	/**
+	 * send byte array to scheduler
+	 * @param message, message to be sent
+	 */
 	public void sendAndReceive(byte[] message){
 
 		// Construct a datagram packet that is to be sent to a specified port on a specified host.
