@@ -7,4 +7,6 @@
 /ElevatorInputPacket.class
 /FloorButtonDirection.class
 /TimeStamp.class
-/Elevator.class
+/ElevatorDatagramPacket.class
+/ElevatorStatus.class
+/Direction.class
