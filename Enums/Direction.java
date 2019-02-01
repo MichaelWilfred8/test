@@ -1,8 +1,13 @@
 package Enums;
 
 public enum Direction {
-	DOWN(0),
-	UP(1);
+	UP(2),
+	DOWN(1);
+	
+	private static final int UP_INT = 2;
+	private static final byte UP_BYTE = (byte) UP_INT;
+	private static final int DOWN_INT = 1;
+	private static final byte DOWN_BYTE = (byte) DOWN_INT;
 	
 	private int value;
 	
@@ -15,21 +20,23 @@ public enum Direction {
 	}
 	
 	public String toString(){
-		if (this.value == 0){
+		if (this.value == DOWN_INT){
 			return "DOWN";
-		} else {
+		} else if (this.value == UP_INT) {
 			return "UP";
+		} else {
+			return "INVALID DIRECTION";
 		}
 	}
 	
 	public byte getByte(){
 		switch(this.value) {
-			case 1:
-				return 0x01;
-			case 0:
-				return 0x00;
+			case UP_INT:
+				return UP_BYTE;
+			case DOWN_INT:
+				return DOWN_BYTE;
 			default:
-				return (byte) 0xFF; //TODO: edit this case to return a null different value?
+				return (Byte) null; //TODO: edit this case to return a null different value?
 		}
 	}
 	
@@ -42,9 +49,9 @@ public enum Direction {
 	 */
 	public static Direction convertFromByte(byte b){
 		switch(b){
-			case 0x01:
+			case UP_BYTE:
 				return UP;
-			case 0x00:
+			case DOWN_BYTE:
 				return DOWN;
 			default:
 				return null;

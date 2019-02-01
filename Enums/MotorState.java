@@ -1,11 +1,19 @@
 package Enums;
 
 public enum MotorState {
-	UP(1),
-	OFF(0),
-	DOWN(-1);
+	UP(3),
+	OFF(2),
+	DOWN(1);
+	
+	private static final int UP_INT = 3;
+	private static final byte UP_BYTE = (byte) UP_INT;
+	private static final int OFF_INT = 2;
+	private static final byte OFF_BYTE = (byte) OFF_INT;
+	private static final int DOWN_INT = 1;
+	private static final byte DOWN_BYTE = (byte) DOWN_INT;
 	
 	private int value;
+	
 	
 	private MotorState (int value){
 		this.value = value;
@@ -17,12 +25,14 @@ public enum MotorState {
 	
 	
 	public String toString(){
-		if (this.value == -1){
-			return "DOWN";
-		} else  if (this.value == 0){
-			return "OFF";
-		} else {
+		if (this.value == UP_INT) {
 			return "UP";
+		} else if (this.value == OFF_INT) {
+			return "OFF";
+		} else if (this.value == DOWN_INT) {
+			return "DOWN";
+		} else {
+			return "INVALID MOTORSTATE";
 		}
 	}
 	
@@ -33,12 +43,12 @@ public enum MotorState {
 	 */
 	public byte getByte(){
 		switch(this.value) {
-			case 1:
-				return 0x01;
-			case 0:
-				return 0x00;
-			case -1:
-				return (byte) 0xFF;
+			case UP_INT:
+				return UP_BYTE;
+			case OFF_INT:
+				return OFF_BYTE;
+			case DOWN_INT:
+				return DOWN_BYTE;
 			default:
 				return (Byte) null; //TODO: edit this case
 		}
@@ -53,11 +63,11 @@ public enum MotorState {
 	 */
 	public static MotorState convertFromByte(byte b){
 		switch(b){
-			case 0x01:
+			case UP_BYTE:
 				return UP;
-			case 0x00:
+			case OFF_BYTE:
 				return OFF;
-			case (byte) 0xFF:
+			case DOWN_BYTE:
 				return DOWN;
 			default:
 				return null;

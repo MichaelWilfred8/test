@@ -9,6 +9,22 @@ public enum SubsystemType {
 	INPUT(2),
 	REQUEST(1);
 	
+	private static final int MOTOR_INT = 7;
+	private static final byte MOTOR_BYTE = (byte) MOTOR_INT;
+	private static final int DOOR_INT = 6;
+	private static final byte DOOR_BYTE = (byte) DOOR_INT;
+	private static final int CARLAMP_INT = 5;
+	private static final byte CARLAMP_BYTE = (byte) CARLAMP_INT;
+	private static final int FLOORLAMP_INT = 4;
+	private static final byte FLOORLAMP_BYTE = (byte) FLOORLAMP_INT;
+	private static final int LOCATION_INT = 3;
+	private static final byte LOCATION_BYTE = (byte) LOCATION_INT;
+	private static final int INPUT_INT = 2;
+	private static final byte INPUT_BYTE = (byte) INPUT_INT;
+	private static final int REQUEST_INT = 1;
+	private static final byte REQUEST_BYTE = (byte) REQUEST_INT;
+	
+	
 	private int value;
 	
 	private SubsystemType (int value){
@@ -21,19 +37,19 @@ public enum SubsystemType {
 	
 	public String toString(){
 		switch(this.value) {
-			case 7:
+			case MOTOR_INT:
 				return "MOTOR";
-			case 6:
+			case DOOR_INT:
 				return "DOOR";
-			case 5:
+			case CARLAMP_INT:
 				return "CARLAMP";
-			case 4:
+			case FLOORLAMP_INT:
 				return "FLOORLAMP";
-			case 3:
+			case LOCATION_INT:
 				return "LOCATION";
-			case 2:
+			case INPUT_INT:
 				return "INPUT";
-			case 1:
+			case REQUEST_INT:
 				return "REQUEST";
 			default:
 				return "Invalid Type";
@@ -48,22 +64,22 @@ public enum SubsystemType {
 	 */
 	public byte getByte(){
 		switch(this.value) {
-			case 7:
-				return 0x07;
-			case 6:
-				return 0x06;
-			case 5:
-				return 0x05;
-			case 4:
-				return 0x04;
-			case 3:
-				return 0x03;
-			case 2:
-				return 0x02;
-			case 1:
-				return 0x01;
+			case MOTOR_INT:
+				return MOTOR_BYTE;
+			case DOOR_INT:
+				return MOTOR_BYTE;
+			case CARLAMP_INT:
+				return CARLAMP_BYTE;
+			case FLOORLAMP_INT:
+				return FLOORLAMP_BYTE;
+			case LOCATION_INT:
+				return LOCATION_BYTE;
+			case INPUT_INT:
+				return INPUT_BYTE;
+			case REQUEST_INT:
+				return REQUEST_BYTE;
 			default:
-				return 0x00;
+				return (Byte) null;
 		}
 	}
 
@@ -76,19 +92,19 @@ public enum SubsystemType {
 	 */
 	public static SubsystemType convertFromByte(byte b){
 		switch(b){
-			case 0x07:
+			case MOTOR_BYTE:
 				return MOTOR;
-			case 0x06:
+			case DOOR_BYTE:
 				return DOOR;
-			case 0x05:
+			case CARLAMP_BYTE:
 				return CARLAMP;
-			case 0x04:
+			case FLOORLAMP_BYTE:
 				return FLOORLAMP;
-			case 0x03:
+			case LOCATION_BYTE:
 				return LOCATION;
-			case 0x02:
+			case INPUT_BYTE:
 				return INPUT;
-			case 0x01:
+			case REQUEST_BYTE:
 				return REQUEST;
 			default:
 				return null;

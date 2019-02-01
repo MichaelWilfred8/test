@@ -1,8 +1,13 @@
 package Enums;
 
 public enum DoorState {
-	OPEN(1),
-	CLOSED(0);
+	OPEN(2),
+	CLOSED(1);
+	
+	private static final int OPEN_INT = 2;
+	private static final byte OPEN_BYTE = (byte) OPEN_INT;
+	private static final int CLOSED_INT = 1;
+	private static final byte CLOSED_BYTE = (byte) CLOSED_INT;
 	
 	private int value;
 	
@@ -22,10 +27,10 @@ public enum DoorState {
 	 */
 	public byte getByte(){
 		switch(this.value) {
-			case 1:
-				return 0x01;
-			case 0:
-				return 0x00;
+			case OPEN_INT:
+				return OPEN_BYTE;
+			case CLOSED_INT:
+				return CLOSED_BYTE;
 			default:
 				return (Byte) null; //TODO: edit this case to return a null different value?
 		}
@@ -40,9 +45,9 @@ public enum DoorState {
 	 */
 	public static DoorState convertFromByte(byte b){
 		switch(b){
-			case 0x01:
+			case OPEN_BYTE:
 				return OPEN;
-			case 0x00:
+			case CLOSED_BYTE:
 				return CLOSED;
 			default:
 				return null;
@@ -50,10 +55,12 @@ public enum DoorState {
 	}
 	
 	public String toString(){
-		if (this.value == 1){
+		if (this.value == OPEN_INT){
 			return "OPEN";
-		} else  {
+		} else if (this.value == CLOSED_INT) {
 			return "CLOSED";
+		} else {
+			return "INVALID DOORSTATE";
 		}
 	}
 }
