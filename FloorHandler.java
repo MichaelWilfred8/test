@@ -9,7 +9,7 @@ public class FloorHandler implements Runnable {
 	Floor[] floors;
 	Scheduler scheduler;
 
-	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
+	DatagramPacket receivePacket; //packets and socket used to send information
 	DatagramSocket receiveSocket;
 
 	FloorHandler(Scheduler scheduler){
