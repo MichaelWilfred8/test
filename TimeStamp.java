@@ -2,22 +2,22 @@ import java.nio.ByteBuffer;
 
 /*
  * Timestamp class for the elevator input packet.
- * 
+ *
  */
 public class TimeStamp {
 	private int hours;
 	private int minutes;
 	private int seconds;
 	private int milliseconds;
-	
+
 	public TimeStamp(int hours, int minutes, int seconds, int milliseconds){
 		this.hours = hours;
 		this.minutes = minutes;
 		this.seconds = seconds;
 		this.milliseconds = milliseconds;
 	}
-	
-	
+
+
 	// Constructor for TimeStamp Class. Takes String in HH:mm:ss:SSS format and parses it to convert it into a timestamp
 	public TimeStamp(String timeStamp){
 		this.hours = Integer.parseInt(timeStamp.substring(0, 2));
@@ -25,19 +25,19 @@ public class TimeStamp {
 		this.seconds = Integer.parseInt(timeStamp.substring(6, 8));
 		this.milliseconds = Integer.parseInt(timeStamp.substring(9, 12));
 	}
-	
+
 	// TODO: Decide about removing this constructor
 	// Constructor for TimeStamp Class. Takes a byte array in H,m,s,S format and converts it to a timestamp object
 	public TimeStamp(byte[] timeStamp){
 		ByteBuffer buf = ByteBuffer.allocate(16);
 		buf.put(timeStamp);
-		
+
 		this.hours = buf.getInt(0);
 		this.minutes = buf.getInt(4);
 		this.seconds = buf.getInt(8);
 		this.milliseconds = buf.getInt(12);
 	}
-	
+
 	public int getHours() {
 		return hours;
 	}
@@ -108,6 +108,7 @@ public class TimeStamp {
 			return false;
 		return true;
 	}
+<<<<<<< HEAD
 	
 	/**
 	 * Converts object into 2D byte array
@@ -139,6 +140,10 @@ public class TimeStamp {
 	
 	// TODO: add isBefore and isAfter methods?
 	
+=======
+
+
+>>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 	// Return a byte array that represents the timestamp object
 	public byte[] getBytes(){
 		ByteBuffer buf = ByteBuffer.allocate(16);
@@ -147,9 +152,9 @@ public class TimeStamp {
 		buf.putInt(this.getSeconds());
 		buf.putInt(this.getMilliseconds());
 		buf.flip();
-		
+
 		return buf.array();
 	}
-	
+
 	// TODO: add isBefore and isAfter methods?
 }

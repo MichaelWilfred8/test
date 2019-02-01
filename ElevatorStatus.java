@@ -19,6 +19,7 @@ import Enums.*;
  *
  */
 public class ElevatorStatus {
+<<<<<<< HEAD
 	private int position;						// floor that elevator is at or was last at
 	private Direction tripDir;					// direction that the elevator is travelling / will be traveling on this trip
 	private SortedSet<Integer> floorsToVisit;	// Sorted Set of floors for this elevator to visit. 
@@ -160,6 +161,16 @@ public class ElevatorStatus {
 	 */
 	public void setFloorButtonLight(int floor, boolean state){
 		this.floorButtonLights[floor - 1] = state;
+=======
+	private int position;	// floor that elevator is at or was last at
+	private Direction dir;	// direction that elevator is traveling in
+	private ArrayList<Integer> floorsToVisit; // list of floors for the elevator to visit next
+	
+	public ElevatorStatus(int floor){
+		this.position = floor;
+		this.dir = Direction.UP;
+		this.floorsToVisit = new ArrayList<Integer>();
+>>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 	}
 	
 	/**

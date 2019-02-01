@@ -25,7 +25,7 @@ public class ElevatorDatagramPacket extends ElevatorInputPacket{
 	
 	
 	// Constructor for creating an ElevatorDatagramPacket to send from InetAddress and Port
-	public ElevatorDatagramPacket(TimeStamp timeStamp, int floor, FloorButtonDirection floorButton, int carButton, InetAddress address, int port){
+	public ElevatorDatagramPacket(TimeStamp timeStamp, int floor, Direction floorButton, int carButton, InetAddress address, int port){
 		super(timeStamp, floor, floorButton, carButton);
 		this.packet = new DatagramPacket(super.getBytes(), super.BYTE_ARRAY_LENGTH, address, port);
 	}
@@ -46,7 +46,7 @@ public class ElevatorDatagramPacket extends ElevatorInputPacket{
 	
 	
 	// Constructor for creating an ElevatorDatagramPacket to send to a given SocketAddress
-	public ElevatorDatagramPacket(TimeStamp timeStamp, int floor, FloorButtonDirection floorButton, int carButton, SocketAddress address){
+	public ElevatorDatagramPacket(TimeStamp timeStamp, int floor, Direction floorButton, int carButton, SocketAddress address){
 		super(timeStamp, floor, floorButton, carButton);
 		this.packet = new DatagramPacket(super.getBytes(), super.BYTE_ARRAY_LENGTH, address);
 	}

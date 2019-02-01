@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
-
+import java.util.Arrays;
 
 public class Test{
 
@@ -24,13 +24,17 @@ public class Test{
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		for (int i=0; i<testLines.length;i++) {
-			//System.out.println(Arrays.toString(testLines[i]));
 			for (int j=0;j<floors.length;j++) {
+				//System.out.println(Arrays.toString(testLines[i]));
 				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
 					floors[j].newRequest(testLines[i]);
 				}
 			}
-			
+
+		}
+		
+		for (int i=0;i<floors.length;i++) {
+			floors[i].purgeRequests();
 		}
 	}
 
@@ -60,7 +64,7 @@ public class Test{
 				e.printStackTrace();
 			}
 		}
-		
+
 		String[][] returnString = new String[inputLines.size()][];//2D array of strings, first dimension is number of lines within the input file, second is details of the line
 		for (int i = 0; i < returnString.length; i++) {//copy the lengths of each internal array to the 1st dimension
 			returnString[i] = new String[inputLines.get(i).length];
@@ -70,11 +74,12 @@ public class Test{
 				returnString[i][j] = inputLines.get(i)[j];
 			}
 		}
-		
+
 		return returnString;
 
 	}
 
+<<<<<<< HEAD
 	public void sendReceive(String passenger) throws IOException{
 
 		byte[] pass = passenger.getBytes();
@@ -91,6 +96,8 @@ public class Test{
 		toserver.close();
 
 	}
+=======
+>>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 
 	public static void main(String[] args) {
 		Test t = new Test();
