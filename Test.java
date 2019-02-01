@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -11,7 +12,12 @@ public class Test{
 	Scheduler scheduler;//Scheduler of 
 
 	Test(){
-		scheduler = new Scheduler();//instantiate Scheduler
+		try {
+			scheduler = new Scheduler();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//instantiate Scheduler
 		
 	}
 
@@ -75,7 +81,7 @@ public class Test{
 
 	}
 
-<<<<<<< HEAD
+
 	public void sendReceive(String passenger) throws IOException{
 
 		byte[] pass = passenger.getBytes();
@@ -92,8 +98,6 @@ public class Test{
 		toserver.close();
 
 	}
-=======
->>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 
 	public static void main(String[] args) {
 		Test t = new Test();

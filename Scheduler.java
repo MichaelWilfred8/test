@@ -36,7 +36,7 @@ public class Scheduler {
 
 			floorHandler = new FloorHandler(this);
 
-			floorHandler.run();
+			//floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets
 			sendRecieveSocket = new DatagramSocket();
@@ -215,21 +215,21 @@ public class Scheduler {
 		// If the Origin of the message was from the elevator
 		if (p.getOrigin() == OriginType.ELEVATOR){
 			switch(p.getSubSystem()){
-				case MOTOR:
-					this.carStatus.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));	// set the motor state in the carStatus class to the motor state sent from the elevator
-					break;
-				case DOOR:
-					this.carStatus.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));	// set the door state in the carStatus class to the motor state sent from the elevator
-					break;
-				case CARLAMP:
-					this.carStatus.toggleFloorButtonLight((int) p.getStatus()[0]);	// Toggle the status of the floor lamp in the elevator
-					break;
-				case LOCATION:
-					this.carStatus.setPosition((int) p.getStatus()[0]);	// Set the location of the elevator to the one sent by the elevator
-					break;
-				default:
-					System.out.println("INVALID CASE");
-					break;
+			case MOTOR:
+				this.carStatus.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));	// set the motor state in the carStatus class to the motor state sent from the elevator
+				break;
+			case DOOR:
+				this.carStatus.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));	// set the door state in the carStatus class to the motor state sent from the elevator
+				break;
+			case CARLAMP:
+				this.carStatus.toggleFloorButtonLight((int) p.getStatus()[0]);	// Toggle the status of the floor lamp in the elevator
+				break;
+			case LOCATION:
+				this.carStatus.setPosition((int) p.getStatus()[0]);	// Set the location of the elevator to the one sent by the elevator
+				break;
+			default:
+				System.out.println("INVALID CASE");
+				break;
 
 			}
 		}
@@ -237,16 +237,16 @@ public class Scheduler {
 		// If the incoming request came from a floor subsystem
 		else if (p.getOrigin() == OriginType.FLOOR) {
 			switch(p.getSubSystem()){
-				case FLOORLAMP:
-					// TODO: handle status of floor lamp here
-					break;
-				case REQUEST:
-					// TODO: handle incoming request from floor here. Change add to offer and surround with try catch
-					this.requestBuffer.add(new ElevatorInputPacket(p.getStatus())); 	// Generate a new ElevatorInputPacket from the status byte array and add it to the request buffer
-					break;
-				default:
-					System.out.println("INVALID SUBSYSTEM");
-					break;
+			case FLOORLAMP:
+				// TODO: handle status of floor lamp here
+				break;
+			case REQUEST:
+				// TODO: handle incoming request from floor here. Change add to offer and surround with try catch
+				this.requestBuffer.add(new ElevatorInputPacket(p.getStatus())); 	// Generate a new ElevatorInputPacket from the status byte array and add it to the request buffer
+				break;
+			default:
+				System.out.println("INVALID SUBSYSTEM");
+				break;
 			}
 		}
 	}
@@ -263,12 +263,12 @@ public class Scheduler {
 		SocketAddress addr = null;
 
 		switch(o){
-			case FLOOR:
-				addr = this.listOfFloorAddresses[id];
-				break;
-			case ELEVATOR:
-				addr = this.carStatus.getAddress();
-				break;
+		case FLOOR:
+			addr = this.listOfFloorAddresses[id];
+			break;
+		case ELEVATOR:
+			addr = this.carStatus.getAddress();
+			break;
 		}
 		return addr;
 	}
@@ -418,4 +418,4 @@ public class Scheduler {
 }
 
 
-}
+
