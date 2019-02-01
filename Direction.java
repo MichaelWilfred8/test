@@ -1,5 +1,5 @@
-
 public enum Direction {
+	NEUTRAL(-1),
 	DOWN(0),
 	UP(1);
 	

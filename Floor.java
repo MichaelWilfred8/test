@@ -115,7 +115,7 @@ public class Floor {
 		}
 		output.write(floorNumber);//write the floor number
 		output.write(directionCode);//write the direction
-		output.write(-1);//write -1 to signify this is not a button press within the elevator
+		output.write(Direction.NEUTRAL.getValue());//write -1 to signify this is not a button press within the elevator
 		returnBytes = output.toByteArray();//creates single byte array to be sent
 		return returnBytes;
 	}
