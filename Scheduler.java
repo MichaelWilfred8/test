@@ -4,9 +4,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import Enums.Direction;
-import Enums.DoorState;
-import Enums.MotorState;
+import Enums.*;
 
 public class Scheduler {
 
@@ -182,6 +180,61 @@ public class Scheduler {
 	}
 	
 	
+	/*
+	 * Data that can be sent to/form elevator:
+	 * Motor, Door, CarLamp, Location, request???
+	 * 
+	 * Data that can be sent to/from floor
+	 * FloorLamp, request?
+	 * 
+	 */
+	
+	/**
+	 * Process incoming requests
+	 * 
+	 * @param b 	byte array representing the incoming request
+	 */
+	private void getIncomingRequest(byte[] b){
+		DataPacket p = new DataPacket(b);
+		
+		// If the Origin of the message was from the elevator
+		if (p.getOrigin() == OriginType.ELEVATOR){
+			switch(p.getSubSystem()){
+				case MOTOR:
+					this.carStatus.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));	// set the motor state in the carStatus class to the motor state sent from the elevator
+					break;
+				case DOOR:
+					this.carStatus.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));	// set the door state in the carStatus class to the motor state sent from the elevator
+					break;
+				case CARLAMP:
+					this.carStatus.toggleFloorButtonLight((int) p.getStatus()[0]);	// Toggle the status of the floor lamp in the elevator
+					break;
+				case LOCATION:
+					this.carStatus.setPosition((int) p.getStatus()[0]);	// Set the location of the elevator to the one sent by the elevator
+					break;
+				default:
+					System.out.println("INVALID CASE");
+					break;
+				
+			}
+		} 
+		
+		// If the incoming request came from a floor subsystem
+		else if (p.getOrigin() == OriginType.FLOOR) {
+			switch(p.getSubSystem()){
+				case FLOORLAMP:
+					// TODO: handle status of floor lamp here
+					break;
+				case REQUEST:
+					// TODO: handle incoming request from floor here
+					break;
+				default:
+					System.out.println("INVALID SUBSYSTEM");
+					break;
+			}
+		}
+	}
+	
 	
 	/**
 	 * @param p	DataPacket request from the floor. Parse the request and assign the request to the appropriate elevator
@@ -189,6 +242,8 @@ public class Scheduler {
 	private void addRequest(DataPacket p){
 		
 	}
-
+	
+	
+	
 }
 
