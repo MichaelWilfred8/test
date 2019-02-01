@@ -1,5 +1,5 @@
 import java.nio.ByteBuffer;
-
+import java.util.Arrays;
 import Enums.*;
 
 /**
@@ -17,6 +17,11 @@ public class DataPacket {
 	byte id;
 	SubsystemType subSystem;
 	byte[] status;
+	
+	private static final int ORIGIN_INDEX = 0;
+	private static final int ID_INDEX = 1;
+	private static final int SUBSYSTEM_INDEX = 2;
+	private static final int STATUS_INDEX = 3;
 	
 	
 	/**
@@ -36,6 +41,91 @@ public class DataPacket {
 	
 	
 	
+	/**
+	 * Constructor for DataPacket object that fills each field based the byte array given as a parameter
+	 * @param b		Byte array that follows the DataPacket getBytes format
+	 */
+	public DataPacket(byte[] b){
+		this.origin = OriginType.convertFromByte(b[ORIGIN_INDEX]);
+		this.id = b[ID_INDEX];
+		this.subSystem = SubsystemType.convertFromByte(b[SUBSYSTEM_INDEX]);
+		this.status = Arrays.copyOfRange(b, STATUS_INDEX, b.length); 
+	}
+	
+	
+	
+	/**
+	 * @return the origin
+	 */
+	public OriginType getOrigin() {
+		return origin;
+	}
+
+
+
+	/**
+	 * @param origin the origin to set
+	 */
+	public void setOrigin(OriginType origin) {
+		this.origin = origin;
+	}
+
+
+
+	/**
+	 * @return the id
+	 */
+	public byte getId() {
+		return id;
+	}
+
+
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(byte id) {
+		this.id = id;
+	}
+
+
+
+	/**
+	 * @return the subSystem
+	 */
+	public SubsystemType getSubSystem() {
+		return subSystem;
+	}
+
+
+
+	/**
+	 * @param subSystem the subSystem to set
+	 */
+	public void setSubSystem(SubsystemType subSystem) {
+		this.subSystem = subSystem;
+	}
+
+
+
+	/**
+	 * @return the status
+	 */
+	public byte[] getStatus() {
+		return status;
+	}
+
+
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(byte[] status) {
+		this.status = status;
+	}
+
+
+
 	/**
 	 * Generate a byte array of all the information in the data packet
 	 * @return byte array containing the information in the data packet

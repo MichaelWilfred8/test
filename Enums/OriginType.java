@@ -25,6 +25,12 @@ public enum OriginType {
 		}
 	}
 	
+	
+	/**	
+	 * Generates a byte value for the enum
+	 * 
+	 * @return	The byte value for this enum
+	 */
 	public byte getByte(){
 		switch(this.value) {
 			case 3:
@@ -35,6 +41,26 @@ public enum OriginType {
 				return 0x01;
 			default:
 				return 0x00;
+		}
+	}
+	
+	
+	/**
+	 * Converts a given byte value into an Enum of the same value
+	 * 
+	 * @param b	the byte to be converted
+	 * @return an OriginType enum that matches the byte parameter
+	 */
+	public static OriginType convertFromByte(byte b){
+		switch(b){
+			case 0x03:
+				return ELEVATOR;
+			case 0x02:
+				return SCHEDULER;
+			case 0x01:
+				return FLOOR;
+			default:
+				return null;
 		}
 	}
 }

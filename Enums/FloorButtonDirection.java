@@ -22,6 +22,12 @@ public enum FloorButtonDirection {
 		}
 	}
 	
+	
+	/**	
+	 * Generates a byte value for the enum
+	 * 
+	 * @return	The byte value for this enum
+	 */
 	public byte getByte(){
 		switch(this.value) {
 			case 1:
@@ -29,7 +35,24 @@ public enum FloorButtonDirection {
 			case 0:
 				return 0x00;
 			default:
-				return (byte) 0xFF; //TODO: edit this case to return a null different value?
+				return (Byte) null; //TODO: edit this case to return a null different value?
+		}
+	}
+	
+	/**
+	 * Converts a given byte value into an Enum of the same value
+	 * 
+	 * @param b	the byte to be converted
+	 * @return a FloorButtonDirection enum that matches the byte parameter
+	 */
+	public static FloorButtonDirection convertFromByte(byte b){
+		switch(b){
+			case 0x01:
+				return UP;
+			case 0x00:
+				return DOWN;
+			default:
+				return null;
 		}
 	}
 }
