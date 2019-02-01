@@ -26,7 +26,7 @@ public class Scheduler {
 	
 	private Queue<ElevatorInputPacket> requestBuffer;	// Buffer Queue for all requests that have not been handled by the scheduler yet
 	
-	private SocketAddress[] listOfFloorAddresses;	// Holds addresses for each floor
+	private SocketAddress floorHandlerAddress;	// Holds addresses for each floor
 	
 	//TODO: create floorStatus class?
 	
@@ -53,14 +53,7 @@ public class Scheduler {
 		
 		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 		
-		this.listOfFloorAddresses = new SocketAddress[MAX_FLOOR];
-		
-		// fill list of floor addresses for the elevator
-		for (int i = 0; i < MAX_FLOOR; ++i){
-			this.listOfFloorAddresses[i] = new InetSocketAddress(InetAddress.getLocalHost(), 3000+i);
-		}
-		
-		
+		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 3000);
 	}
 	
 	
@@ -201,6 +194,22 @@ public class Scheduler {
 
 	}
 	
+	/**
+	 * Determine the next state the motor must be in
+	 * 
+	 * @return	MotorState the state that the motor has to be in
+	 */
+	private MotorState findNextMotorState(){
+		if (this.carStatus.getNextFloor() == this.carStatus.getPosition()){
+			return MotorState.OFF;
+		} else if (this.carStatus.getNextDestination() > this.carStatus.getPosition()){
+			return MotorState.UP;
+		} else if (this.carStatus.getNextDestination() < this.carStatus.getPosition()){
+			return MotorState.OFF;
+		} else {
+			return MotorState.OFF;
+		}
+	}
 	
 	/*
 	 * Data that can be sent to/form elevator:
@@ -269,7 +278,7 @@ public class Scheduler {
 		
 		switch(o){
 			case FLOOR:
-				addr = this.listOfFloorAddresses[id];
+				addr = this.floorHandlerAddress;
 				break;
 			case ELEVATOR:
 				addr = this.carStatus.getAddress();
@@ -385,14 +394,28 @@ public class Scheduler {
 
 	}
 	
+	private void stopAtFloorAlgorithm(){
+		// Tell the elevator to stop
+		sendRequest();
+		
+		// update elevator status
+		receiveRequest();
+		carStatus.update();
+		
+		// open Doors
+	}
+	
 	
 	
 	private void elevatorControlLoop(){
 		while(true){
 			// Wait to receive packet and parse it
-			this.parseIncomingRequest(receiveRequest());
+			DataPacket p = receiveRequest();
+			
+			this.parseIncomingRequest(p);
 			
 			// Handle the incoming request
+			
 			
 			// if request is a floor number
 			
