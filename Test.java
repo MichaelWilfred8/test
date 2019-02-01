@@ -5,24 +5,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Test{
-
-	Floor [] floors;//list of floors within the building
 	Scheduler scheduler;//Scheduler of 
 
 	Test(){
 		scheduler = new Scheduler();//instantiate Scheduler
-		floors = new Floor[scheduler.getTopFloor()];
-		for(int i=0;i<scheduler.getTopFloor();i++) {
-			floors[i] = new Floor(scheduler, i+1);
-		}
+		
 	}
 
 	public void runTest() {
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
+		Floor [] floors = scheduler.floorHandler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
 			for (int j=0;j<floors.length;j++) {
-				//System.out.println(Arrays.toString(testLines[i]));
+				//System.out.println("LALALA " + Arrays.toString(testLines[i]));
 				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
 					floors[j].newRequest(testLines[i]);
 				}
