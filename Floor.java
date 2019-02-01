@@ -14,20 +14,15 @@ public class Floor {
 	private FloorLamp[] floorLamps;//list of lamps on floor
 	private byte[][] requests;//list of requests
 	private int requestInsert = 0;//where to insert in list of requests
-	private boolean requested;//if an elevator has been requested for this floor
+	private boolean requested;
 
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
-	DatagramSocket sendSocket;
+	DatagramSocket sendReceiveSocket;
 
-	/**
-	 * Generic constructor
-	 * @param scheduler
-	 * @param floorNumber
-	 */
 	public Floor(Scheduler scheduler, int floorNumber){
 		try {
-			sendSocket = new DatagramSocket();
+			sendReceiveSocket = new DatagramSocket();
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -83,7 +78,7 @@ public class Floor {
 
 		// Send the datagram packet to the server via the send/receive socket. 
 		try {
-			sendSocket.send(sendPacket);
+			sendReceiveSocket.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -120,11 +115,10 @@ public class Floor {
 		}
 		output.write(floorNumber);//write the floor number
 		output.write(directionCode);//write the direction
-		output.write(-1);//write -1 to signify this is not a button press within the elevator
+		output.write(Direction.NEUTRAL.getValue());//write -1 to signify this is not a button press within the elevator
 		returnBytes = output.toByteArray();//creates single byte array to be sent
 		return returnBytes;
 	}
-	
 	 /**
 	  * Create destination request, to be stored until an elevator arrives
 	  * @param request request data from csv
@@ -181,10 +175,8 @@ public class Floor {
 		}else {
 			requests[requestInsert++] = destination;
 		}
-	}
-	
-	public void elevatorArrived() {
-		
+
+
 	}
 
 	/**
