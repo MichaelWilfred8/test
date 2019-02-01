@@ -1,9 +1,10 @@
+import Enums.Direction;
 
 public class FloorLamp {
-	
+
 	private boolean state;
 	private Direction direction;
-	
+
 	/**
 	 * Generic constructor
 	 */
@@ -11,7 +12,7 @@ public class FloorLamp {
 		state = false;
 		this.direction=direction;
 	}
-	
+
 	/**
 	 * Constructor with initial state
 	 * @param state initial state
@@ -20,20 +21,20 @@ public class FloorLamp {
 		this.state = state;
 		this.direction = direction;
 	}
-	
+
 	/**
 	 * Toggle state (switches from T->F, or does the opposite)
 	 */
 	public void toggle() {
 		state = !state;
 	}
-	
+
 	/**
 	 * @return direction of lamp
 	 */
 	public Direction getDirection() {
 		return direction;
 	}
-	
+
 
 }

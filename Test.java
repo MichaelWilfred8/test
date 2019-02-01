@@ -18,7 +18,7 @@ public class Test{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}//instantiate Scheduler
-		
+
 	}
 
 	public void runTest() {
@@ -34,7 +34,7 @@ public class Test{
 			}
 
 		}
-		
+
 		for (int i=0;i<floors.length;i++) {
 			floors[i].purgeRequests();
 		}

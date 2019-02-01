@@ -5,8 +5,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
-
-import Enums.FloorButtonDirection;
+import Enums.Direction;
 
 public class Floor {
 
@@ -91,7 +90,7 @@ public class Floor {
 			System.exit(1);
 		}
 		System.out.println("Sent\n");
-		
+
 		//TODO:notice elevator arrival
 		//TODO:toggle direction lamp
 		//TODO:send list of requests 
@@ -126,12 +125,12 @@ public class Floor {
 		returnBytes = output.toByteArray();//creates single byte array to be sent
 		return returnBytes;
 	}
-	
-	 /**
-	  * Create destination request, to be stored until an elevator arrives
-	  * @param request request data from csv
-	  * @return byte array message
-	  */
+
+	/**
+	 * Create destination request, to be stored until an elevator arrives
+	 * @param request request data from csv
+	 * @return byte array message
+	 */
 	private byte[] destinationRequest(String[] request) {
 		byte[] messageBytes = null;
 		int directionCode;//direction code
@@ -156,7 +155,7 @@ public class Floor {
 
 		return messageBytes;
 	}
-	
+
 	/**
 	 * send all requests for floor to scheduler
 	 */
@@ -166,7 +165,7 @@ public class Floor {
 			sendRequest(requests[i]);//send request to scheduler
 			requests[i] = null;//clear request registry
 		}
-		
+
 	}
 
 	/**
@@ -184,9 +183,9 @@ public class Floor {
 			requests[requestInsert++] = destination;
 		}
 	}
-	
+
 	public void elevatorArrived() {
-		
+
 	}
 
 	/**

@@ -12,18 +12,18 @@ import Enums.*;
  */
 
 public class DataPacket {
-	
+
 	OriginType origin;
 	byte id;
 	SubsystemType subSystem;
 	byte[] status;
-	
+
 	private static final int ORIGIN_INDEX = 0;
 	private static final int ID_INDEX = 1;
 	private static final int SUBSYSTEM_INDEX = 2;
 	private static final int STATUS_INDEX = 3;
-	
-	
+
+
 	/**
 	 * Constructor for DataPacket object
 	 * 
@@ -38,9 +38,9 @@ public class DataPacket {
 		this.subSystem = subSystem;
 		this.status = status;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Constructor for DataPacket object that fills each field based the byte array given as a parameter
 	 * @param b		Byte array that follows the DataPacket getBytes format
@@ -51,9 +51,9 @@ public class DataPacket {
 		this.subSystem = SubsystemType.convertFromByte(b[SUBSYSTEM_INDEX]);
 		this.status = Arrays.copyOfRange(b, STATUS_INDEX, b.length); 
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @return the origin
 	 */
@@ -136,9 +136,9 @@ public class DataPacket {
 		buf.put(this.id);
 		buf.putShort(this.subSystem.getByte());
 		buf.put(this.status);
-		
+
 		buf.flip();
-		
+
 		return buf.array();
 	}
 }	

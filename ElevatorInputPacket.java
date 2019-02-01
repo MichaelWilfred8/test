@@ -1,7 +1,7 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import Enums.FloorButtonDirection;
+import Enums.Direction;
 
 import java.nio.ByteBuffer;
 

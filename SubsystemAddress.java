@@ -13,8 +13,8 @@ public class SubsystemAddress {
 	private int id;
 	private InetAddress inetAddress;
 	private int port;
-	
-	
+
+
 	public SubsystemAddress(OriginType type, int id, InetAddress address, int port) {
 		super();
 		this.type = type;
@@ -22,8 +22,8 @@ public class SubsystemAddress {
 		this.inetAddress = address;
 		this.port = port;
 	}
-	
-	
+
+
 	public SubsystemAddress(OriginType type, int id, InetSocketAddress address) {
 		super();
 		this.type = type;
@@ -55,8 +55,8 @@ public class SubsystemAddress {
 	public InetAddress getInetAddress() {
 		return inetAddress;
 	}
-	
-	
+
+
 	public SocketAddress getSocketAddress(){
 		return new InetSocketAddress(this.inetAddress, this.port);
 	}
@@ -67,7 +67,7 @@ public class SubsystemAddress {
 	public int getPort() {
 		return port;
 	}
-	
-	
-	
+
+
+
 }

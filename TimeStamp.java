@@ -108,7 +108,7 @@ public class TimeStamp {
 			return false;
 		return true;
 	}
-	
+
 	/**
 	 * Converts object into 2D byte array
 	 * @return 2D byte array (4X4) containing TimeStamp parameters as bytes
@@ -118,11 +118,11 @@ public class TimeStamp {
 		byte [] minBytes = ByteBuffer.allocate(4).putInt(minutes).array();
 		byte [] secBytes = ByteBuffer.allocate(4).putInt(seconds).array();
 		byte [] milliBytes = ByteBuffer.allocate(4).putInt(milliseconds).array();
-		
+
 		byte [] timestampBytes = {hourBytes[3],minBytes[3],secBytes[3],milliBytes[3]};
-	    return timestampBytes;
+		return timestampBytes;
 	}
-	
+
 	/**
 	 * 
 	 * @param timeBytes array of array of time bytes, 4 arrays one for each time parameter
@@ -136,9 +136,9 @@ public class TimeStamp {
 		TimeStamp returnStamp = new TimeStamp(newHours, newMin, newSec, newMilli);
 		return returnStamp;
 	}
-	
+
 	// TODO: add isBefore and isAfter methods?
-	
+
 	// Return a byte array that represents the timestamp object
 	public byte[] getBytes(){
 		ByteBuffer buf = ByteBuffer.allocate(16);

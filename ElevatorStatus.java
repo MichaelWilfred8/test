@@ -29,7 +29,7 @@ public class ElevatorStatus {
 	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
 	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
 	private SocketAddress address;				// SocketAddress of the elevator 
-	
+
 	/**
 	 * Constructor for ElevatorStatus class
 	 * 
@@ -44,22 +44,22 @@ public class ElevatorStatus {
 		this.floorsToVisit = new TreeSet<Integer>();	// TreeSet is an implementation of the SortedSet interface
 		this.motorState = motorState;
 		this.doorState = doorState;
-		
+
 		this.MAX_FLOOR = numFloors;		// set the highest floor in the elevator to the number of all floors in the building
 		this.MIN_FLOOR = 1;				// set the lowest floor in the elevator to 1
-		
+
 		this.floorButtonLights = new boolean[numFloors];
-		
+
 		// set all the floor button lights to be off
 		for(int i = 0; i < numFloors; ++i){
 			floorButtonLights[i] = false;
 		}
-		
+
 		this.address = address;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @return The current floor of the elevator
 	 */
@@ -150,8 +150,8 @@ public class ElevatorStatus {
 	public void setAllFloorButtonLights(boolean[] floorButtonLights) {
 		this.floorButtonLights = floorButtonLights;
 	}
-	
-	
+
+
 	/**
 	 * Set the state for a single floor button light (i.e. on/off)
 	 * 
@@ -161,7 +161,7 @@ public class ElevatorStatus {
 	public void setFloorButtonLight(int floor, boolean state){
 		this.floorButtonLights[floor - 1] = state;
 	}
-	
+
 	/**
 	 * Toggle a single floorButtonLight
 	 * 
@@ -190,8 +190,8 @@ public class ElevatorStatus {
 	public void addFloor(int floor){
 		this.floorsToVisit.add(floor);			// Add the new floor to the sorted set
 	}
-	
-	
+
+
 
 	/**
 	 * @return the nextDestination
@@ -208,7 +208,7 @@ public class ElevatorStatus {
 	public void setNextDestination(int nextDestination) {
 		this.nextDestination = nextDestination;
 	}
-	
+
 
 
 	/**
@@ -244,10 +244,10 @@ public class ElevatorStatus {
 				return this.position;				// return the current position of the elevator so it remains on this floor
 			} else {								// if the elevator has another floor to visit
 				this.setTripDir(Direction.DOWN);		// set the current trip direction to down
-				
+
 				int tempFloor = this.floorsToVisit.last();	// set a temporary value to the highest value in the set
 				this.floorsToVisit.remove(tempFloor);		// remove the highest value from the set
-				
+
 				return tempFloor;							// return the highest value from the set stored in the temporary value
 			}
 		} else if ((this.tripDir == Direction.DOWN) && (this.position == this.MIN_FLOOR)) {	// check if the elevator is current at the bottom floor and on a downwards trip
@@ -255,94 +255,94 @@ public class ElevatorStatus {
 				return this.position;							// return the current position of the elevator so it remains on this floor
 			} else {											// if the elevator has another floor to visit
 				this.setTripDir(Direction.UP);					// set the current trip direction to up
-				
+
 				int tempFloor = this.floorsToVisit.first();		// set a temporary value to the lowest value in the set
 				this.floorsToVisit.remove(tempFloor);			// remove the lowest value from the set
-				
+
 				return tempFloor;								// return the lowest value
 			}
 		}
-		
+
 		// Check if this elevator is on an upwards trip
 		if (this.tripDir == Direction.UP){
 			// TODO: find more efficient way of looking through the sorted set
 			Integer[] tempFloorArray =  new Integer[this.floorsToVisit.size()];
 			tempFloorArray = this.floorsToVisit.toArray(tempFloorArray);
-			
+
 			// iterate through all the floors in the list to find the nearest floor to visit above the current floor
 			for(int i = 0; i < tempFloorArray.length; ++i){
 				if (tempFloorArray[i] > this.position){
-					
+
 					int tempFloor = tempFloorArray[i];			
 					this.floorsToVisit.remove(tempFloor);
-					
+
 					return tempFloor;
 				}
 			}
-			
+
 			// If there are no more floors to visit above the elevator's current floor then find the nearest floor below the elevator
 			// iterate through all the floors in the list to find the nearest floor to visit below the current floor
 			for(int i = tempFloorArray.length; i >= 0; --i){
 				if (tempFloorArray[i] < this.position){
-					
+
 					this.setTripDir(Direction.UP); 			// Change direction to down
-					
+
 					int tempFloor = tempFloorArray[i];		// get nearest floor from the floor array
 					this.floorsToVisit.remove(tempFloor);	// remove that floor from the floor list
-					
+
 					return tempFloor;						// return the floor
 				}
 			}
-			
-			
+
+
 		} else if (this.tripDir == Direction.DOWN){
 			// TODO: find more efficient way of looking through the sorted set
 			Integer[] tempFloorArray =  new Integer[this.floorsToVisit.size()];
 			tempFloorArray = this.floorsToVisit.toArray(tempFloorArray);
-			
+
 			// iterate through all the floors in the list to find the nearest floor to visit below the current floor
 			for(int i = tempFloorArray.length; i >= 0; --i){
 				if (tempFloorArray[i] < this.position){
-					
+
 					int tempFloor = tempFloorArray[i];			
 					this.floorsToVisit.remove(tempFloor);
-					
+
 					return tempFloor;
 				}
 			}
-			
+
 			// if there are no requests below this current floor then search for the nearest request above
 			// iterate through all the floors in the list to find the nearest floor to visit above the current floor
 			for(int i = 0; i < tempFloorArray.length; ++i){
 				if (tempFloorArray[i] > this.position){
-					
+
 					this.setTripDir(Direction.UP); 			// Change direction to up
-					
+
 					int tempFloor = tempFloorArray[i];		// get nearest floor from the floor array
 					this.floorsToVisit.remove(tempFloor);	// remove that floor from the floor list
-					
+
 					return tempFloor;						// return the floor
 				}
 			}
 		} 
-		
+
 		return this.position;	// if a new floor cannot be determined then stay on this floor
 	}
 
 
 
-	
+
 	@Override
 	public String toString() {
 		return "ElevatorStatus [position=" + position + ", tripDir=" + tripDir + ", floorsToVisit=" + floorsToVisit
 				+ ", motorState=" + motorState + ", doorState=" + doorState + ", floorButtonLights="
 				+ Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR + ", MAX_FLOOR=" + MAX_FLOOR + "]";
 	}
-	
+
 	public static void main(String args[]) throws UnknownHostException{
 		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, new InetSocketAddress(InetAddress.getLocalHost(), 4000));
-		
+
 		System.out.println(e.toString());
 	}
-	
+
 }
