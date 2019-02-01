@@ -329,7 +329,13 @@ public class ElevatorStatus {
 		
 		return this.position;	// if a new floor cannot be determined then stay on this floor
 	}
-
+	
+	
+	public void update(DataPacket p){
+		switch(p.getSubSystem()){
+		case 
+		}
+	}
 
 
 	
