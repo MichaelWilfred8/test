@@ -9,6 +9,8 @@ public enum SubsystemType {
 	INPUT(2),
 	REQUEST(1);
 	
+	// test coment
+	
 	private static final int MOTOR_INT = 7;
 	private static final byte MOTOR_BYTE = (byte) MOTOR_INT;
 	private static final int DOOR_INT = 6;

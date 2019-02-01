@@ -26,7 +26,10 @@ public class Scheduler {
 	
 	private Queue<ElevatorInputPacket> requestBuffer;	// Buffer Queue for all requests that have not been handled by the scheduler yet
 	
-	private SubsystemAddress[] listOfFloors;
+	private SocketAddress[] listOfFloorAddresses;	// Holds addresses for each floor
+	
+	//TODO: create floorStatus class?
+	
 
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
@@ -49,6 +52,15 @@ public class Scheduler {
 		this.requestBuffer = new ConcurrentLinkedQueue();
 		
 		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		
+		this.listOfFloorAddresses = new SocketAddress[MAX_FLOOR];
+		
+		// fill list of floor addresses for the elevator
+		for (int i = 0; i < MAX_FLOOR; ++i){
+			this.listOfFloorAddresses[i] = new InetSocketAddress(InetAddress.getLocalHost(), 3000+i);
+		}
+		
+		
 	}
 	
 	
@@ -253,15 +265,17 @@ public class Scheduler {
 	 * @return		SocketAddress of the subsystem
 	 */
 	private SocketAddress getAddressOfSubsystem(OriginType o, int id){
-		InetAddress addr = null;
-		try {
-			addr = InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		SocketAddress addr = null;
+		
+		switch(o){
+			case FLOOR:
+				addr = this.listOfFloorAddresses[id];
+				break;
+			case ELEVATOR:
+				addr = this.carStatus.getAddress();
+				break;
 		}
-		int port = 5000;
-		return new InetSocketAddress(addr, port);
+		return addr;
 	}
 	
 	/**
