@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -15,24 +14,29 @@ public class Scheduler {
 	DatagramPacket sendPacket;
 	static DatagramPacket receivePacket;
 	DatagramSocket sendRecieveSocket, receiveSocket;
-	
+	FloorHandler floorHandler;
+
 	private ElevatorStatus carStatus;	// Information about the status of an elevator car
-	
+
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
-	
+
 	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
-	
+
 	private Queue<ElevatorInputPacket> requestBuffer;	// Buffer Queue for all requests that have not been handled by the scheduler yet
-	
+
 	private SocketAddress[] listOfFloorAddresses;	// Holds addresses for each floor
-	
+
 	//TODO: create floorStatus class?
-	
+
 
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
+
+			floorHandler = new FloorHandler(this);
+
+			floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets
 			sendRecieveSocket = new DatagramSocket();
@@ -46,42 +50,33 @@ public class Scheduler {
 			se.printStackTrace();
 			System.exit(1);
 		}
-		
+
 		this.upRequests = new ArrayList<Integer>();
 		this.downRequests = new ArrayList<Integer>();
 		this.requestBuffer = new ConcurrentLinkedQueue();
-		
+
 		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
-		
+
 		this.listOfFloorAddresses = new SocketAddress[MAX_FLOOR];
-		
+
 		// fill list of floor addresses for the elevator
 		for (int i = 0; i < MAX_FLOOR; ++i){
 			this.listOfFloorAddresses[i] = new InetSocketAddress(InetAddress.getLocalHost(), 3000+i);
 		}
-		
-		
-	}
-	
-	
-	
-	/**
-	 * @return Top Level of building
-	 */
-	public int getTopFloor() {
-		return MAX_FLOOR;
+
+
 	}
 
 	public void receiveAndForward(){
 		while(true){ // Block until a datagram packet is received from receiveSocket.
-			// Construct a DatagramPacket for receiving packets up 
+			// Construct a DatagramPacket for receiving packets up
 			// to 100 bytes long (the length of the byte array).
 			byte data[] = new byte[100];
 			receivePacket = new DatagramPacket(data, data.length);
 
 			System.out.println("Intermediate Host: Waiting for Packet.\n");
 
-			try {        
+			try {
 				System.out.println("Waiting..."); // so we know we're waiting
 				receiveSocket.receive(receivePacket);
 			} catch (IOException e) {
@@ -100,7 +95,7 @@ public class Scheduler {
 			System.out.println("Containing: " );
 
 			//Form a String from the byte array.
-			String received = new String(data,0,len);   
+			String received = new String(data,0,len);
 			System.out.println("(String) " + received);
 			System.out.println("(Bytes) " + Arrays.toString(data) + "\n");
 
@@ -135,10 +130,10 @@ public class Scheduler {
 				System.exit(1);
 			}
 
-			System.out.println("Intermediate Host: packet sent\n");		
+			System.out.println("Intermediate Host: packet sent\n");
 
 			// Block until a datagram packet is received from receiveSocket.
-			try {        
+			try {
 				System.out.println("Waiting..."); // so we know we're waiting
 				receiveSocket.receive(receivePacket);
 			} catch (IOException e) {
@@ -157,7 +152,7 @@ public class Scheduler {
 			System.out.println("Containing: " );
 
 			//Form a String from the byte array.
-			received = new String(data,0,len);   
+			received = new String(data,0,len);
 			System.out.println("(String)" + received);
 			System.out.println("(bytes)" + Arrays.toString(data) + "\n");
 
@@ -187,7 +182,7 @@ public class Scheduler {
 			System.out.println("(String)" + new String(sendPacket.getData(),0,len));
 			System.out.println("(bytes)" + Arrays.toString(sendPacket.getData()) + "\n");
 
-			// Send the datagram packet to the client via the send socket. 
+			// Send the datagram packet to the client via the send socket.
 			try {
 				sendSocket.send(sendPacket);
 			} catch (IOException e) {
@@ -200,20 +195,20 @@ public class Scheduler {
 		receiveSocket.close();
 
 	}
-	
-	
+
+
 	/*
 	 * Data that can be sent to/form elevator:
 	 * Motor, Door, CarLamp, Location, request???
-	 * 
+	 *
 	 * Data that can be sent to/from floor
 	 * FloorLamp, request?
-	 * 
+	 *
 	 */
-	
+
 	/**
 	 * Process incoming requests from other subsystems
-	 * 
+	 *
 	 * @param b 	DataPacket from the incoming request
 	 */
 	private void parseIncomingRequest(DataPacket p){
@@ -235,10 +230,10 @@ public class Scheduler {
 				default:
 					System.out.println("INVALID CASE");
 					break;
-				
+
 			}
-		} 
-		
+		}
+
 		// If the incoming request came from a floor subsystem
 		else if (p.getOrigin() == OriginType.FLOOR) {
 			switch(p.getSubSystem()){
@@ -255,18 +250,18 @@ public class Scheduler {
 			}
 		}
 	}
-	
+
 	//TODO: fix this function to give the address of the subsystem with the specified origin and ID
 	/**
 	 * Get the SocketAddress of the subsystem with given OriginType and id
-	 * 
+	 *
 	 * @param o		Subsystem type
 	 * @param id	id of the specific subsystem
 	 * @return		SocketAddress of the subsystem
 	 */
 	private SocketAddress getAddressOfSubsystem(OriginType o, int id){
 		SocketAddress addr = null;
-		
+
 		switch(o){
 			case FLOOR:
 				addr = this.listOfFloorAddresses[id];
@@ -277,14 +272,14 @@ public class Scheduler {
 		}
 		return addr;
 	}
-	
+
 	/**
 	 * Schedule requests in the elevator queue. Assign requests to the best elevator
 	 */
 	private void scheduleElevator(){
 		// TODO: Consider not having this as a loop as it may delay the functioning of the rest of the elevator
 		while(!this.requestBuffer.isEmpty()){ // Loop until the requestBuffer has no more requests remaining
-			
+
 			// check if the request originated from outside the elevator
 			if (this.requestBuffer.peek().getCarButton() == ElevatorInputPacket.REQUEST_FROM_FLOOR){
 				// Assign the request to the best elevator
@@ -294,11 +289,11 @@ public class Scheduler {
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Print what was received from a datagram packet to the console
-	 * 
+	 *
 	 * @param p		datagram packet that was received
 	 * @param mode	String representing if a packet was sent ("sent") or received ("received")
 	 */
@@ -308,31 +303,31 @@ public class Scheduler {
 			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		} else if (mode == "received") {
-			System.out.println("Scheduler received:");		
+			System.out.println("Scheduler received:");
 			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket 
+		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket
 		System.out.println("Data (String): " + data); 							// Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
 	}
-	
-	
+
+
 	/**
 	 * Receive a request from another subsystem
-	 * 
-	 * @return 	A 
+	 *
+	 * @return 	A
 	 */
 	private DataPacket receiveRequest(){
 		byte data[] = new byte[100];
 		receivePacket = new DatagramPacket(data, data.length);
 
 		System.out.println("Scheduler: Waiting for Packet.\n");
-		
+
 		// Wait to receive a DatagramPacket
-		try {        
+		try {
 			System.out.println("Waiting..."); // so we know we're waiting
 			receiveSocket.receive(receivePacket);
 		} catch (IOException e) {
@@ -341,24 +336,24 @@ public class Scheduler {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+
 		printDatagramPacket(receivePacket, "received");
-		
+
 		return new DataPacket(receivePacket.getData());
 	}
-	
-	
+
+
 	/**
 	 * Send a request from the scheduler to the appropriate subsystem
-	 * 
+	 *
 	 * @param p					DataPacket containing the information to be sent
 	 * @param destinationType	OriginType of the destination
 	 * @param id				ID of the destination
 	 */
 	private void sendRequest(DataPacket p, OriginType destinationType, int id){
-		
+
 		byte data[] = p.getBytes();
-		
+
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
 
@@ -372,7 +367,7 @@ public class Scheduler {
 		};
 
 		if (sendSocket == null) return;
-		
+
 		// Try to send the DatagramPacket from the scheduler to its destination via the send socket
 		try {
 			sendRecieveSocket.send(sendPacket);
@@ -384,21 +379,43 @@ public class Scheduler {
 		System.out.println("Scheduler: packet sent\n");
 
 	}
-	
-	
-	
+
+
+
 	private void elevatorControlLoop(){
 		while(true){
 			// Wait to receive packet and parse it
 			this.parseIncomingRequest(receiveRequest());
-			
+
 			// Handle the incoming request
-			
+
 			// if request is a floor number
-			
+
 		}
 	}
-	
-	
+
+	/**
+	 * @return Top Level of building
+	 */
+	public int getTopFloor() {
+		return MAX_FLOOR;
+	}
+
+	/**
+	 * @return floorHandler
+	 */
+	public FloorHandler getFloorHandler() {
+		return floorHandler;
+	}
+
+	/**
+	 * @return socket for scheduler
+	 */
+	public int getSchedulerSocket() {
+		return receiveSocket.getPort();
+	}
+
 }
 
+
+}
