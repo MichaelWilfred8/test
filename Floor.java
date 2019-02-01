@@ -12,8 +12,9 @@ public class Floor {
 	private int floorNumber;//floor number, unique id
 	private FloorButton[] floorButtons;//list of buttons on floor
 	private FloorLamp[] floorLamps;//list of lamps on floor
-	private int[] requests;//list of requests
+	private byte[][] requests;//list of requests
 	private int requestInsert = 0;//where to insert in list of requests
+	private boolean requested;
 
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
@@ -48,41 +49,15 @@ public class Floor {
 			floorLamps[1] = new FloorLamp(Direction.UP);
 		}
 
-		requests = new int[scheduler.getTopFloor()];//can only have as many requests as there are floors
-	}
-
-	/**
-	 * @param time The time request was initiated in bytes [Hours,Minutes,Seconds,Milliseconds]
-	 * @param direction The direction requester would like to travel
-	 * @return byte array to be sent within a DatagramPacket via DatagramSocket
-	 */
-	public byte[] createMessage(byte[] time, String[] direction) {
-		byte[] returnBytes=null;//instantiate array to be returned
-		int directionCode;//direction code
-		if(direction[0].equalsIgnoreCase("UP")) {//if requester wants to go up
-			directionCode = 1;
-		}else if(direction[0].equalsIgnoreCase("DOWN")) {//if requester wants to go down
-			directionCode = 0;
-		}else directionCode=-1;//invalid request, should never happen
-
-		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
-		for (int i=0;i<time.length;i++) {//write each time parameter
-			output.write(time[i]);
-		}
-		output.write(floorNumber);//write the floor number
-		if (directionCode!=-1) {//if the direction code is not invalid
-			output.write(directionCode);
-		}
-		returnBytes = output.toByteArray();//creates single byte array to be sent
-		//System.out.println(Arrays.toString(returnBytes));
-		return returnBytes;
+		requests = new byte[scheduler.getTopFloor()][];//can only have as many requests as there are floors
+		requested = false;
 	}
 
 	/**
 	 * send byte array to scheduler
 	 * @param message, message to be sent
 	 */
-	public void sendAndReceive(byte[] message){
+	public void sendRequest(byte[] message){
 
 		// Construct a datagram packet that is to be sent to a specified port on a specified host.
 		try {
@@ -99,7 +74,91 @@ public class Floor {
 		int len = sendPacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: ");
-		System.out.println("(Bytes)" + Arrays.toString(sendPacket.getData()) + "\n");
+		System.out.println("(Bytes)" + Arrays.toString(sendPacket.getData()));
+
+		// Send the datagram packet to the server via the send/receive socket. 
+		try {
+			sendReceiveSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		System.out.println("Sent\n");
+		
+		//TODO:notice elevator arrival
+		//TODO:toggle direction lamp
+		//TODO:send list of requests 
+		//TODO:remove direction lamp when it leaves
+	}
+
+	/**
+	 * Create elevator request
+	 * @param request request data from csv
+	 * @return byte array message
+	 */
+	private byte[] requestElevator(String[] request){
+		byte[] returnBytes=null;//instantiate array to be returned
+		int directionCode;//direction code
+
+		TimeStamp ts = new TimeStamp (request[0]);//create a new timestamp from the request string
+		byte[] time = ts.getBytes();//get the bytes of the timestamp
+
+		if(request[2].equalsIgnoreCase("UP")) {//if requester wants to go up
+			directionCode = 1;
+		}else {//if requester wants to go down
+			directionCode = 0;
+		}
+
+		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
+		for (int i=0;i<time.length;i++) {//write each time parameter
+			output.write(time[i]);
+		}
+		output.write(floorNumber);//write the floor number
+		output.write(directionCode);//write the direction
+		output.write(-1);//write -1 to signify this is not a button press within the elevator
+		returnBytes = output.toByteArray();//creates single byte array to be sent
+		return returnBytes;
+	}
+	 /**
+	  * Create destination request, to be stored until an elevator arrives
+	  * @param request request data from csv
+	  * @return byte array message
+	  */
+	private byte[] destinationRequest(String[] request) {
+		byte[] messageBytes = null;
+		int directionCode;//direction code
+
+		TimeStamp ts = new TimeStamp (request[0]);//create a new timestamp from the request string
+		byte[] time = ts.getBytes();//get the bytes of the timestamp
+
+		if(request[2].equalsIgnoreCase("UP")) {//if requester wants to go up
+			directionCode = 1;
+		}else {//if requester wants to go down
+			directionCode = 0;
+		}
+
+		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
+		for (int i=0;i<time.length;i++) {//write each time parameter
+			output.write(time[i]);
+		}
+		output.write(floorNumber);//write the floor number
+		output.write(directionCode);//write the direction
+		output.write(Integer.parseInt(request[3]));//write the destination floor
+		messageBytes = output.toByteArray();//creates single byte array to be sent
+
+		return messageBytes;
+	}
+	
+	/**
+	 * send all requests for floor to scheduler
+	 */
+	public void purgeRequests() {
+		System.out.println("Floor " + floorNumber + " is purging");
+		for (int i=0; i<requestInsert; i++) {
+			sendRequest(requests[i]);//send request to scheduler
+			requests[i] = null;//clear request registry
+		}
+		
 	}
 
 	/**
@@ -107,13 +166,16 @@ public class Floor {
 	 * @param request String containing request information (time, floor, direction)
 	 */
 	public void newRequest(String[] request) {
-		TimeStamp ts = new TimeStamp (request[0]);//create a new timestamp from the request string
-		byte[] time = ts.getBytes();//get the bytes of the timestamp
-		byte[] message = createMessage(time, Arrays.copyOfRange(request,2,3));
-		requests[requestInsert] = Integer.parseInt(request[3]);
-		System.out.println(requests[requestInsert]);
-		requestInsert++;
-		sendAndReceive(message);
+		byte[] message = requestElevator(request);
+		byte[] destination = destinationRequest(request);
+		if(!requested) {
+			sendRequest(message);
+			requests[requestInsert++] = destination;
+			requested = true;
+		}else {
+			requests[requestInsert++] = destination;
+		}
+
 
 	}
 
@@ -139,6 +201,14 @@ public class Floor {
 	 */
 	public int getFloorNumber() {	//getter for floor number
 		return floorNumber;
+	}
+
+	/**
+	 * 
+	 * @return whether or not an elevator has been requested
+	 */
+	public boolean getReqested() {
+		return requested;
 	}
 
 }

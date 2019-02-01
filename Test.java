@@ -29,6 +29,10 @@ public class Test{
 			}
 
 		}
+		
+		for (int i=0;i<floors.length;i++) {
+			floors[i].purgeRequests();
+		}
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
