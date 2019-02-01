@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -8,6 +7,7 @@ public class Scheduler {
 
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendRecieveSocket, receiveSocket;
+	FloorHandler floorHandler;
 	
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
@@ -16,6 +16,11 @@ public class Scheduler {
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
 
 	public Scheduler(){//TODO:make it a singleton?
+		
+		floorHandler = new FloorHandler(this);
+		
+		floorHandler.run();
+		
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets
@@ -34,14 +39,6 @@ public class Scheduler {
 		
 		upRequests = new ArrayList<Integer>();
 		downRequests = new ArrayList<Integer>();
-	}
-	
-	
-	/**
-	 * @return Top Level of building
-	 */
-	public int getTopFloor() {
-		return MAX_FLOOR;
 	}
 
 	public void receiveAndForward(){
@@ -172,6 +169,26 @@ public class Scheduler {
 		receiveSocket.close();
 
 	}
+	
+	/**
+	 * @return Top Level of building
+	 */
+	public int getTopFloor() {
+		return MAX_FLOOR;
+	}
+	
+	/**
+	 * @return floorHandler
+	 */
+	public FloorHandler getFloorHandler() {
+		return floorHandler;
+	}
+	
+	/**
+	 * @return socket for scheduler
+	 */
+	public int getSchedulerSocket() {
+		return receiveSocket.getPort();
+	}
 
 }
-
