@@ -108,7 +108,6 @@ public class TimeStamp {
 			return false;
 		return true;
 	}
-<<<<<<< HEAD
 	
 	/**
 	 * Converts object into 2D byte array
@@ -140,10 +139,6 @@ public class TimeStamp {
 	
 	// TODO: add isBefore and isAfter methods?
 	
-=======
-
-
->>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 	// Return a byte array that represents the timestamp object
 	public byte[] getBytes(){
 		ByteBuffer buf = ByteBuffer.allocate(16);

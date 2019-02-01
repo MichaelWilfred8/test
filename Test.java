@@ -4,28 +4,30 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Test{
-
-	Floor [] floors;//list of floors within the building
 	Scheduler scheduler;//Scheduler of 
 
 	Test(){
-		scheduler = new Scheduler();//instantiate Scheduler
-		floors = new Floor[scheduler.getTopFloor()];
-		for(int i=0;i<scheduler.getTopFloor();i++) {
-			floors[i] = new Floor(scheduler, i+1);
-		}
+		try {
+			scheduler = new Scheduler();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//instantiate Scheduler
+		
 	}
 
 	public void runTest() {
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
+		Floor [] floors = scheduler.floorHandler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
 			for (int j=0;j<floors.length;j++) {
-				//System.out.println(Arrays.toString(testLines[i]));
+				//System.out.println("LALALA " + Arrays.toString(testLines[i]));
 				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
 					floors[j].newRequest(testLines[i]);
 				}
@@ -79,7 +81,7 @@ public class Test{
 
 	}
 
-<<<<<<< HEAD
+
 	public void sendReceive(String passenger) throws IOException{
 
 		byte[] pass = passenger.getBytes();
@@ -96,8 +98,6 @@ public class Test{
 		toserver.close();
 
 	}
-=======
->>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 
 	public static void main(String[] args) {
 		Test t = new Test();
