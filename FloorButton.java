@@ -5,7 +5,7 @@ public class FloorButton extends Button {
 	private Direction direction;//direction of the button
 
 
-	public FloorButton(Direction down) {
+	public FloorButton(Direction direction) {
 		state = false;//instantiate button to false
 		this.direction = direction;//instantiate direction as input direction
 	}

@@ -13,4 +13,11 @@ public class Button {
 	public Button(boolean state){
 		this.state = state;
 	}
+	
+	/**
+	 * toggle a button
+	 */
+	public void toggle() {
+		state = !state;
+	}
 }
