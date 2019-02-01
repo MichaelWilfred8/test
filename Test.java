@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -76,6 +79,25 @@ public class Test{
 
 	}
 
+<<<<<<< HEAD
+	public void sendReceive(String passenger) throws IOException{
+
+		byte[] pass = passenger.getBytes();
+
+		DatagramSocket toserver;
+		toserver = new DatagramSocket();
+		InetAddress intserver = InetAddress.getByName("localhost");
+		int intserverSocket = 33;
+
+		// Creates a Datagram packet sending the request in bytes, with the length of the request array(beginning), to address localhost, and using port 69
+		DatagramPacket send = new DatagramPacket(pass,pass.length,intserver,intserverSocket);
+		toserver.send(send);
+		System.out.println("Sending the following to the Server: " +new String(send.getData()));
+		toserver.close();
+
+	}
+=======
+>>>>>>> 3b3770c8d0ae983bfa459b872e007f31fb155ffc
 
 	public static void main(String[] args) {
 		Test t = new Test();
