@@ -5,6 +5,7 @@ import Enums.Direction;
 
 import java.nio.ByteBuffer;
 
+import Enums.*;
 
 /**
  * @author Craig Worthington
@@ -32,8 +33,7 @@ public class ElevatorInputPacket {
 	public static final int CAR_BUTTON_INDEX = 24;
 
 	public static final int REQUEST_FROM_FLOOR = -1;	// Constant value used in carButton field if the request originated from a floor and not within an elevator
-	
-	
+
 	/**
 	 * Constructor for ElevatorInputPacket. Each element of the ElevatorInputPacket is entered separately
 	 *

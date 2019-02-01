@@ -6,9 +6,9 @@ import Enums.Direction;
 
 
 /*
- * ElevatorDatagramPacket class. Extends ElevatorInputPacket class and is used to mimic 
+ * ElevatorDatagramPacket class. Extends ElevatorInputPacket class and is used to mimic
  * a DatagramPacket class for sending and receiving packets.
- * 
+ *
  */
 
 
