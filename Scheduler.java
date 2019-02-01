@@ -1,14 +1,19 @@
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Enums.*;
 
+/**
+ * @author craig
+ *
+ */
 public class Scheduler {
 
-	DatagramPacket sendPacket, receivePacket;
+	DatagramPacket sendPacket;
+	static DatagramPacket receivePacket;
 	DatagramSocket sendRecieveSocket, receiveSocket;
 	
 	private ElevatorStatus carStatus;	// Information about the status of an elevator car
@@ -18,8 +23,12 @@ public class Scheduler {
 	
 	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
+	
+	private Queue<ElevatorInputPacket> requestBuffer;	// Buffer Queue for all requests that have not been handled by the scheduler yet
+	
+	private SubsystemAddress[] listOfFloors;
 
-	public Scheduler(){//TODO:make it a singleton?
+	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets
@@ -37,8 +46,9 @@ public class Scheduler {
 		
 		this.upRequests = new ArrayList<Integer>();
 		this.downRequests = new ArrayList<Integer>();
+		this.requestBuffer = new ConcurrentLinkedQueue();
 		
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 	}
 	
 	
@@ -190,13 +200,11 @@ public class Scheduler {
 	 */
 	
 	/**
-	 * Process incoming requests
+	 * Process incoming requests from other subsystems
 	 * 
-	 * @param b 	byte array representing the incoming request
+	 * @param b 	DataPacket from the incoming request
 	 */
-	private void getIncomingRequest(byte[] b){
-		DataPacket p = new DataPacket(b);
-		
+	private void parseIncomingRequest(DataPacket p){
 		// If the Origin of the message was from the elevator
 		if (p.getOrigin() == OriginType.ELEVATOR){
 			switch(p.getSubSystem()){
@@ -226,7 +234,8 @@ public class Scheduler {
 					// TODO: handle status of floor lamp here
 					break;
 				case REQUEST:
-					// TODO: handle incoming request from floor here
+					// TODO: handle incoming request from floor here. Change add to offer and surround with try catch
+					this.requestBuffer.add(new ElevatorInputPacket(p.getStatus())); 	// Generate a new ElevatorInputPacket from the status byte array and add it to the request buffer
 					break;
 				default:
 					System.out.println("INVALID SUBSYSTEM");
@@ -235,14 +244,146 @@ public class Scheduler {
 		}
 	}
 	
-	
+	//TODO: fix this function to give the address of the subsystem with the specified origin and ID
 	/**
-	 * @param p	DataPacket request from the floor. Parse the request and assign the request to the appropriate elevator
+	 * Get the SocketAddress of the subsystem with given OriginType and id
+	 * 
+	 * @param o		Subsystem type
+	 * @param id	id of the specific subsystem
+	 * @return		SocketAddress of the subsystem
 	 */
-	private void addRequest(DataPacket p){
-		
+	private SocketAddress getAddressOfSubsystem(OriginType o, int id){
+		InetAddress addr = null;
+		try {
+			addr = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int port = 5000;
+		return new InetSocketAddress(addr, port);
 	}
 	
+	/**
+	 * Schedule requests in the elevator queue. Assign requests to the best elevator
+	 */
+	private void scheduleElevator(){
+		// TODO: Consider not having this as a loop as it may delay the functioning of the rest of the elevator
+		while(!this.requestBuffer.isEmpty()){ // Loop until the requestBuffer has no more requests remaining
+			
+			// check if the request originated from outside the elevator
+			if (this.requestBuffer.peek().getCarButton() == ElevatorInputPacket.REQUEST_FROM_FLOOR){
+				// Assign the request to the best elevator
+				this.carStatus.addFloor(this.requestBuffer.remove().getFloor()); 	// Assign the floor from the request buffer to the elevator and remove it from the buffer
+			} else {	// request originated from within the elevator
+				this.carStatus.addFloor(this.requestBuffer.remove().getCarButton()); // Assign the floor from the request buffer to the elevator and remove it from the buffer
+			}
+		}
+	}
+	
+	
+	/**
+	 * Print what was received from a datagram packet to the console
+	 * 
+	 * @param p		datagram packet that was received
+	 * @param mode	String representing if a packet was sent ("sent") or received ("received")
+	 */
+	private static void printDatagramPacket(DatagramPacket p, String mode){
+		if (mode == "sent"){
+			System.out.println("Scheduler sent:");
+			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
+			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
+		} else if (mode == "received") {
+			System.out.println("Scheduler received:");		
+			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
+			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
+		}
+		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
+		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket 
+		System.out.println("Data (String): " + data); 							// Print the data in the packet as a String
+		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
+		System.out.println();
+	}
+	
+	
+	/**
+	 * Receive a request from another subsystem
+	 * 
+	 * @return 	A 
+	 */
+	private DataPacket receiveRequest(){
+		byte data[] = new byte[100];
+		receivePacket = new DatagramPacket(data, data.length);
+
+		System.out.println("Scheduler: Waiting for Packet.\n");
+		
+		// Wait to receive a DatagramPacket
+		try {        
+			System.out.println("Waiting..."); // so we know we're waiting
+			receiveSocket.receive(receivePacket);
+		} catch (IOException e) {
+			System.out.print("IO Exception: likely:");
+			System.out.println("Receive Socket Timed Out.\n" + e);
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		printDatagramPacket(receivePacket, "received");
+		
+		return new DataPacket(receivePacket.getData());
+	}
+	
+	
+	/**
+	 * Send a request from the scheduler to the appropriate subsystem
+	 * 
+	 * @param p					DataPacket containing the information to be sent
+	 * @param destinationType	OriginType of the destination
+	 * @param id				ID of the destination
+	 */
+	private void sendRequest(DataPacket p, OriginType destinationType, int id){
+		
+		byte data[] = p.getBytes();
+		
+		// Create a new datagram packet containing the string received from the server.
+		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
+
+		DatagramSocket sendSocket = null;//instantiate new send socket
+		try {
+			sendSocket = new DatagramSocket();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		};
+
+		if (sendSocket == null) return;
+		
+		// Try to send the DatagramPacket from the scheduler to its destination via the send socket
+		try {
+			sendRecieveSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		System.out.println("Scheduler: packet sent\n");
+
+	}
+	
+	
+	
+	private void elevatorControlLoop(){
+		while(true){
+			// Wait to receive packet and parse it
+			this.parseIncomingRequest(receiveRequest());
+			
+			// Handle the incoming request
+			
+			// if request is a floor number
+			
+		}
+	}
 	
 	
 }
