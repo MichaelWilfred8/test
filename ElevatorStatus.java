@@ -14,31 +14,28 @@ import Enums.*;
 
 /**
  * Class for the scheduler to hold information about a single elevator car
- * 
+ *
  * @author Craig Worthington
  *
  */
 public class ElevatorStatus {
-<<<<<<< HEAD
-=======
 
->>>>>>> Modifying-Scheduler-to-Control-Elevator
 	private int position;						// floor that elevator is at or was last at
 	private Direction tripDir;					// direction that the elevator is travelling / will be traveling on this trip
-	private SortedSet<Integer> floorsToVisit;	// Sorted Set of floors for this elevator to visit. 
+	private SortedSet<Integer> floorsToVisit;	// Sorted Set of floors for this elevator to visit.
 	private int nextDestination;				// Floor for this elevator to visit next
 	private MotorState motorState;				// state of the elevator motor (up, down, off)
 	private DoorState doorState;				// state that the elevator door is (open/closed)
-	private boolean[] floorButtonLights;		// boolean array containing the state of the lights of all the floor buttons in the elevator. Array is indexed from zero so the light for floor 3 is stored at floorButtonLight[2] 
+	private boolean[] floorButtonLights;		// boolean array containing the state of the lights of all the floor buttons in the elevator. Array is indexed from zero so the light for floor 3 is stored at floorButtonLight[2]
 	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
 	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
-	private SocketAddress address;				// SocketAddress of the elevator 
+	private SocketAddress address;				// SocketAddress of the elevator
 
 	/**
 	 * Constructor for ElevatorStatus class
-	 * 
+	 *
 	 * @param currentFloor		Floor that the elevator is currently at
-	 * @param motorState		State of the elevator motor (up, off, down) 
+	 * @param motorState		State of the elevator motor (up, off, down)
 	 * @param doorState			State of the elevator doors (open, closed)
 	 * @param numFloors			Number of floors in the building
 	 */
@@ -138,7 +135,7 @@ public class ElevatorStatus {
 
 	/**
 	 * Get the state of all floorButtonLights
-	 * 
+	 *
 	 * @return the full array of floorButtonLights states
 	 */
 	public boolean[] getAllFloorButtonLights() {
@@ -148,7 +145,7 @@ public class ElevatorStatus {
 
 	/**
 	 * Set the state of all floorButtonLights
-	 * 
+	 *
 	 * @param floorButtonLights the status of the lights in the elevator for all floors (i.e. on/off)
 	 */
 	public void setAllFloorButtonLights(boolean[] floorButtonLights) {
@@ -158,7 +155,7 @@ public class ElevatorStatus {
 
 	/**
 	 * Set the state for a single floor button light (i.e. on/off)
-	 * 
+	 *
 	 * @param floor		The floor of the button to be set
 	 * @param state		The state to set the button to
 	 */
@@ -168,11 +165,11 @@ public class ElevatorStatus {
 
 	/**
 	 * Toggle a single floorButtonLight
-	 * 
+	 *
 	 * @param floor	The floor of the floor button to be toggled
 	 */
 	public void toggleFloorButtonLight(int floor){
-		this.floorButtonLights[floor - 1] = !this.floorButtonLights[floor - 1];		// toggle 
+		this.floorButtonLights[floor - 1] = !this.floorButtonLights[floor - 1];		// toggle
 	}
 
 
@@ -187,8 +184,8 @@ public class ElevatorStatus {
 
 
 	/**
-	 * Add a floor to the set of floors for this elevator to visit. 
-	 * 
+	 * Add a floor to the set of floors for this elevator to visit.
+	 *
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
@@ -238,7 +235,7 @@ public class ElevatorStatus {
 	 * Determines the next floor for this elevator to visit. Will try to find the nearest floor in the direction of the trip the
 	 * elevator is currently taking. If no floors can be found in its current direction, or it has reached either end of the shaft
 	 * then change the direction of the elevator.
-	 * 
+	 *
 	 * @return The next floor for this elevator to visit
 	 */
 	public int getNextFloor(){
@@ -277,7 +274,7 @@ public class ElevatorStatus {
 			for(int i = 0; i < tempFloorArray.length; ++i){
 				if (tempFloorArray[i] > this.position){
 
-					int tempFloor = tempFloorArray[i];			
+					int tempFloor = tempFloorArray[i];
 					this.floorsToVisit.remove(tempFloor);
 
 					return tempFloor;
@@ -308,7 +305,7 @@ public class ElevatorStatus {
 			for(int i = tempFloorArray.length; i >= 0; --i){
 				if (tempFloorArray[i] < this.position){
 
-					int tempFloor = tempFloorArray[i];			
+					int tempFloor = tempFloorArray[i];
 					this.floorsToVisit.remove(tempFloor);
 
 					return tempFloor;
@@ -328,15 +325,15 @@ public class ElevatorStatus {
 					return tempFloor;						// return the floor
 				}
 			}
-		} 
+		}
 
 		return this.position;	// if a new floor cannot be determined then stay on this floor
 	}
-	
-	
+
+
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState
-	 * 
+	 *
 	 * @param p	DataPacket from the elevator
 	 */
 	public void update(DataPacket p){
