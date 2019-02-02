@@ -14,7 +14,6 @@ public class Scheduler {
 	DatagramPacket sendPacket;
 	static DatagramPacket receivePacket;
 	DatagramSocket sendRecieveSocket, receiveSocket;
-	FloorHandler floorHandler;
 
 	private ElevatorStatus carStatus;	// Information about the status of an elevator car
 
@@ -33,8 +32,6 @@ public class Scheduler {
 
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
-
-			floorHandler = new FloorHandler(this);
 
 			//floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine

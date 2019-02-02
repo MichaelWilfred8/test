@@ -14,7 +14,6 @@ public class Scheduler {
 	DatagramPacket sendPacket;
 	static DatagramPacket receivePacket;
 	DatagramSocket sendReceiveSocket, receiveSocket;
-	FloorHandler floorHandler;
 
 	private ElevatorStatus carStatus;	// Information about the status of an elevator car
 
