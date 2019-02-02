@@ -177,7 +177,7 @@ public class Floor {
 		byte[] message = requestElevator(request);
 		byte[] destination = destinationRequest(request);
 
-		if(!floorButtons[message[17]].getState()) {//if the lamp indicating the direction the elevator travelling is not yet on
+		if(!floorButtons[message[17]].getState()) {//if the button indicating the direction the elevator travelling is not yet on
 			floorButtons[message[17]].toggle();//switch it on
 			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message[17]].getDirection().toString() + " button on.");
 			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message[17]].getDirection().toString() + " is now " + floorButtons[message[17]].getStateString());	

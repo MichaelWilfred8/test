@@ -27,7 +27,7 @@ public class Test{
 		Floor [] floors = scheduler.floorHandler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
 			for (int j=0;j<floors.length;j++) {
-				//System.out.println("LALALA " + Arrays.toString(testLines[i]));
+				//System.out.println(Arrays.toString(testLines[i]));
 				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
 					floors[j].newRequest(testLines[i]);
 				}
