@@ -31,11 +31,10 @@ public class FloorHandler implements Runnable {
 		}
 	}
 	
-	// static method to create instance of Singleton class 
+	// static method to create instance of class 
     public static FloorHandler getHandler(int numFloors){ 
         if (instance == null) 
             instance = new FloorHandler(numFloors); 
-  
         return instance; 
     }
 
@@ -94,6 +93,7 @@ public class FloorHandler implements Runnable {
 	/**
 	 * Thread run class
 	 */
+	@Override
 	public void run() {
 		listen();
 
