@@ -489,9 +489,6 @@ public class Scheduler {
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 		
 		
-		// wait to receive location from elevator and update car location
-//		p = this.receiveRequest();
-//		this.carStatus.update(p);
 		
 		// Turn on motor up
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
@@ -533,7 +530,7 @@ public class Scheduler {
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 		
 		// Open doors
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
 		
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
