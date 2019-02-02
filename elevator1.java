@@ -43,6 +43,8 @@ public class elevator1 {
 	int count;				// number of floors in the elevator
 	boolean[] floorLights;	// Array containing the status of the floor lights in each elevator
 	
+	int id = 1;		// ID for this elevator
+	
 	MotorState motorState;
 	
 	
@@ -168,6 +170,31 @@ public class elevator1 {
 //		receiveSocket.close();
 //	}
 	
+	
+	/**
+	 * Print what was received from a datagram packet to the console
+	 *
+	 * @param p		datagram packet that was received
+	 * @param mode	String representing if a packet was sent ("sent") or received ("received")
+	 */
+	private static void printDatagramPacket(DatagramPacket p, String mode){
+		if (mode == "s"){
+			System.out.println("Elevator sent:");
+			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
+			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
+		} else if (mode == "r") {
+			System.out.println("Elevator received:");
+			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
+			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
+		}
+		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
+		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket
+		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
+		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
+		System.out.println();
+	}
+	
+	
 	public void receiveAndEcho() throws IOException, ClassNotFoundException, InterruptedException
 	{
 		while (true){
@@ -187,13 +214,11 @@ public class elevator1 {
 			   System.exit(1);
 			}
 			
+			printDatagramPacket(this.receivePacket, "r");
+			
 			// Convert DatagramPacket to DataPacket
 			DataPacket p = new DataPacket(receivePacket.getData());
 			
-			System.out.println("Packet is " + p.toString());
-			
-			System.out.println("SUBSYSTEM IS   " + p.getSubSystem());
-			System.out.println("STATE IS   " + Arrays.toString(p.getStatus()));
 			
 			// at this stage, elevator will decode the packet 
 			
@@ -244,7 +269,7 @@ public class elevator1 {
 			}
 			
 			// Echo back the packet
-			this.sendPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
+			this.sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
 			
 			//receiveSocket.close();
 		}
@@ -262,10 +287,13 @@ public class elevator1 {
 		return new DataPacket(OriginType.ELEVATOR, (byte) 0, subSystem, status);
 	}
 	
-	private void sendPacket(DataPacket p, SocketAddress address){
+	private void sendDataPacket(DataPacket p, SocketAddress address){
 		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, address);
 		
+		
 		System.out.println("Elevator: Sending packet...");
+		
+		printDatagramPacket(sendPacket, "s");
 		
 		try {
 		      this.sendSocket.send(this.sendPacket);
@@ -277,28 +305,53 @@ public class elevator1 {
 		   System.out.println("Elevator: packet sent \n");
 	}
 	
-	public void sendLocation() throws IOException {
+	
+	public void sendLocation() throws IOException, InterruptedException {
+		DataPacket p = new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.LOCATION, new byte[] {(byte) this.currentFloor});
+
+		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, this.receivePacket.getAddress(), this.receivePacket.getPort());
+
+		System.out.println( "Elevator: Sending packet to scheduler ");
 		
-		String [] floornum = {Integer.toString(currentFloor)};
-		byte[] location = convertToBytes(floornum);
-		//send packet back contains location 
-	   sendPacket = new DatagramPacket(location, location.length, receivePacket.getAddress(), receivePacket.getPort());
-	   
-	   
-	   System.out.println( "Elevator: Sending packet to scheduler ");
-	    
-	   try {
-	      sendSocket.send(sendPacket);
-	   } catch (IOException e) {
-	      e.printStackTrace();
-	      System.exit(1);
-	   }
-	
-	   System.out.println("Elevator: packet sent \n");
-	
-	   // We're finished, so close the sockets.
-	   //sendSocket.close();
+		printDatagramPacket(this.sendPacket, "s");
+		
+		TimeUnit.SECONDS.sleep(1);
+		
+		try {
+			sendSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		System.out.println("Elevator: packet sent \n");
+		
+		// We're finished, so close the sockets.
+		//sendSocket.close();
 	}
+
+//	public void sendLocation() throws IOException {
+//		
+//		String [] floornum = {Integer.toString(currentFloor)};
+//		byte[] location = convertToBytes(floornum);
+//		//send packet back contains location 
+//	   sendPacket = new DatagramPacket(location, location.length, receivePacket.getAddress(), receivePacket.getPort());
+//	   
+//	   
+//	   System.out.println( "Elevator: Sending packet to scheduler ");
+//	    
+//	   try {
+//	      sendSocket.send(sendPacket);
+//	   } catch (IOException e) {
+//	      e.printStackTrace();
+//	      System.exit(1);
+//	   }
+//	
+//	   System.out.println("Elevator: packet sent \n");
+//	
+//	   // We're finished, so close the sockets.
+//	   //sendSocket.close();
+//	}
 	
 	
 	public void Motor(MotorState command) throws IOException, InterruptedException{
