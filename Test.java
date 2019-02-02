@@ -1,16 +1,27 @@
-package ElevatorClass;
+package elevator1;
 
 
-import java.io.*;
-import java.net.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.Arrays;
 
 
-public class Test {
+
+
+public class test {
 
 	DatagramPacket sendPacket, receivePacket, EchoPacket;
 	DatagramSocket sendSocket, receiveSocket, EchoSocket ;
+	int count;
 
-	public Test()
+	public test()
 	{
 	   try {
 
@@ -22,17 +33,19 @@ public class Test {
 	   } 
 	}
 	
-	public void receiveAndForward() throws InterruptedException, UnknownHostException, UnsupportedEncodingException
+	public void receiveAndForward() throws InterruptedException, IOException, ClassNotFoundException
 	{
 	   // Construct a DatagramPacket for receiving packets
-	   byte data[] = {5};
-	   
+		String[] strings = {"2","0","3","1"};
+		byte[] data = convertToBytes(strings);
+		
+	    
 	   //send to server
 
 	   sendPacket = new DatagramPacket(data, data.length,
 			   InetAddress.getLocalHost(),69);
 
-	   System.out.println( "scheduler: send command from 5th floor");
+	   System.out.println( "scheduler: sent " +Arrays.toString(strings));
 
 	   // Send the datagram packet to the Elevator via the send socket. 
 	   try {
@@ -45,6 +58,7 @@ public class Test {
 	   
 	   
 	   //Receive done packet from server
+	   while(count!=5) {
 	   byte data1[] = new byte[100];
 	   EchoPacket = new DatagramPacket(data1,data1.length);
 	      try {
@@ -55,31 +69,50 @@ public class Test {
 	          e.printStackTrace();
 	          System.exit(1);
 	       }
-	   System.out.println("Waiting for echo packet from ELevator"); // so we know we're waiting
-	   System.out.println("Scheduler: echo Packet received from Elevator");
-	   System.out.print("Containing: " );
-	   String stringData =GetString(sendPacket.getData());
-	   System.out.println(stringData);  
+	   System.out.println("Waiting for current location from ELevator"); // so we know we're waiting
+	   String[] Ehco = GetString(EchoPacket.getData());
+	   System.out.println("elevator is on " + Ehco[0] );
+
+	  
+	   count ++;
+	   }
+ 	  
+	
 	}
 	
 
-	public String GetString(byte[] bytes)
+	public String[] GetString(byte[] bytes) throws ClassNotFoundException, IOException
 	{
-	// Form a String from the byte array.
-	String file_string = "";
+		// Form a String from the byte array.
+		final ByteArrayInputStream byteArrayInputStream =
+			    new ByteArrayInputStream(bytes);
+			final ObjectInputStream objectInputStream =
+			    new ObjectInputStream(byteArrayInputStream);
 
-    for(int i = 0; i < bytes.length; i++)
-    {
-        file_string += (char)bytes[i];
-    }
+			final String[] stringArray2 = (String[]) objectInputStream.readObject();
 
-    return file_string;    
+			objectInputStream.close();
+			return stringArray2;   
+	}
+	
+	private static byte[] convertToBytes(String[] strings) throws IOException {
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		final ObjectOutputStream objectOutputStream =
+		new ObjectOutputStream(byteArrayOutputStream);
+		objectOutputStream.writeObject(strings);
+		objectOutputStream.flush();
+		objectOutputStream.close();
+
+		final byte[] data = byteArrayOutputStream.toByteArray();
+
+		return data;
 	}
 	
 
-	public static void main( String args[] ) throws InterruptedException, UnknownHostException, UnsupportedEncodingException
+	public static void main( String args[] ) throws InterruptedException, IOException, ClassNotFoundException
 	{
-		Test c = new Test();
+		test c = new test();
 		c.receiveAndForward();
 	}
+	
 }
