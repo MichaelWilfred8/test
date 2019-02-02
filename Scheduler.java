@@ -386,7 +386,7 @@ public class Scheduler {
 
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
-		
+
 		printDatagramPacket(sendPacket, "send");
 
 		DatagramSocket sendSocket = null;//instantiate new send socket
@@ -569,15 +569,15 @@ public class Scheduler {
 
 		}
 	}
-	
-	
+
+
 	public static void main(String args[]) throws UnknownHostException{
 		Scheduler s = new Scheduler();
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
-		
-		
+
+
 		s.sendRequest(p, OriginType.FLOOR, (byte) 4);
-		
+
 	}
 
 }
