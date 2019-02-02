@@ -67,13 +67,6 @@ public class Scheduler {
 	}
 
 	/**
-	 * @return floorHandler
-	 */
-	public FloorHandler getFloorHandler() {
-		return floorHandler;
-	}
-
-	/**
 	 * @return socket for scheduler
 	 */
 	public int getSchedulerSocket() {
