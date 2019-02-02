@@ -16,6 +16,9 @@ public class Floor {
 	private byte[][] requests;//list of requests
 	private int requestInsert = 0;//where to insert in list of requests
 	private boolean requested;//if an elevator has been requested for this floor
+	
+	
+	
 
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
@@ -231,8 +234,8 @@ public class Floor {
 	/**
 	 * @param lampTrigger: toggles the correct button and lamp
 	 */
-	public void elevatorArrived(byte lampTrigger) {
-
+	public void elevatorArrived(byte lt) {
+		byte lampTrigger = (byte) (lt - 1);
 		floorLamps[lampTrigger].toggle();
 		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
 		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());

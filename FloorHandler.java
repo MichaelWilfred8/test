@@ -11,7 +11,10 @@ public class FloorHandler implements Runnable {
 
 	DatagramPacket receivePacket; //packets and socket used to send information
 	DatagramSocket receiveSocket;
-
+	
+	private static final int DIRECTION_BYTE = 4;
+	private static final int FLOOR_NUM_BYTE = 3;
+	
 	FloorHandler(Scheduler scheduler){
 		this.scheduler = scheduler;
 		floors = new Floor[scheduler.getTopFloor()];
@@ -83,8 +86,8 @@ public class FloorHandler implements Runnable {
 				notDone = false;
 			} else {
 				for (int i = 0; i<floors.length;i++) {
-					if(floors[i].getFloorNumber() == data[15]) {
-						floors[i].elevatorArrived(data[19]);
+					if(floors[i].getFloorNumber() == data[FLOOR_NUM_BYTE]) {
+						floors[i].elevatorArrived(data[DIRECTION_BYTE]);
 					}
 				}
 			}

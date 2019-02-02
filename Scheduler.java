@@ -383,6 +383,9 @@ public class Scheduler {
 	private void sendRequest(DataPacket p, OriginType destinationType, int id){
 
 		byte data[] = p.getBytes();
+		System.out.println("byte array = " + Arrays.toString(p.getBytes()));
+		
+		
 
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
@@ -450,7 +453,11 @@ public class Scheduler {
 		}
 
 		this.carStatus.update(p); // Update the ElevatorStatus with the message
-
+		
+		
+		// TODO: Tell floor to trigger direction lamp
+		
+		
 		// Tell elevator to open doors
 		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
 
@@ -574,8 +581,7 @@ public class Scheduler {
 	public static void main(String args[]) throws UnknownHostException{
 		Scheduler s = new Scheduler();
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
-
-
+		System.out.println(p.toString());
 		s.sendRequest(p, OriginType.FLOOR, (byte) 4);
 
 	}
