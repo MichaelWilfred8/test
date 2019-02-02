@@ -15,7 +15,7 @@ public class ElevatorHandler implements Runnable{
 	private ElevatorHandler(int numElevators) {
 		elevatorList = new Elevator[numElevators];
 		for (int i=0;i<numElevators;i++) {
-			elevatorList[i] = new Elevator(10);
+			elevatorList[i] = new Elevator(10, i+1);
 		}
 
 		// Construct a datagram socket and bind it to port 5000 
@@ -104,6 +104,9 @@ public class ElevatorHandler implements Runnable{
 
 	}
 
-
+	public static void main(String args[]){
+		ElevatorHandler eh = new ElevatorHandler(10);
+		eh.run();
+	}
 
 }
