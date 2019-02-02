@@ -88,8 +88,6 @@ public class DataPacket {
 		this.id = id;
 	}
 
-
-
 	/**
 	 * @return the subSystem
 	 */

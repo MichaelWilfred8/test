@@ -42,10 +42,12 @@ public class Floor {
 			floorButtons[0] = new FloorButton(Direction.DOWN);//only button on the floor will to go down
 			floorLamps[0] = new FloorLamp(Direction.DOWN);//only light on floor will point down
 		}else if (floorNumber == 1) {//if the floor is the bottom floor
-			floorButtons = new FloorButton[1];//create arrays of size one
-			floorLamps = new FloorLamp[1];
-			floorButtons[0] = new FloorButton(Direction.UP);//only button on the floor will be to go up
-			floorLamps[0] = new FloorLamp(Direction.UP);//only lamp on floor will point up
+			floorButtons = new FloorButton[2];//create arrays of size one
+			floorLamps = new FloorLamp[2];
+			floorLamps[0] = null;
+			floorButtons[0] = null;
+			floorButtons[1] = new FloorButton(Direction.UP);//only button on the floor will be to go up
+			floorLamps[1] = new FloorLamp(Direction.UP);//only lamp on floor will point up
 		}else {
 			floorButtons = new FloorButton[2];//create arrays of size two
 			floorLamps = new FloorLamp[2];
@@ -93,7 +95,6 @@ public class Floor {
 
 		//TODO:notice elevator arrival
 		//TODO:toggle direction lamp
-		//TODO:send list of requests 
 		//TODO:remove direction lamp when it leaves
 	}
 
@@ -175,17 +176,26 @@ public class Floor {
 	public void newRequest(String[] request) {
 		byte[] message = requestElevator(request);
 		byte[] destination = destinationRequest(request);
-		if(!requested) {
-			sendRequest(message);
-			requests[requestInsert++] = destination;
-			requested = true;
+
+		if(!floorLamps[message[17]].getState()) {//if the lamp indicating the direction the elevator travelling is not yet on
+			floorLamps[message[17]].toggle();//switch it on
+			//System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[message[17]].getDirection().toString() + " lamp on.");
+			//System.out.println("Floor lamp facing " + floorLamps[message[17]].getDirection().toString() + " is now " + floorLamps[message[17]].getStateString());	
+		}
+
+		if(!requested) {//if no request has been made for this floor
+			sendRequest(message);//request an elevator
+			requests[requestInsert++] = destination;//add destination to request list
+			requested = true;//a request now has been made
 		}else {
-			requests[requestInsert++] = destination;
+			requests[requestInsert++] = destination;//add destination to request list
 		}
 	}
 
-	public void elevatorArrived() {
-
+	public void elevatorArrived(byte lampTrigger) {
+		floorLamps[lampTrigger].toggle();
+		//System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[message[17]].getDirection().toString() + " lamp off.");
+		//System.out.println("Floor lamp facing " + floorLamps[message[17]].getDirection().toString() + " is now " + floorLamps[message[17]].getStateString());
 	}
 
 	/**
