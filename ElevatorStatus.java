@@ -19,6 +19,10 @@ import Enums.*;
  *
  */
 public class ElevatorStatus {
+<<<<<<< HEAD
+=======
+
+>>>>>>> Modifying-Scheduler-to-Control-Elevator
 	private int position;						// floor that elevator is at or was last at
 	private Direction tripDir;					// direction that the elevator is travelling / will be traveling on this trip
 	private SortedSet<Integer> floorsToVisit;	// Sorted Set of floors for this elevator to visit. 
@@ -328,7 +332,31 @@ public class ElevatorStatus {
 
 		return this.position;	// if a new floor cannot be determined then stay on this floor
 	}
-
+	
+	
+	/**
+	 * Take a message from the elevator and use it to update the state in elevatorState
+	 * 
+	 * @param p	DataPacket from the elevator
+	 */
+	public void update(DataPacket p){
+		switch(p.getSubSystem()){
+			case MOTOR:	// Motor is to be updated
+				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
+				break;
+			case DOOR:	// Door state is to be updated
+				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
+				break;
+			case CARLAMP:	// Car Lamp State is to be updated
+				//TODO: handle updates from elevator about floor lights
+				break;
+			case LOCATION:	// Location is to be updated
+				this.setPosition((int) p.getStatus()[0]);
+				break;
+			default:
+				break;
+		}
+	}
 
 
 

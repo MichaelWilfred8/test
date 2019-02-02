@@ -139,4 +139,18 @@ public class DataPacket {
 
 		return buf.array();
 	}
+	
+	public boolean equals(OriginType origin, int id, SubsystemType subSystem, byte[] status){
+		if (!origin.equals(this.origin)){
+			return false;
+		} else if (id != this.id) {
+			return false;
+		} else if (!subSystem.equals(this.subSystem)) {
+			return false;
+		} else if (!status.equals(this.status)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 }	
