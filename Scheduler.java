@@ -60,15 +60,6 @@ public class Scheduler {
 		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 3000);
 	}
 
-
-
-	/**
-	 * @return Top Level of building
-	 */
-	public int getTopFloor() {
-		return MAX_FLOOR;
-	}
-
 	public void receiveAndForward(){
 		while(true){ // Block until a datagram packet is received from receiveSocket.
 			// Construct a DatagramPacket for receiving packets up
