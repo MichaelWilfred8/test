@@ -46,7 +46,7 @@ public class FloorHandler implements Runnable {
 
 			try {
 				// Block until a datagram is received via sendReceiveSocket.
-				System.out.println("Client: Waiting for Packet.\n");
+				System.out.println("FloorHandler: Waiting for Packet.\n");
 				receiveSocket.receive(receivePacket);
 			} catch(IOException e) {
 				System.out.print("IO Exception: likely:");
@@ -56,7 +56,7 @@ public class FloorHandler implements Runnable {
 			}
 
 			// Process the received datagram.
-			System.out.println("Client: Packet received:");
+			System.out.println("FloorHandler: Packet received:");
 			System.out.println("From host: " + receivePacket.getAddress());
 			System.out.println("Host port: " + receivePacket.getPort());
 			int len = receivePacket.getLength();
