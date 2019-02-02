@@ -11,11 +11,28 @@ public class FloorButton extends Button {
 	}
 
 	/**
-	 * 
 	 * @return direction of the button
 	 */
 	public Direction getDirection() {//getter for direction
 		return direction;
+	}
+
+	/**
+	 * @return state of buttons
+	 */
+	public boolean getState() {
+		return state;
+	}
+
+	/**
+	 * @return String representation of status
+	 */
+	public String getStateString() {
+		if (state) {
+			return "PRESSED";
+		}else {
+			return "UNPRESSED";
+		}
 	}
 
 }
