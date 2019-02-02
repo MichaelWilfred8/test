@@ -132,7 +132,7 @@ public class DataPacket {
 		ByteBuffer buf = ByteBuffer.allocate(100);
 		buf.put(this.origin.getByte());
 		buf.put(this.id);
-		buf.putShort(this.subSystem.getByte());
+		buf.put(this.subSystem.getByte());
 		buf.put(this.status);
 
 		buf.flip();
@@ -153,4 +153,17 @@ public class DataPacket {
 			return true;
 		}
 	}
+
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "DataPacket [origin=" + origin + ", id=" + id + ", subSystem=" + subSystem + ", status="
+				+ Arrays.toString(status) + "]";
+	}
+	
+	
 }	

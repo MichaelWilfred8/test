@@ -20,6 +20,7 @@ public class Scheduler {
 
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
+	private static final int ARRAY_LEN = 50;
 
 	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
@@ -33,8 +34,6 @@ public class Scheduler {
 
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
-
-			floorHandler = new FloorHandler(this);
 
 			//floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
@@ -55,16 +54,39 @@ public class Scheduler {
 		this.downRequests = new ArrayList<Integer>();
 		this.requestBuffer = new ConcurrentLinkedQueue();
 
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 69));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
-		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 3000);
+		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 32);
+	}
+
+
+
+	/**
+	 * @return Top Level of building
+	 */
+	public int getTopFloor() {
+		return MAX_FLOOR;
+	}
+
+	/**
+	 * @return floorHandler
+	 */
+	public FloorHandler getFloorHandler() {
+		return floorHandler;
+	}
+
+	/**
+	 * @return socket for scheduler
+	 */
+	public int getSchedulerSocket() {
+		return receiveSocket.getPort();
 	}
 
 	public void receiveAndForward(){
 		while(true){ // Block until a datagram packet is received from receiveSocket.
 			// Construct a DatagramPacket for receiving packets up
-			// to 100 bytes long (the length of the byte array).
-			byte data[] = new byte[100];
+			// to 50 bytes long (the length of the byte array).
+			byte data[] = new byte[ARRAY_LEN];
 			receivePacket = new DatagramPacket(data, data.length);
 
 			System.out.println("Intermediate Host: Waiting for Packet.\n");
@@ -278,6 +300,10 @@ public class Scheduler {
 			case ELEVATOR:
 				addr = this.carStatus.getAddress();
 				break;
+			default:
+				System.out.println("Invalid Origin Type");
+				System.exit(0);
+				break;
 		}
 		return addr;
 	}
@@ -330,7 +356,7 @@ public class Scheduler {
 	 * @return 	A
 	 */
 	private DataPacket receiveRequest(){
-		byte data[] = new byte[100];
+		byte data[] = new byte[ARRAY_LEN];
 		receivePacket = new DatagramPacket(data, data.length);
 
 		System.out.println("Scheduler: Waiting for Packet.\n");
@@ -362,9 +388,14 @@ public class Scheduler {
 	private void sendRequest(DataPacket p, OriginType destinationType, int id){
 
 		byte data[] = p.getBytes();
+		System.out.println("byte array = " + Arrays.toString(p.getBytes()));
+		
+		
 
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
+
+		printDatagramPacket(sendPacket, "send");
 
 		DatagramSocket sendSocket = null;//instantiate new send socket
 		try {
@@ -427,7 +458,11 @@ public class Scheduler {
 		}
 
 		this.carStatus.update(p); // Update the ElevatorStatus with the message
-
+		
+		
+		// TODO: Tell floor to trigger direction lamp
+		
+		
 		// Tell elevator to open doors
 		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
 
@@ -547,25 +582,15 @@ public class Scheduler {
 		}
 	}
 
-	/**
-	 * @return Top Level of building
-	 */
-	public int getTopFloor() {
-		return MAX_FLOOR;
-	}
 
-	/**
-	 * @return floorHandler
-	 */
-	public FloorHandler getFloorHandler() {
-		return floorHandler;
-	}
+	public static void main(String args[]) throws UnknownHostException{
+		Scheduler s = new Scheduler();
+		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+		
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
+		System.out.println(p.toString());
+		s.sendRequest(p, OriginType.ELEVATOR, (byte) 0);
 
-	/**
-	 * @return socket for scheduler
-	 */
-	public int getSchedulerSocket() {
-		return receiveSocket.getPort();
 	}
 
 }
