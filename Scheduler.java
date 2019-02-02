@@ -565,7 +565,6 @@ public class Scheduler {
 		//System.out.println(p.toString());
 		//s.sendRequest(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 		
-		System.out.println(s.carStatus.id);
 		s.moveUpOneFloor();
 
 	}
