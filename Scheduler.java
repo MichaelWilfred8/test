@@ -69,6 +69,20 @@ public class Scheduler {
 		return MAX_FLOOR;
 	}
 
+	/**
+	 * @return floorHandler
+	 */
+	public FloorHandler getFloorHandler() {
+		return floorHandler;
+	}
+
+	/**
+	 * @return socket for scheduler
+	 */
+	public int getSchedulerSocket() {
+		return receiveSocket.getPort();
+	}
+
 	public void receiveAndForward(){
 		while(true){ // Block until a datagram packet is received from receiveSocket.
 			// Construct a DatagramPacket for receiving packets up
@@ -554,27 +568,6 @@ public class Scheduler {
 			// if request is a floor number
 
 		}
-	}
-
-	/**
-	 * @return Top Level of building
-	 */
-	public int getTopFloor() {
-		return MAX_FLOOR;
-	}
-
-	/**
-	 * @return floorHandler
-	 */
-	public FloorHandler getFloorHandler() {
-		return floorHandler;
-	}
-
-	/**
-	 * @return socket for scheduler
-	 */
-	public int getSchedulerSocket() {
-		return receiveSocket.getPort();
 	}
 
 }
