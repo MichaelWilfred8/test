@@ -111,9 +111,9 @@ public class Floor {
 		byte[] time = ts.getBytes();//get the bytes of the timestamp
 
 		if(request[2].equalsIgnoreCase("UP")) {//if requester wants to go up
-			directionCode = 1;
+			directionCode = 2;
 		}else {//if requester wants to go down
-			directionCode = 0;
+			directionCode = 1;
 		}
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
@@ -177,10 +177,10 @@ public class Floor {
 		byte[] message = requestElevator(request);
 		byte[] destination = destinationRequest(request);
 
-		if(!floorButtons[message[17]].getState()) {//if the button indicating the direction the elevator travelling is not yet on
-			floorButtons[message[17]].toggle();//switch it on
-			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message[17]].getDirection().toString() + " button on.");
-			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message[17]].getDirection().toString() + " is now " + floorButtons[message[17]].getStateString());	
+		if(!floorButtons[message[17]-1].getState()) {//if the button indicating the direction the elevator travelling is not yet on
+			floorButtons[message[17]-1].toggle();//switch it on
+			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message[17]-1].getDirection().toString() + " button on.");
+			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message[17]-1].getDirection().toString() + " is now " + floorButtons[message[17]-1].getStateString());	
 		}
 
 		if(!requested) {//if no request has been made for this floor
