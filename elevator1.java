@@ -284,8 +284,8 @@ public class elevator1 {
 	}
 	
 	
-	private static DataPacket createEchoPacket(SubsystemType subSystem, byte[] status){
-		return new DataPacket(OriginType.ELEVATOR, (byte) 0, subSystem, status);
+	private DataPacket createEchoPacket(SubsystemType subSystem, byte[] status){
+		return new DataPacket(OriginType.ELEVATOR, (byte) this.id, subSystem, status);
 	}
 	
 	private void sendDataPacket(DataPacket p, SocketAddress address){

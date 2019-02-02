@@ -30,6 +30,7 @@ public class ElevatorStatus {
 	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
 	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
 	private SocketAddress address;				// SocketAddress of the elevator
+	public int id;
 
 	/**
 	 * Constructor for ElevatorStatus class
@@ -39,7 +40,7 @@ public class ElevatorStatus {
 	 * @param doorState			State of the elevator doors (open, closed)
 	 * @param numFloors			Number of floors in the building
 	 */
-	public ElevatorStatus(int currentFloor, MotorState motorState, DoorState doorState, int numFloors, SocketAddress address){
+	public ElevatorStatus(int currentFloor, MotorState motorState, DoorState doorState, int numFloors, SocketAddress address, int id){
 		this.position = currentFloor;
 		this.tripDir = Direction.UP;
 		this.floorsToVisit = new TreeSet<Integer>();	// TreeSet is an implementation of the SortedSet interface

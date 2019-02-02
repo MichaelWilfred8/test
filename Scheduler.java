@@ -53,7 +53,7 @@ public class Scheduler {
 		this.downRequests = new ArrayList<Integer>();
 		this.requestBuffer = new ConcurrentLinkedQueue();
 
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 69));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 69), 1);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
 		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 32);
 	}
