@@ -73,7 +73,7 @@ public class Scheduler {
 	public int getSchedulerSocket() {
 		return receiveSocket.getPort();
 	}
-	
+
 
 	/**
 	 * Determine the next state the motor must be in
@@ -158,16 +158,16 @@ public class Scheduler {
 		SocketAddress addr = null;
 
 		switch(o){
-			case FLOOR:
-				addr = this.floorHandlerAddress;
-				break;
-			case ELEVATOR:
-				addr = this.carStatus.getAddress();
-				break;
-			default:
-				System.out.println("Invalid Origin Type");
-				System.exit(0);
-				break;
+		case FLOOR:
+			addr = this.floorHandlerAddress;
+			break;
+		case ELEVATOR:
+			addr = this.carStatus.getAddress();
+			break;
+		default:
+			System.out.println("Invalid Origin Type");
+			System.exit(0);
+			break;
 		}
 		return addr;
 	}
@@ -240,40 +240,40 @@ public class Scheduler {
 
 		return new DataPacket(receivePacket.getData());
 	}
-	
-	
+
+
 	/**
 	 * Receive a request from another subsystem and add it to the queue of requests
 	 *
 	 * 
 	 */
-//	private void receiveRequest(){
-//		byte data[] = new byte[ARRAY_LEN];
-//		receivePacket = new DatagramPacket(data, data.length);
-//
-//		System.out.println("Scheduler: Waiting for Packet.\n");
-//
-//		// Wait to receive a DatagramPacket
-//		try {
-//			System.out.println("Waiting..."); // so we know we're waiting
-//			receiveSocket.receive(receivePacket);
-//		} catch (IOException e) {
-//			System.out.print("IO Exception: likely:");
-//			System.out.println("Receive Socket Timed Out.\n" + e);
-//			e.printStackTrace();
-//			System.exit(1);
-//		}
-//
-//		printDatagramPacket(receivePacket, "received");
-//		
-//		DataPacket p = new DataPacket(receivePacket.getData());
-//		
-//		if (p.getSubSystem() == SubsystemType.REQUEST){
-//			this.requestBuffer.add(new ElevatorInputPacket(p.getStatus()));
-//		}
-//		
-//		return new DataPacket(receivePacket.getData());
-//	}
+	//	private void receiveRequest(){
+	//		byte data[] = new byte[ARRAY_LEN];
+	//		receivePacket = new DatagramPacket(data, data.length);
+	//
+	//		System.out.println("Scheduler: Waiting for Packet.\n");
+	//
+	//		// Wait to receive a DatagramPacket
+	//		try {
+	//			System.out.println("Waiting..."); // so we know we're waiting
+	//			receiveSocket.receive(receivePacket);
+	//		} catch (IOException e) {
+	//			System.out.print("IO Exception: likely:");
+	//			System.out.println("Receive Socket Timed Out.\n" + e);
+	//			e.printStackTrace();
+	//			System.exit(1);
+	//		}
+	//
+	//		printDatagramPacket(receivePacket, "received");
+	//		
+	//		DataPacket p = new DataPacket(receivePacket.getData());
+	//		
+	//		if (p.getSubSystem() == SubsystemType.REQUEST){
+	//			this.requestBuffer.add(new ElevatorInputPacket(p.getStatus()));
+	//		}
+	//		
+	//		return new DataPacket(receivePacket.getData());
+	//	}
 
 	/**
 	 * Send a request through the sendReceiveSocket from the scheduler to the appropriate subsystem
@@ -286,8 +286,8 @@ public class Scheduler {
 
 		byte data[] = p.getBytes();
 		//System.out.println("byte array = " + Arrays.toString(p.getBytes()));
-		
-		
+
+
 
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
@@ -316,12 +316,12 @@ public class Scheduler {
 	 * @return					Returns true if the packet that was received is an echo of the packet it sent
 	 */
 	private void requestEchoed(DataPacket sendPacket, OriginType destinationType, int id) throws IOException {
-		
+
 		this.sendRequest(sendPacket, destinationType, id);
-		
+
 		System.out.println("waiting to get echo of request");
 		DataPacket receivePacket = receiveRequest();
-		
+
 		//System.out.println("send packet status = " + Arrays.toString(sendPacket.getBytes()));
 		if (receivePacket.equals(destinationType, id, sendPacket.getSubSystem(), sendPacket.getStatus())){
 			return;
@@ -330,8 +330,8 @@ public class Scheduler {
 		}
 	}
 
-	
-	
+
+
 	/**
 	 * Algorithm for stopping the elevator if it is at the next destination floor
 	 */
@@ -339,7 +339,7 @@ public class Scheduler {
 
 		// Tell elevator to stop.
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
-		
+
 		try{
 			this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
 		} catch (IOException e){
@@ -348,11 +348,11 @@ public class Scheduler {
 		}
 
 		this.carStatus.update(p); // Update the ElevatorStatus with the message
-		
-		
+
+
 		// TODO: Tell floor to trigger direction lamp
-		
-		
+
+
 		// Tell elevator to open doors
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
 
@@ -422,7 +422,7 @@ public class Scheduler {
 			}
 		}
 	}
-	
+
 	/**
 	 * Algorithm for moving the elevator towards its next destination
 	 */
@@ -454,8 +454,8 @@ public class Scheduler {
 			this.stopAtFloor();
 		}
 	}
-	
-	
+
+
 	/**
 	 * Send a request to the elevator and check to see if it has been echoed back. Update the carStatus once the echo has been received
 	 * @param p				DataPacket to be sent
@@ -472,8 +472,8 @@ public class Scheduler {
 
 		this.carStatus.update(p); // Update the ElevatorStatus with the message
 	}
-	
-	
+
+
 	/**
 	 * Move the elevator up one floor
 	 * @throws InterruptedException 
@@ -481,60 +481,70 @@ public class Scheduler {
 	private void moveUpOneFloor() throws InterruptedException{
 		// Set destination floor
 		this.carStatus.addFloor(2);
-		
+
 		// Close doors
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
 		System.out.println(p.toString());
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-		
-		
+
+		//Turn on the lamp
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+
+		// send packet
+		this.sendRequestAndUpdate(p, OriginType.FLOOR, (byte) this.carStatus.getPosition());
+
+
 		// wait to receive location from elevator and update car location
-//		p = this.receiveRequest();
-//		this.carStatus.update(p);
-		
+		//		p = this.receiveRequest();
+		//		this.carStatus.update(p);
+
 		// Turn on motor up
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
-		
+
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-		
-		
+
+
 		// Wait to see if elevator is at destination floor
 		// Request location from elevator
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.LOCATION, new byte[] {0x00});
-		
+
 		// send packet
 		this.sendRequest(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-		
+
 		// get location from elevator
 		p = this.receiveRequest();
-		
+
 		// if elevator is still on the same floor
 		if ((p.getSubSystem() == SubsystemType.LOCATION) && (p.getStatus()[0] == (byte) this.carStatus.getPosition())){
 			// Send a request every second until elevator gets to correct location
 			while((p.getSubSystem() == SubsystemType.LOCATION) && ((int) p.getStatus()[0] != this.carStatus.getNextDestination())){
 				// Request location from elevator
 				p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.LOCATION, new byte[] {0x00});
-				
+
 				p = this.receiveRequest();
-				
+
 				TimeUnit.SECONDS.wait(1);
 			}
 		}
-		
-		
-		
-		
+
+
 		// Turn off motor up
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
-				
+
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-		
+
+		//Turn on the lamp
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+
+		// send packet
+		this.sendRequestAndUpdate(p, OriginType.FLOOR, (byte) this.carStatus.getPosition());
+
 		// Open doors
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
-		
+
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 	}
@@ -559,12 +569,12 @@ public class Scheduler {
 	public static void main(String args[]) throws UnknownHostException, InterruptedException{
 		Scheduler s = new Scheduler();
 		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
-		
+
 		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
-		
+
 		//System.out.println(p.toString());
 		//s.sendRequest(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-		
+
 		s.moveUpOneFloor();
 
 	}
