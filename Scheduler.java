@@ -20,6 +20,7 @@ public class Scheduler {
 
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
+	private static final int ARRAY_LEN = 50;
 
 	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
@@ -53,7 +54,7 @@ public class Scheduler {
 		this.downRequests = new ArrayList<Integer>();
 		this.requestBuffer = new ConcurrentLinkedQueue();
 
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 69));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
 		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 32);
 	}
@@ -84,8 +85,8 @@ public class Scheduler {
 	public void receiveAndForward(){
 		while(true){ // Block until a datagram packet is received from receiveSocket.
 			// Construct a DatagramPacket for receiving packets up
-			// to 100 bytes long (the length of the byte array).
-			byte data[] = new byte[100];
+			// to 50 bytes long (the length of the byte array).
+			byte data[] = new byte[ARRAY_LEN];
 			receivePacket = new DatagramPacket(data, data.length);
 
 			System.out.println("Intermediate Host: Waiting for Packet.\n");
@@ -299,6 +300,10 @@ public class Scheduler {
 			case ELEVATOR:
 				addr = this.carStatus.getAddress();
 				break;
+			default:
+				System.out.println("Invalid Origin Type");
+				System.exit(0);
+				break;
 		}
 		return addr;
 	}
@@ -351,7 +356,7 @@ public class Scheduler {
 	 * @return 	A
 	 */
 	private DataPacket receiveRequest(){
-		byte data[] = new byte[100];
+		byte data[] = new byte[ARRAY_LEN];
 		receivePacket = new DatagramPacket(data, data.length);
 
 		System.out.println("Scheduler: Waiting for Packet.\n");
@@ -580,9 +585,11 @@ public class Scheduler {
 
 	public static void main(String args[]) throws UnknownHostException{
 		Scheduler s = new Scheduler();
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+		
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
 		System.out.println(p.toString());
-		s.sendRequest(p, OriginType.FLOOR, (byte) 4);
+		s.sendRequest(p, OriginType.ELEVATOR, (byte) 0);
 
 	}
 
