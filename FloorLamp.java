@@ -35,6 +35,24 @@ public class FloorLamp {
 	public Direction getDirection() {
 		return direction;
 	}
+	
+	/**
+	 * @return if the lamp is on/off
+	 */
+	public boolean getState() {
+		return state;
+	}
+	
+	/**
+	 * @return String representation of status
+	 */
+	public String getStateString() {
+		if (state) {
+			return "ON";
+		}else {
+			return "OFF";
+		}
+	}
 
 
 }
