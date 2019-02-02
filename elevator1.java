@@ -251,9 +251,11 @@ public class elevator1 {
 					case OPEN:
 						door = true;		//door open and send message
 						System.out.println("door opened  " );
+						TimeUnit.SECONDS.sleep(1);
 						break;
 					case CLOSED:
 						door = false;		//door closed and send message
+						TimeUnit.SECONDS.sleep(1);
 						System.out.println("door closed " );
 						break;
 					default:
@@ -270,7 +272,10 @@ public class elevator1 {
 			
 			System.out.println("\n\n");
 			// Echo back the packet
-			this.sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
+			if (p.getSubSystem() != SubsystemType.MOTOR){
+				this.sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
+			}
+			
 			
 			//receiveSocket.close();
 		}
@@ -358,33 +363,22 @@ public class elevator1 {
 	public void Motor(MotorState command) throws IOException, InterruptedException{
 		System.out.println("Elevator: I am at floor "+ currentFloor);
 		
-//		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
-//			if(command == MotorState.DOWN) {
-//				this.motorState = MotorState.DOWN;
-//				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
-//				currentFloor--;	
-//				sendLocation();
-//			} else if (command == MotorState.UP){
-//				this.motorState = MotorState.UP;
-//				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
-//				currentFloor++;	
-//				sendLocation();
-//			}
-//			
-//			System.out.println("Elevator: I am at  "+ currentFloor);
-//			count ++;
-//		}
-		
 		if(command == MotorState.DOWN) {
 			this.motorState = MotorState.DOWN;
-			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			
+			// send state to scheduler
+			this.sendDataPacket(this.createEchoPacket(SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), this.receivePacket.getSocketAddress());
+			
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor--;	
-			sendLocation();
 		} else if (command == MotorState.UP){
 			this.motorState = MotorState.UP;
-			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			
+			// send state to scheduler
+			this.sendDataPacket(this.createEchoPacket(SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), this.receivePacket.getSocketAddress());
+				
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor++;	
-			sendLocation();
 		}
 		
 		System.out.println("Elevator: I am at  "+ currentFloor);

@@ -9,7 +9,7 @@ import Enums.*;
  * @author craig
  *
  */
-public class Scheduler {
+public class NewScheduler {
 
 	DatagramPacket sendPacket;
 	static DatagramPacket receivePacket;
@@ -30,7 +30,7 @@ public class Scheduler {
 	//TODO: create floorStatus class?
 
 
-	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
+	public NewScheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
 
 			//floorHandler.run();
@@ -52,7 +52,7 @@ public class Scheduler {
 		this.downRequests = new ArrayList<Integer>();
 		this.requestBuffer = new ConcurrentLinkedQueue();
 
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000), 1);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
 		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 3000);
 	}
@@ -656,12 +656,7 @@ public class Scheduler {
 		return MAX_FLOOR;
 	}
 
-	/**
-	 * @return floorHandler
-	 */
-	public FloorHandler getFloorHandler() {
-		return floorHandler;
-	}
+	
 
 	/**
 	 * @return socket for scheduler

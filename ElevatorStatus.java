@@ -58,6 +58,8 @@ public class ElevatorStatus {
 		}
 
 		this.address = address;
+		
+		this.id = id;
 	}
 
 
@@ -369,7 +371,7 @@ public class ElevatorStatus {
 	}
 
 	public static void main(String args[]) throws UnknownHostException{
-		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, new InetSocketAddress(InetAddress.getLocalHost(), 4000));
+		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, new InetSocketAddress(InetAddress.getLocalHost(), 4000), 1);
 
 		System.out.println(e.toString());
 	}
