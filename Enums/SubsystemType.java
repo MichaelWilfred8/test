@@ -6,7 +6,7 @@ public enum SubsystemType {
 	CARLAMP(5),
 	FLOORLAMP(4),
 	LOCATION(3),
-	INPUT(2),
+	INPUT(2),	// TODO: remove input since it is no longer used
 	REQUEST(1);
 	
 	// test coment

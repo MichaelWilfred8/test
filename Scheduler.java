@@ -200,7 +200,7 @@ public class Scheduler {
 	 * @return	MotorState the state that the motor has to be in
 	 */
 	private MotorState findNextMotorState(){
-		if (this.carStatus.getNextFloor() == this.carStatus.getPosition()){
+		if (this.carStatus.getNextDestination() == this.carStatus.getPosition()){
 			return MotorState.OFF;
 		} else if (this.carStatus.getNextDestination() > this.carStatus.getPosition()){
 			return MotorState.UP;
@@ -394,17 +394,147 @@ public class Scheduler {
 
 	}
 	
-	private void stopAtFloorAlgorithm(){
-		// Tell the elevator to stop
-		sendRequest();
+	
+	/**
+	 * Send a request to the given destination subsystem and ID
+	 * 
+	 * @param sendPacket		DataPacket to be sent to the subsystem
+	 * @param destinationType	Subsystem to send the packet to
+	 * @param id				Identifier of the specific element of the subsystem
+	 * @return					Returns true if the packet that was received is an echo of the packet it sent
+	 */
+	private void requestEchoed(DataPacket sendPacket, OriginType destinationType, int id) throws IOException {
+		this.sendRequest(sendPacket, destinationType, id);
 		
-		// update elevator status
-		receiveRequest();
-		carStatus.update();
+		DataPacket receivePacket = receiveRequest();
 		
-		// open Doors
+		if (receivePacket.equals(destinationType, id, sendPacket.getSubSystem(), sendPacket.getStatus())){
+			return;
+		} else {
+			throw new IOException("Request was not as expected");
+		}
 	}
 	
+	
+	/**
+	 * Algorithm for stopping the elevator if it is at the next destination floor
+	 */
+	private void stopAtFloor(){
+		
+		// Tell elevator to stop. 
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
+		
+		try{
+			this.requestEchoed(p, OriginType.ELEVATOR, 1);
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		this.carStatus.update(p); // Update the ElevatorStatus with the message
+		
+		// Tell elevator to open doors
+		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
+		
+		try{
+			this.requestEchoed(p, OriginType.ELEVATOR, 1);
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		this.carStatus.update(p); // Update the ElevatorStatus with the message
+		
+		
+		this.receiveRequest(); // Try to receive a request from the floor
+		
+		// Tell elevator to close doors
+		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+		
+		try{
+			this.requestEchoed(p, OriginType.ELEVATOR, 1);
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		this.carStatus.update(p); // Update the ElevatorStatus with the message
+		
+		
+		// Check if the elevator has a new destination
+		if (this.carStatus.getNextDestination() != this.carStatus.getPosition()){
+			// Tell elevator to close doors
+			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+			
+			try{
+				this.requestEchoed(p, OriginType.ELEVATOR, 1);
+			} catch (IOException e){
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			this.carStatus.update(p); // Update the ElevatorStatus with the message
+			
+			if (this.carStatus.getTripDir() == Direction.UP){
+				p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
+				
+				try{
+					this.requestEchoed(p, OriginType.ELEVATOR, 1);
+				} catch (IOException e){
+					e.printStackTrace();
+					System.exit(1);
+				}
+				
+				this.carStatus.update(p); // Update the ElevatorStatus with the message
+				
+			} else {
+				p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.DOWN.getByte()});
+				
+				try{
+					this.requestEchoed(p, OriginType.ELEVATOR, 1);
+				} catch (IOException e){
+					e.printStackTrace();
+					System.exit(1);
+				}
+				
+				this.carStatus.update(p); // Update the ElevatorStatus with the message
+				
+			}
+		}
+	}
+	
+	
+	/**
+	 * Algorithm for moving the elevator towards its next destination
+	 */
+	private void continueOneFloor(){
+		if(this.carStatus.getNextDestination() > this.carStatus.getPosition()){
+			DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
+			
+			try{
+				this.requestEchoed(p, OriginType.ELEVATOR, 1);
+			} catch (IOException e){
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			this.carStatus.update(p); // Update the ElevatorStatus with the message
+			
+		} else if (this.carStatus.getNextDestination() < this.carStatus.getPosition()){
+			DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.DOWN.getByte()});
+			
+			try{
+				this.requestEchoed(p, OriginType.ELEVATOR, 1);
+			} catch (IOException e){
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			this.carStatus.update(p); // Update the ElevatorStatus with the message
+		} else if (this.carStatus.getNextDestination() == this.carStatus.getPosition()){
+			this.stopAtFloor();
+		}
+	}
 	
 	
 	private void elevatorControlLoop(){

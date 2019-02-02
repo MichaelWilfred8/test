@@ -331,9 +331,27 @@ public class ElevatorStatus {
 	}
 	
 	
+	/**
+	 * Take a message from the elevator and use it to update the state in elevatorState
+	 * 
+	 * @param p	DataPacket from the elevator
+	 */
 	public void update(DataPacket p){
 		switch(p.getSubSystem()){
-		case 
+			case MOTOR:	// Motor is to be updated
+				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
+				break;
+			case DOOR:	// Door state is to be updated
+				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
+				break;
+			case CARLAMP:	// Car Lamp State is to be updated
+				//TODO: handle updates from elevator about floor lights
+				break;
+			case LOCATION:	// Location is to be updated
+				this.setPosition((int) p.getStatus()[0]);
+				break;
+			default:
+				break;
 		}
 	}
 
