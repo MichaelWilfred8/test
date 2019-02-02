@@ -69,8 +69,8 @@ public class FloorHandler implements Runnable {
 				notDone = false;
 			} else {
 				for (int i = 0; i<floors.length;i++) {
-					if(floors[i].getFloorNumber() == data[16]) {
-						floors[i].elevatorArrived();
+					if(floors[i].getFloorNumber() == data[15]) {
+						floors[i].elevatorArrived(data[19]);
 					}
 				}
 			}
