@@ -60,7 +60,43 @@ public class Floor {
 		requests = new byte[scheduler.getTopFloor()][];//can only have as many requests as there are floors
 		requested = false;
 	}
+	
+	
+	public Floor(int highestFloor, int floorNumber){
+		try {
+			sendSocket = new DatagramSocket();
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 
+		//this.scheduler = scheduler;
+		this.floorNumber = floorNumber;
+
+		if (floorNumber == highestFloor) {//if the floor is the top floor
+			floorButtons = new FloorButton[1];//create arrays of size one
+			floorLamps = new FloorLamp[1];
+			floorButtons[0] = new FloorButton(Direction.DOWN);//only button on the floor will to go down
+			floorLamps[0] = new FloorLamp(Direction.DOWN);//only light on floor will point down
+		}else if (floorNumber == 1) {//if the floor is the bottom floor
+			floorButtons = new FloorButton[2];//create arrays of size one
+			floorLamps = new FloorLamp[2];
+			floorLamps[0] = null;
+			floorButtons[0] = null;
+			floorButtons[1] = new FloorButton(Direction.UP);//only button on the floor will be to go up
+			floorLamps[1] = new FloorLamp(Direction.UP);//only lamp on floor will point up
+		}else {
+			floorButtons = new FloorButton[2];//create arrays of size two
+			floorLamps = new FloorLamp[2];
+			floorButtons[0] = new FloorButton(Direction.DOWN);//create an up button
+			floorButtons[1] = new FloorButton(Direction.UP);//create a down button
+			floorLamps[0] = new FloorLamp(Direction.DOWN);
+			floorLamps[1] = new FloorLamp(Direction.UP);
+		}
+
+		requests = new byte[highestFloor][];//can only have as many requests as there are floors
+		requested = false;
+	}
+	
 	/**
 	 * send byte array to scheduler
 	 * @param message, message to be sent

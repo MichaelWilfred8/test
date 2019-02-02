@@ -25,6 +25,20 @@ public class FloorHandler implements Runnable {
 			e.printStackTrace();
 		}
 	}
+	
+	FloorHandler(int numFloors){
+		floors = new Floor[numFloors];
+		for(int i=0;i<numFloors;i++) {
+			//floors[i] = new Floor(scheduler, i+1);
+			floors[i] = new Floor(numFloors, i+1);
+		}
+
+		try {
+			receiveSocket = new DatagramSocket(32);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * @return All Floors
@@ -84,6 +98,12 @@ public class FloorHandler implements Runnable {
 	public void run() {
 		listen();
 
+	}
+	
+	public static void main(String args[]){
+		FloorHandler fh = new FloorHandler(10);
+		
+		fh.run();
 	}
 
 }

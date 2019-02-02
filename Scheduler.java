@@ -34,8 +34,6 @@ public class Scheduler {
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
 
-			floorHandler = new FloorHandler(this);
-
 			//floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets
@@ -57,7 +55,7 @@ public class Scheduler {
 
 		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 5000));	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
-		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 3000);
+		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 32);
 	}
 
 
@@ -388,6 +386,8 @@ public class Scheduler {
 
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
+		
+		printDatagramPacket(sendPacket, "send");
 
 		DatagramSocket sendSocket = null;//instantiate new send socket
 		try {
@@ -568,6 +568,16 @@ public class Scheduler {
 			// if request is a floor number
 
 		}
+	}
+	
+	
+	public static void main(String args[]) throws UnknownHostException{
+		Scheduler s = new Scheduler();
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+		
+		
+		s.sendRequest(p, OriginType.FLOOR, (byte) 4);
+		
 	}
 
 }
