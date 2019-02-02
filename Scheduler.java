@@ -13,14 +13,14 @@ public class Scheduler {
 
 	DatagramPacket sendPacket;
 	static DatagramPacket receivePacket;
-	DatagramSocket sendRecieveSocket, receiveSocket;
+	DatagramSocket sendReceiveSocket, receiveSocket;
 	FloorHandler floorHandler;
 
 	private ElevatorStatus carStatus;	// Information about the status of an elevator car
 
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
-	private static final int ARRAY_LEN = 50;
+	private static final int ARRAY_LEN = 100;
 
 	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
@@ -36,8 +36,8 @@ public class Scheduler {
 		try {
 			// floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
-			// used to send and receive packets
-			sendRecieveSocket = new DatagramSocket();
+			// used to send and receive packets as echos
+			sendReceiveSocket = new DatagramSocket(2300);
 
 
 			// Construct a datagram socket and bind it to port 23 on the local host machine.
@@ -201,21 +201,21 @@ public class Scheduler {
 	 * Print what was received from a datagram packet to the console
 	 *
 	 * @param p		datagram packet that was received
-	 * @param mode	String representing if a packet was sent ("sent") or received ("received")
+	 * @param mode	String representing if a packet was sent ("s") or received ("r")
 	 */
 	private static void printDatagramPacket(DatagramPacket p, String mode){
-		if (mode == "sent"){
+		if (mode == "s"){
 			System.out.println("Scheduler sent:");
 			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
-		} else if (mode == "received") {
+		} else if (mode == "r") {
 			System.out.println("Scheduler received:");
 			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
 		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket
-		System.out.println("Data (String): " + data); 							// Print the data in the packet as a String
+		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
 	}
@@ -228,22 +228,22 @@ public class Scheduler {
 	 */
 	private DataPacket receiveRequest(){
 		byte data[] = new byte[ARRAY_LEN];
-		receivePacket = new DatagramPacket(data, data.length);
+		this.receivePacket = new DatagramPacket(data, data.length);
 
 		System.out.println("Scheduler: Waiting for Packet.\n");
 
 		// Wait to receive a DatagramPacket
 		try {
 			System.out.println("Waiting..."); // so we know we're waiting
-			receiveSocket.receive(receivePacket);
+			this.sendReceiveSocket.receive(receivePacket);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
-			System.out.println("Receive Socket Timed Out.\n" + e);
+			System.out.println("sendReceive Socket Timed Out.\n" + e);
 			e.printStackTrace();
 			System.exit(1);
 		}
 
-		printDatagramPacket(receivePacket, "received");
+		printDatagramPacket(receivePacket, "r");
 
 		return new DataPacket(receivePacket.getData());
 	}
@@ -283,7 +283,7 @@ public class Scheduler {
 //	}
 
 	/**
-	 * Send a request from the scheduler to the appropriate subsystem
+	 * Send a request through the sendReceiveSocket from the scheduler to the appropriate subsystem
 	 *
 	 * @param p					DataPacket containing the information to be sent
 	 * @param destinationType	OriginType of the destination
@@ -299,22 +299,11 @@ public class Scheduler {
 		// Create a new datagram packet containing the string received from the server.
 		sendPacket = new DatagramPacket(data, data.length, this.getAddressOfSubsystem(destinationType, id));
 
-		printDatagramPacket(sendPacket, "send");
+		printDatagramPacket(sendPacket, "s");
 
-		DatagramSocket sendSocket = null;//instantiate new send socket
+		// Try to send the DatagramPacket from the scheduler to its destination via the sendReceive socket
 		try {
-			sendSocket = new DatagramSocket();
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(1);
-		};
-
-		if (sendSocket == null) return;
-
-		// Try to send the DatagramPacket from the scheduler to its destination via the send socket
-		try {
-			sendRecieveSocket.send(sendPacket);
+			this.sendReceiveSocket.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -334,10 +323,13 @@ public class Scheduler {
 	 * @return					Returns true if the packet that was received is an echo of the packet it sent
 	 */
 	private void requestEchoed(DataPacket sendPacket, OriginType destinationType, int id) throws IOException {
+		
 		this.sendRequest(sendPacket, destinationType, id);
-
+		
+		System.out.println("waiting to get echo of request");
 		DataPacket receivePacket = receiveRequest();
-
+		
+		System.out.println("send packet status = " + Arrays.toString(sendPacket.getBytes()));
 		if (receivePacket.equals(destinationType, id, sendPacket.getSubSystem(), sendPacket.getStatus())){
 			return;
 		} else {
@@ -438,63 +430,6 @@ public class Scheduler {
 		}
 	}
 	
-	
-	/**
-	 * Send a request to the elevator and check to see if it has been echoed back. Update the carStatus once the echo has been received
-	 * @param p				DataPacket to be sent
-	 * @param destination	Destination type of the packet	
-	 * @param id			ID of the destination for the packet
-	 */
-	private void sendRequestAndUpdate(DataPacket p, OriginType destination, int id){
-		try{
-			this.requestEchoed(p, destination, id);
-		} catch (IOException e){
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		this.carStatus.update(p); // Update the ElevatorStatus with the message
-	}
-	
-	
-	/**
-	 * Move the elevator up one floor
-	 */
-	private void moveUpOneFloor(){
-		// Set destination floor
-		this.carStatus.addFloor(2);
-		
-		// Close doors
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
-		
-		// send packet
-		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
-		
-		// Turn on motor up
-		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
-		
-		// send packet
-		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
-		
-		
-		// Wait to see if elevator is at destination floor
-		p = this.receiveRequest();
-		
-		if ((p.getSubSystem() == SubsystemType.LOCATION) && ((int) p.getStatus()[0] == this.carStatus.getNextDestination())){
-			// Turn off motor up
-			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
-					
-			// send packet
-			this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
-			
-			// Open doors
-			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
-			
-			// send packet
-			this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
-		}
-	}
-	
 	/**
 	 * Algorithm for moving the elevator towards its next destination
 	 */
@@ -524,6 +459,63 @@ public class Scheduler {
 			this.carStatus.update(p); // Update the ElevatorStatus with the message
 		} else if (this.carStatus.getNextDestination() == this.carStatus.getPosition()){
 			this.stopAtFloor();
+		}
+	}
+	
+	
+	/**
+	 * Send a request to the elevator and check to see if it has been echoed back. Update the carStatus once the echo has been received
+	 * @param p				DataPacket to be sent
+	 * @param destination	Destination type of the packet	
+	 * @param id			ID of the destination for the packet
+	 */
+	private void sendRequestAndUpdate(DataPacket p, OriginType destination, int id){
+		try{
+			this.requestEchoed(p, destination, id);
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		this.carStatus.update(p); // Update the ElevatorStatus with the message
+	}
+	
+	
+	/**
+	 * Move the elevator up one floor
+	 */
+	private void moveUpOneFloor(){
+		// Set destination floor
+		this.carStatus.addFloor(2);
+		
+		// Close doors
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+		System.out.println(p.toString());
+		// send packet
+		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+		
+		// Turn on motor up
+		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
+		
+		// send packet
+		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+		
+		
+		// Wait to see if elevator is at destination floor
+		p = this.receiveRequest();
+		
+		if ((p.getSubSystem() == SubsystemType.LOCATION) && ((int) p.getStatus()[0] == this.carStatus.getNextDestination())){
+			// Turn off motor up
+			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
+					
+			// send packet
+			this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+			
+			// Open doors
+			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+			
+			// send packet
+			this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
 		}
 	}
 

@@ -69,7 +69,7 @@ public enum SubsystemType {
 			case MOTOR_INT:
 				return MOTOR_BYTE;
 			case DOOR_INT:
-				return MOTOR_BYTE;
+				return DOOR_BYTE;
 			case CARLAMP_INT:
 				return CARLAMP_BYTE;
 			case FLOORLAMP_INT:

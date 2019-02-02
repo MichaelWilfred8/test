@@ -142,18 +142,33 @@ public class DataPacket {
 	
 	public boolean equals(OriginType origin, int id, SubsystemType subSystem, byte[] status){
 		if (!origin.equals(this.origin)){
+			System.out.println("Origin");
 			return false;
 		} else if (id != this.id) {
+			System.out.println("id");
 			return false;
 		} else if (!subSystem.equals(this.subSystem)) {
+			System.out.println("subsystem");
 			return false;
-		} else if (!status.equals(this.status)) {
+		} else if (!Arrays.equals(Arrays.copyOfRange(status, 0, this.status.length), this.status)) {
+			byte [] statusCopy = Arrays.copyOfRange(status, 0, this.status.length);
+			
+			for(int i = 0; i < Math.min(statusCopy.length, this.status.length); ++i){
+				if (statusCopy[i] != this.status[i]){
+					System.out.println("statusCopy[" + i + "] = " + statusCopy[i]);
+					System.out.println("this.status[" + i + "] = " + this.status[i]);
+				}
+			}
+			System.out.println("given status = " + Arrays.toString(Arrays.copyOfRange(status, 0, this.status.length)));
+			System.out.println("this status = " + Arrays.toString(this.status));
+			System.out.println("status");
 			return false;
 		} else {
 			return true;
 		}
 	}
-
+	
+	
 
 
 	/* (non-Javadoc)
