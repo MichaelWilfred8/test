@@ -28,7 +28,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
-
+import java.util.concurrent.TimeUnit;
 
 import Enums.*;
 
@@ -40,26 +40,58 @@ public class elevator1 {
 	int currentFloor = 1;
 	int DesFloor;
 	boolean door = false;
-	int count;
+	int count;				// number of floors in the elevator
+	boolean[] floorLights;
+	
+	MotorState motorState;
+	
+	
 	
 	
 	public elevator1()
 	{
-	try {
+		try {
+		
+		   sendSocket = new DatagramSocket();
+		
+		   // Construct a datagram socket and bind it to port 5000 
+		   // on the local host machine. This socket will be used to
+		   // receive UDP Datagram packets.
+		   receiveSocket = new DatagramSocket(69);
+		   
+		   // to test socket timeout (2 seconds)
+		   //receiveSocket.setSoTimeout(2000);
+		} catch (SocketException se) {
+		   se.printStackTrace();
+		   System.exit(1);
+		} 
+	}
 	
-	   sendSocket = new DatagramSocket();
 	
-	   // Construct a datagram socket and bind it to port 5000 
-	   // on the local host machine. This socket will be used to
-	   // receive UDP Datagram packets.
-	   receiveSocket = new DatagramSocket(69);
-	   
-	   // to test socket timeout (2 seconds)
-	   //receiveSocket.setSoTimeout(2000);
-	} catch (SocketException se) {
-	   se.printStackTrace();
-	   System.exit(1);
-	} 
+	public elevator1(int numFloors){
+		try {
+		
+		   sendSocket = new DatagramSocket();
+		
+		   // Construct a datagram socket and bind it to port 5000 
+		   // on the local host machine. This socket will be used to
+		   // receive UDP Datagram packets.
+		   receiveSocket = new DatagramSocket(69);
+		   
+		   // to test socket timeout (2 seconds)
+		   //receiveSocket.setSoTimeout(2000);
+		} catch (SocketException se) {
+		   se.printStackTrace();
+		   System.exit(1);
+		} 
+		
+		count = numFloors;
+		
+		// initialize all floor lights to off
+		this.floorLights = new boolean[numFloors];
+		for(int i = 0; i < numFloors; ++i){
+			floorLights[i] = false;
+		}
 	}
 	
 //	public void receiveAndEcho() throws IOException, ClassNotFoundException, InterruptedException
@@ -171,15 +203,15 @@ public class elevator1 {
 			switch(MotorState.convertFromByte(p.getStatus()[0])){
 				case DOWN:
 					System.out.println("going down" );
-					Motor(1);		//motor down and send message
+					Motor(MotorState.DOWN);		//motor down and send message
 					break;
 				case OFF:
 					System.out.println("motor off" );
-					Motor(2);		//motor off
+					Motor(MotorState.OFF);		//motor off
 					break;
 				case UP:
 					System.out.println("going up" );
-					Motor(3);		//motor up and send message
+					Motor(MotorState.UP);		//motor up and send message
 					break;
 				default:
 					System.out.println("Invalid type");
@@ -204,6 +236,9 @@ public class elevator1 {
 		} else if (p.getSubSystem() == SubsystemType.LOCATION){
 			System.out.println("SUBSYSTEM IS LOCATION  " );
 			sendLocation();
+		} else if (p.getSubSystem() == SubsystemType.INPUT){
+			System.out.println("SUBSYSTEM IS INPUT");
+			setFloorLight(p);
 		}
 		
 		// Echo back the packet
@@ -211,6 +246,13 @@ public class elevator1 {
 		
 		//receiveSocket.close();
 	}
+	
+	
+	// toggle the floor light inside the elevator to on or off
+	private void setFloorLight(DataPacket p){
+		this.floorLights[(int) p.getStatus()[0]] = !this.floorLights[(int) p.getStatus()[0]];
+	}
+	
 	
 	private static DataPacket createEchoPacket(SubsystemType subSystem, byte[] status){
 		return new DataPacket(OriginType.ELEVATOR, (byte) 0, subSystem, status);
@@ -255,42 +297,47 @@ public class elevator1 {
 	}
 	
 	
-	public void Motor(MotorState command) throws IOException{
+	public void Motor(MotorState command) throws IOException, InterruptedException{
 		System.out.println("Elevator: I am at floor "+ currentFloor);
 		
 		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
 		
 		if(command == MotorState.DOWN) {
+			this.motorState = MotorState.DOWN;
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor--;	
 			sendLocation();
 		}
 		if (command == MotorState.UP){
+			this.motorState = MotorState.UP;
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor++;	
 			sendLocation();
 		}
-		System.out.println("Elevator: i am at  "+ currentFloor);
+		System.out.println("Elevator: I am at  "+ currentFloor);
 			count ++;
 		}
 		
 	}
 	
-	public void Motor(int command) throws IOException{
-		System.out.println("Elevator: I am at floor "+ currentFloor);
-		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
-		
-		if(command == 1) {
-			currentFloor--;	
-			sendLocation();
-		}
-		if (command == 3){
-			currentFloor++;	
-			sendLocation();
-		}
-		System.out.println("Elevator: i am at  "+ currentFloor);
-			count ++;
-		}
-		
-	}
+	// Depricated
+//	public void Motor(int command) throws IOException{
+//		System.out.println("Elevator: I am at floor "+ currentFloor);
+//		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
+//		
+//		if(command == 1) {
+//			currentFloor--;	
+//			sendLocation();
+//		}
+//		if (command == 3){
+//			currentFloor++;	
+//			sendLocation();
+//		}
+//		System.out.println("Elevator: i am at  "+ currentFloor);
+//			count ++;
+//		}
+//		
+//	}
 	
 	public String[] GetString(byte[] bytes) throws ClassNotFoundException, IOException
 	{

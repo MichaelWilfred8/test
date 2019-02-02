@@ -106,7 +106,8 @@ public class Elevator {
 		sendSocket.close();
 		receiveSocket.close();
 	}
-
+	
+	// Depreciated
 	public void Motor(int floor) {
 		System.out.println("Elevator: i am at  "+ currentFloor);
 		while(DesFloor != currentFloor) {
