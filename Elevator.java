@@ -99,8 +99,6 @@ public class Elevator {
 	public void receiveAndEcho(DataPacket p, DatagramPacket packet) throws IOException, ClassNotFoundException, InterruptedException {
 		while (true){
 
-
-
 			// at this stage, elevator will decode the packet
 
 			// The elevator will decode the packet
