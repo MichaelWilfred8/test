@@ -268,6 +268,7 @@ public class elevator1 {
 				setFloorLight(p);
 			}
 			
+			System.out.println("\n\n");
 			// Echo back the packet
 			this.sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
 			
