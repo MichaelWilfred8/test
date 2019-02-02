@@ -5,6 +5,8 @@ import java.net.SocketException;
 import java.util.Arrays;
 
 public class FloorHandler implements Runnable {
+	
+	private static FloorHandler instance = null;
 
 	Floor[] floors;
 	Scheduler scheduler;
@@ -15,21 +17,7 @@ public class FloorHandler implements Runnable {
 	private static final int DIRECTION_BYTE = 4;
 	private static final int FLOOR_NUM_BYTE = 3;
 	
-	FloorHandler(Scheduler scheduler){
-		this.scheduler = scheduler;
-		floors = new Floor[scheduler.getTopFloor()];
-		for(int i=0;i<scheduler.getTopFloor();i++) {
-			floors[i] = new Floor(scheduler, i+1);
-		}
-
-		try {
-			receiveSocket = new DatagramSocket(32);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	FloorHandler(int numFloors){
+	private FloorHandler(int numFloors){
 		floors = new Floor[numFloors];
 		for(int i=0;i<numFloors;i++) {
 			//floors[i] = new Floor(scheduler, i+1);
@@ -42,6 +30,14 @@ public class FloorHandler implements Runnable {
 			e.printStackTrace();
 		}
 	}
+	
+	// static method to create instance of Singleton class 
+    public static FloorHandler getHandler(int numFloors){ 
+        if (instance == null) 
+            instance = new FloorHandler(numFloors); 
+  
+        return instance; 
+    }
 
 	/**
 	 * @return All Floors
@@ -104,7 +100,7 @@ public class FloorHandler implements Runnable {
 	}
 	
 	public static void main(String args[]){
-		FloorHandler fh = new FloorHandler(10);
+		FloorHandler fh = FloorHandler.getHandler(10);
 		
 		fh.run();
 	}

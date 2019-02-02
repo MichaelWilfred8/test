@@ -5,6 +5,7 @@
 // 3. send a packet back contains [OK/fail, DestinationFloorNum]
 // 4. run the motor logic 
 // 5. once currentFloor = DestinationFloor, send a [OK/fail] packet
+//DEPRECATED
 
 import java.io.*;
 import java.net.*;

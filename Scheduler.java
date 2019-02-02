@@ -34,8 +34,7 @@ public class Scheduler {
 
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
-
-			//floorHandler.run();
+			// floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets
 			sendRecieveSocket = new DatagramSocket();
@@ -549,11 +548,10 @@ public class Scheduler {
 		Scheduler s = new Scheduler();
 		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
 		
-		/*
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
-		System.out.println(p.toString());
-		s.sendRequest(p, OriginType.ELEVATOR, (byte) 0);
-		*/
+		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
+		
+		//System.out.println(p.toString());
+		//s.sendRequest(p, OriginType.ELEVATOR, (byte) 0);
 		
 		s.moveUpOneFloor();
 

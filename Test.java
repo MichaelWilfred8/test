@@ -9,22 +9,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Test{
-	Scheduler scheduler;//Scheduler of 
+	FloorHandler handler;//Scheduler of 
 
 	Test(){
-		try {
-			scheduler = new Scheduler();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}//instantiate Scheduler
+		
+		handler = FloorHandler.getHandler(10);
 
 	}
 
 	public void runTest() {
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
-		Floor [] floors = scheduler.floorHandler.getFloors();
+		Floor [] floors = handler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
 			for (int j=0;j<floors.length;j++) {
 				//System.out.println(Arrays.toString(testLines[i]));
@@ -102,6 +98,5 @@ public class Test{
 	public static void main(String[] args) {
 		Test t = new Test();
 		t.runTest();
-
 	}
 }
