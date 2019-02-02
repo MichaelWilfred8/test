@@ -177,10 +177,10 @@ public class Floor {
 		byte[] message = requestElevator(request);
 		byte[] destination = destinationRequest(request);
 
-		if(!floorLamps[message[17]].getState()) {//if the lamp indicating the direction the elevator travelling is not yet on
-			floorLamps[message[17]].toggle();//switch it on
-			//System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[message[17]].getDirection().toString() + " lamp on.");
-			//System.out.println("Floor lamp facing " + floorLamps[message[17]].getDirection().toString() + " is now " + floorLamps[message[17]].getStateString());	
+		if(!floorButtons[message[17]].getState()) {//if the lamp indicating the direction the elevator travelling is not yet on
+			floorButtons[message[17]].toggle();//switch it on
+			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message[17]].getDirection().toString() + " button on.");
+			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message[17]].getDirection().toString() + " is now " + floorButtons[message[17]].getStateString());	
 		}
 
 		if(!requested) {//if no request has been made for this floor
@@ -192,10 +192,25 @@ public class Floor {
 		}
 	}
 
+	/**
+	 * @param lampTrigger: toggles the correct button and lamp
+	 */
 	public void elevatorArrived(byte lampTrigger) {
+
 		floorLamps[lampTrigger].toggle();
-		//System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[message[17]].getDirection().toString() + " lamp off.");
-		//System.out.println("Floor lamp facing " + floorLamps[message[17]].getDirection().toString() + " is now " + floorLamps[message[17]].getStateString());
+		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
+		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
+		
+		floorButtons[lampTrigger].toggle();
+		System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[lampTrigger].getDirection().toString() + " button off.");
+		System.out.println("Floor lamp facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
+
+		purgeRequests();
+		
+		floorLamps[lampTrigger].toggle();
+		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp off.");
+		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
+		
 	}
 
 	/**
