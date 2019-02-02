@@ -81,135 +81,7 @@ public class Scheduler {
 	public int getSchedulerSocket() {
 		return receiveSocket.getPort();
 	}
-
-	public void receiveAndForward(){
-		while(true){ // Block until a datagram packet is received from receiveSocket.
-			// Construct a DatagramPacket for receiving packets up
-			// to 50 bytes long (the length of the byte array).
-			byte data[] = new byte[ARRAY_LEN];
-			receivePacket = new DatagramPacket(data, data.length);
-
-			System.out.println("Intermediate Host: Waiting for Packet.\n");
-
-			try {
-				System.out.println("Waiting..."); // so we know we're waiting
-				receiveSocket.receive(receivePacket);
-			} catch (IOException e) {
-				System.out.print("IO Exception: likely:");
-				System.out.println("Receive Socket Timed Out.\n" + e);
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			// Process the received datagram.
-			System.out.println("Intermediate Host: Packet received:");
-			System.out.println("From host: " + receivePacket.getAddress());
-			System.out.println("Host port: " + receivePacket.getPort());
-			int len = receivePacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.println("Containing: " );
-
-			//Form a String from the byte array.
-			String received = new String(data,0,len);
-			System.out.println("(String) " + received);
-			System.out.println("(Bytes) " + Arrays.toString(data) + "\n");
-
-
-			int clientPort = receivePacket.getPort();//stores client port #
-
-			// Slow things down (wait 1 second)
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e ) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			// Create a new datagram packet containing the string received from the client.
-			sendPacket = new DatagramPacket(data, receivePacket.getLength(), receivePacket.getAddress(), 69);
-
-			//Print outgoing packet
-			System.out.println( "Intermediate Host: Sending packet:");
-			System.out.println("To host: " + sendPacket.getAddress());
-			System.out.println("Destination host port: " + sendPacket.getPort());
-			len = sendPacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.println("Containing: ");
-			System.out.println("(String) " + new String(sendPacket.getData(),0,len));
-			System.out.println("(Bytes) " + Arrays.toString(sendPacket.getData()) + "\n");
-
-			try {// Send the datagram packet to the client via the send socket.
-				sendRecieveSocket.send(sendPacket);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			System.out.println("Intermediate Host: packet sent\n");
-
-			// Block until a datagram packet is received from receiveSocket.
-			try {
-				System.out.println("Waiting..."); // so we know we're waiting
-				receiveSocket.receive(receivePacket);
-			} catch (IOException e) {
-				System.out.print("IO Exception: likely:");
-				System.out.println("Receive Socket Timed Out.\n" + e);
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			// Process the received datagram.
-			System.out.println("Intermediate Host: Packet received:");
-			System.out.println("From host: " + receivePacket.getAddress());
-			System.out.println("Host port: " + receivePacket.getPort());
-			len = receivePacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.println("Containing: " );
-
-			//Form a String from the byte array.
-			received = new String(data,0,len);
-			System.out.println("(String)" + received);
-			System.out.println("(bytes)" + Arrays.toString(data) + "\n");
-
-
-			// Create a new datagram packet containing the string received from the server.
-			sendPacket = new DatagramPacket(data, receivePacket.getLength(),
-					receivePacket.getAddress(), clientPort);
-
-			DatagramSocket sendSocket = null;//instantiate new send socket
-			try {
-				sendSocket = new DatagramSocket();
-			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.exit(1);
-			};
-
-			if (sendSocket == null) break;
-
-			//Print outgoing packet
-			System.out.println( "Intermediate Host: Sending packet:");
-			System.out.println("To host: " + sendPacket.getAddress());
-			System.out.println("Destination host port: " + sendPacket.getPort());
-			len = sendPacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.println("Containing: ");
-			System.out.println("(String)" + new String(sendPacket.getData(),0,len));
-			System.out.println("(bytes)" + Arrays.toString(sendPacket.getData()) + "\n");
-
-			// Send the datagram packet to the client via the send socket.
-			try {
-				sendSocket.send(sendPacket);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
-		// We're finished, so close the sockets.
-		sendRecieveSocket.close();
-		receiveSocket.close();
-
-	}
+	
 
 	/**
 	 * Determine the next state the motor must be in
@@ -376,7 +248,40 @@ public class Scheduler {
 
 		return new DataPacket(receivePacket.getData());
 	}
-
+	
+	
+	/**
+	 * Receive a request from another subsystem and add it to the queue of requests
+	 *
+	 * 
+	 */
+//	private void receiveRequest(){
+//		byte data[] = new byte[ARRAY_LEN];
+//		receivePacket = new DatagramPacket(data, data.length);
+//
+//		System.out.println("Scheduler: Waiting for Packet.\n");
+//
+//		// Wait to receive a DatagramPacket
+//		try {
+//			System.out.println("Waiting..."); // so we know we're waiting
+//			receiveSocket.receive(receivePacket);
+//		} catch (IOException e) {
+//			System.out.print("IO Exception: likely:");
+//			System.out.println("Receive Socket Timed Out.\n" + e);
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
+//
+//		printDatagramPacket(receivePacket, "received");
+//		
+//		DataPacket p = new DataPacket(receivePacket.getData());
+//		
+//		if (p.getSubSystem() == SubsystemType.REQUEST){
+//			this.requestBuffer.add(new ElevatorInputPacket(p.getStatus()));
+//		}
+//		
+//		return new DataPacket(receivePacket.getData());
+//	}
 
 	/**
 	 * Send a request from the scheduler to the appropriate subsystem
@@ -441,7 +346,8 @@ public class Scheduler {
 		}
 	}
 
-
+	
+	
 	/**
 	 * Algorithm for stopping the elevator if it is at the next destination floor
 	 */
@@ -449,7 +355,7 @@ public class Scheduler {
 
 		// Tell elevator to stop.
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
-
+		
 		try{
 			this.requestEchoed(p, OriginType.ELEVATOR, 1);
 		} catch (IOException e){
@@ -532,8 +438,64 @@ public class Scheduler {
 			}
 		}
 	}
+	
+	
+	/**
+	 * Send a request to the elevator and check to see if it has been echoed back. Update the carStatus once the echo has been received
+	 * @param p				DataPacket to be sent
+	 * @param destination	Destination type of the packet	
+	 * @param id			ID of the destination for the packet
+	 */
+	private void sendRequestAndUpdate(DataPacket p, OriginType destination, int id){
+		try{
+			this.requestEchoed(p, destination, id);
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 
-
+		this.carStatus.update(p); // Update the ElevatorStatus with the message
+	}
+	
+	
+	/**
+	 * Move the elevator up one floor
+	 */
+	private void moveUpOneFloor(){
+		// Set destination floor
+		this.carStatus.addFloor(2);
+		
+		// Close doors
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+		
+		// send packet
+		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+		
+		// Turn on motor up
+		p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
+		
+		// send packet
+		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+		
+		
+		// Wait to see if elevator is at destination floor
+		p = this.receiveRequest();
+		
+		if ((p.getSubSystem() == SubsystemType.LOCATION) && ((int) p.getStatus()[0] == this.carStatus.getNextDestination())){
+			// Turn off motor up
+			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
+					
+			// send packet
+			this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+			
+			// Open doors
+			p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+			
+			// send packet
+			this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) 0);
+		}
+	}
+	
 	/**
 	 * Algorithm for moving the elevator towards its next destination
 	 */
@@ -587,9 +549,13 @@ public class Scheduler {
 		Scheduler s = new Scheduler();
 		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
 		
+		/*
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
 		System.out.println(p.toString());
 		s.sendRequest(p, OriginType.ELEVATOR, (byte) 0);
+		*/
+		
+		s.moveUpOneFloor();
 
 	}
 

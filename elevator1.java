@@ -41,7 +41,7 @@ public class elevator1 {
 	int DesFloor;
 	boolean door = false;
 	int count;				// number of floors in the elevator
-	boolean[] floorLights;
+	boolean[] floorLights;	// Array containing the status of the floor lights in each elevator
 	
 	MotorState motorState;
 	
@@ -92,6 +92,8 @@ public class elevator1 {
 		for(int i = 0; i < numFloors; ++i){
 			floorLights[i] = false;
 		}
+		
+		this.currentFloor = 1;
 	}
 	
 //	public void receiveAndEcho() throws IOException, ClassNotFoundException, InterruptedException
@@ -168,83 +170,85 @@ public class elevator1 {
 	
 	public void receiveAndEcho() throws IOException, ClassNotFoundException, InterruptedException
 	{
-	
-		//receive the packet
-		byte data[] = new byte[100];
-		
-		receivePacket = new DatagramPacket(data, data.length);
-		System.out.println("Elevator: Waiting for Command.\n");
-		
-		try {        
-		   System.out.println("Waiting..."); // so we know we're waiting
-		   receiveSocket.receive(receivePacket);
-		} catch (IOException e) {
-		   System.out.print("IO Exception: likely:");
-		   System.out.println("Receive Socket Timed Out.\n" + e);
-		   e.printStackTrace();
-		   System.exit(1);
+		while (true){
+			//receive the packet
+			byte data[] = new byte[100];
+			
+			receivePacket = new DatagramPacket(data, data.length);
+			System.out.println("Elevator: Waiting for Command.\n");
+			
+			try {        
+			   System.out.println("Waiting..."); // so we know we're waiting
+			   receiveSocket.receive(receivePacket);
+			} catch (IOException e) {
+			   System.out.print("IO Exception: likely:");
+			   System.out.println("Receive Socket Timed Out.\n" + e);
+			   e.printStackTrace();
+			   System.exit(1);
+			}
+			
+			// Convert DatagramPacket to DataPacket
+			DataPacket p = new DataPacket(receivePacket.getData());
+			
+			System.out.println("Packet is " + p.toString());
+			
+			System.out.println("SUBSYSTEM IS   " + p.getSubSystem());
+			System.out.println("STATE IS   " + Arrays.toString(p.getStatus()));
+			
+			// at this stage, elevator will decode the packet 
+			
+			// The elevator will decode the packet
+			if(p.getSubSystem() == SubsystemType.MOTOR) {
+				//case of motor
+				System.out.println("SUBSYSTEM IS MOTOR  " );
+				
+				switch(MotorState.convertFromByte(p.getStatus()[0])){
+					case DOWN:
+						System.out.println("going down" );
+						Motor(MotorState.DOWN);		//motor down and send message
+						break;
+					case OFF:
+						System.out.println("motor off" );
+						Motor(MotorState.OFF);		//motor off
+						break;
+					case UP:
+						System.out.println("going up" );
+						Motor(MotorState.UP);		//motor up and send message
+						break;
+					default:
+						System.out.println("Invalid type");
+						break;
+				}
+			} else if (p.getSubSystem() == SubsystemType.DOOR) {
+				System.out.println("SUBSYSTEM IS DOOR  " );
+				
+				switch(DoorState.convertFromByte(p.getStatus()[0])){
+					case OPEN:
+						door = true;		//door open and send message
+						System.out.println("door opened  " );
+						break;
+					case CLOSED:
+						door = false;		//door closed and send message
+						System.out.println("door closed " );
+						break;
+					default:
+						System.out.println("Invalid State");
+						break;
+				}
+			} else if (p.getSubSystem() == SubsystemType.LOCATION){
+				System.out.println("SUBSYSTEM IS LOCATION  " );
+				sendLocation();
+			} else if (p.getSubSystem() == SubsystemType.INPUT){
+				System.out.println("SUBSYSTEM IS INPUT");
+				setFloorLight(p);
+			}
+			
+			// Echo back the packet
+			this.sendPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
+			
+			//receiveSocket.close();
 		}
 		
-		// Convert DatagramPacket to DataPacket
-		DataPacket p = new DataPacket(receivePacket.getData());
-		
-		System.out.println("Packet is " + p.toString());
-		
-		System.out.println("SUBSYSTEM IS   " + p.getSubSystem());
-		System.out.println("STATE IS   " + Arrays.toString(p.getStatus()));
-		
-		// at this stage, elevator will decode the packet 
-		
-		// The elevator will decode the packet
-		if(p.getSubSystem() == SubsystemType.MOTOR) {
-			//case of motor
-			System.out.println("SUBSYSTEM IS MOTOR  " );
-			
-			switch(MotorState.convertFromByte(p.getStatus()[0])){
-				case DOWN:
-					System.out.println("going down" );
-					Motor(MotorState.DOWN);		//motor down and send message
-					break;
-				case OFF:
-					System.out.println("motor off" );
-					Motor(MotorState.OFF);		//motor off
-					break;
-				case UP:
-					System.out.println("going up" );
-					Motor(MotorState.UP);		//motor up and send message
-					break;
-				default:
-					System.out.println("Invalid type");
-					break;
-			}
-		} else if (p.getSubSystem() == SubsystemType.DOOR) {
-			System.out.println("SUBSYSTEM IS DOOR  " );
-			
-			switch(DoorState.convertFromByte(p.getStatus()[0])){
-				case OPEN:
-					door = true;		//door open and send message
-					System.out.println("door opened  " );
-					break;
-				case CLOSED:
-					door = false;		//door closed and send message
-					System.out.println("door closed " );
-					break;
-				default:
-					System.out.println("Invalid State");
-					break;
-			}
-		} else if (p.getSubSystem() == SubsystemType.LOCATION){
-			System.out.println("SUBSYSTEM IS LOCATION  " );
-			sendLocation();
-		} else if (p.getSubSystem() == SubsystemType.INPUT){
-			System.out.println("SUBSYSTEM IS INPUT");
-			setFloorLight(p);
-		}
-		
-		// Echo back the packet
-		this.sendPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), receivePacket.getSocketAddress());
-		
-		//receiveSocket.close();
 	}
 	
 	
@@ -300,24 +304,37 @@ public class elevator1 {
 	public void Motor(MotorState command) throws IOException, InterruptedException{
 		System.out.println("Elevator: I am at floor "+ currentFloor);
 		
-		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
+//		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
+//			if(command == MotorState.DOWN) {
+//				this.motorState = MotorState.DOWN;
+//				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+//				currentFloor--;	
+//				sendLocation();
+//			} else if (command == MotorState.UP){
+//				this.motorState = MotorState.UP;
+//				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+//				currentFloor++;	
+//				sendLocation();
+//			}
+//			
+//			System.out.println("Elevator: I am at  "+ currentFloor);
+//			count ++;
+//		}
 		
 		if(command == MotorState.DOWN) {
 			this.motorState = MotorState.DOWN;
-			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor--;	
 			sendLocation();
-		}
-		if (command == MotorState.UP){
+		} else if (command == MotorState.UP){
 			this.motorState = MotorState.UP;
-			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor++;	
 			sendLocation();
 		}
-		System.out.println("Elevator: I am at  "+ currentFloor);
-			count ++;
-		}
 		
+		System.out.println("Elevator: I am at  "+ currentFloor);
+		count ++;
 	}
 	
 	// Depricated
@@ -366,7 +383,7 @@ public class elevator1 {
 	
 	public static void main( String args[] ) throws IOException, ClassNotFoundException, InterruptedException {
 		while(true) {
-			elevator1 c = new elevator1();
+			elevator1 c = new elevator1(10);
 			c.receiveAndEcho();
 		}
 	}

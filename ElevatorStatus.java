@@ -340,15 +340,18 @@ public class ElevatorStatus {
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
+				System.out.println("motor was updated to " + this.getMotorState());
 				break;
 			case DOOR:	// Door state is to be updated
 				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
+				System.out.println("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
 				//TODO: handle updates from elevator about floor lights
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
+				System.out.println("position was updated to " + this.getPosition());
 				break;
 			default:
 				break;
