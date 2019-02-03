@@ -30,3 +30,6 @@
 /bin/
 /NewScheduler.class
 /ElevatorHandler.class
+/Floor.class
+/FloorButton.class
+/Test.class
