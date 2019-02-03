@@ -7,7 +7,12 @@ import java.util.concurrent.TimeUnit;
 import Enums.*;
 
 /**
- * @author craig
+ * 
+ * Scheduler class. Holds information about the state of 
+ * each elevator and processes requests. Verifies that each subsystem 
+ * echoes back the correct request	
+ * 
+ * @author Craig Worthington
  *
  */
 public class Scheduler {
