@@ -50,8 +50,8 @@ public class FloorHandler implements Runnable {
 	 */
 	private void listen(){
 		boolean notDone = true;
-		Test t = new Test();
-		t.runTest();
+		//Test t = new Test();
+		//t.runTest();
 		while(notDone) {
 			// Construct a DatagramPacket for receiving packets up 
 			// to 100 bytes long (the length of the byte array).
@@ -71,7 +71,7 @@ public class FloorHandler implements Runnable {
 
 			// Process the received datagram.
 			System.out.println("FloorHandler: Packet received:");
-			System.out.println("From host: " + receivePacket.getAddress());
+			System.out.println("From host: " + receivePacket.getAddress()); 
 			System.out.println("Host port: " + receivePacket.getPort());
 			int len = receivePacket.getLength();
 			System.out.println("Length: " + len);

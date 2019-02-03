@@ -1,8 +1,6 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import Enums.Direction;
-
 import java.nio.ByteBuffer;
 
 import Enums.*;
@@ -129,16 +127,6 @@ public class ElevatorInputPacket {
 		ByteBuffer buf = ByteBuffer.allocate(BYTE_ARRAY_LENGTH);
 
 		buf.put(this.timeStamp.getBytes()); // add timestamp object as bytes to the byte buffer
-
-		// TODO: Use this code below to add bytes to the timestamp to reduce coupling?
-		/*
-		buf.putInt(this.timeStamp.getHours()); 			// add hour from time stamp as bytes to the byte buffer
-		buf.putInt(this.timeStamp.getMinutes());		// add minute from time stamp as bytes to the byte buffer
-		buf.putInt(this.timeStamp.getSeconds());		// add second from time stamp as bytes to the byte buffer
-		buf.putInt(this.timeStamp.getMilliseconds());	// add nanosecond from time stamp as bytes to the byte buffer
-		 */
-
-
 		buf.putInt(this.floor);	// add floor number to byte buffer
 		buf.putInt(this.floorButton.ordinal()); // add floor button to byte buffer
 		buf.putInt(this.carButton);		// add car button to byte buffer

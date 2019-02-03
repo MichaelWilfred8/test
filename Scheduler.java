@@ -18,7 +18,7 @@ import Enums.*;
 public class Scheduler {
 
 	DatagramPacket sendPacket;
-	static DatagramPacket receivePacket;
+	DatagramPacket receivePacket;
 	DatagramSocket sendReceiveSocket, receiveSocket;
 
 	private ElevatorStatus carStatus;	// Information about the status of an elevator car
@@ -27,9 +27,6 @@ public class Scheduler {
 	private static final int MIN_FLOOR = 1;
 	private static final int ARRAY_LEN = 100;
 	private static final int DELAY_MILLIS = 250;	// Delay 0.25 of a second
-
-	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
-	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
 
 	private Queue<ElevatorInputPacket> requestBuffer;	// Buffer Queue for all requests that have not been handled by the scheduler yet
 
@@ -55,9 +52,7 @@ public class Scheduler {
 			System.exit(1);
 		}
 
-		this.upRequests = new ArrayList<Integer>();
-		this.downRequests = new ArrayList<Integer>();
-		this.requestBuffer = new ConcurrentLinkedQueue();
+		this.requestBuffer = new ConcurrentLinkedQueue<ElevatorInputPacket>();
 
 		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 69), 1);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
@@ -79,80 +74,7 @@ public class Scheduler {
 	public int getSchedulerSocket() {
 		return receiveSocket.getPort();
 	}
-
-
-	/**
-	 * Determine the next state the motor must be in
-	 *
-	 * @return	MotorState the state that the motor has to be in
-	 */
-	private MotorState findNextMotorState(){
-		if (this.carStatus.getNextDestination() == this.carStatus.getPosition()){
-			return MotorState.OFF;
-		} else if (this.carStatus.getNextDestination() > this.carStatus.getPosition()){
-			return MotorState.UP;
-		} else if (this.carStatus.getNextDestination() < this.carStatus.getPosition()){
-			return MotorState.OFF;
-		} else {
-			return MotorState.OFF;
-		}
-	}
-
-	/*
-	 * Data that can be sent to/form elevator:
-	 * Motor, Door, CarLamp, Location, request???
-	 *
-	 * Data that can be sent to/from floor
-	 * FloorLamp, request?
-	 *
-	 */
 	
-	
-	// TODO: determine if this method can be removed
-	/**
-	 * Process incoming requests from other subsystems
-	 *
-	 * @param b 	DataPacket from the incoming request
-	 */
-	private void parseIncomingRequest(DataPacket p){
-		// If the Origin of the message was from the elevator
-		if (p.getOrigin() == OriginType.ELEVATOR){
-			switch(p.getSubSystem()){
-			case MOTOR:
-				this.carStatus.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));	// set the motor state in the carStatus class to the motor state sent from the elevator
-				break;
-			case DOOR:
-				this.carStatus.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));	// set the door state in the carStatus class to the motor state sent from the elevator
-				break;
-			case CARLAMP:
-				this.carStatus.toggleFloorButtonLight((int) p.getStatus()[0]);	// Toggle the status of the floor lamp in the elevator
-				break;
-			case LOCATION:
-				this.carStatus.setPosition((int) p.getStatus()[0]);	// Set the location of the elevator to the one sent by the elevator
-				break;
-			default:
-				System.out.println("INVALID CASE");
-				break;
-
-			}
-		}
-
-		// If the incoming request came from a floor subsystem
-		else if (p.getOrigin() == OriginType.FLOOR) {
-			switch(p.getSubSystem()){
-			case FLOORLAMP:
-				// TODO: handle status of floor lamp here
-				break;
-			case REQUEST:
-				// TODO: handle incoming request from floor here. Change add to offer and surround with try catch
-				this.requestBuffer.add(new ElevatorInputPacket(p.getStatus())); 	// Generate a new ElevatorInputPacket from the status byte array and add it to the request buffer
-				break;
-			default:
-				System.out.println("INVALID SUBSYSTEM");
-				break;
-			}
-		}
-	}
 
 	//TODO: fix this function to give the address of the subsystem with the specified origin and ID
 	/**
@@ -181,7 +103,7 @@ public class Scheduler {
 	}
 
 	/**
-	 * Schedule requests in the elevator queue. Assign requests to the best elevator
+	 * Schedule requests in the elevator queue. Assign requests to the best elevator. Function not yet complete
 	 */
 	private void scheduleElevator(){
 		// TODO: Consider not having this as a loop as it may delay the functioning of the rest of the elevator
@@ -215,7 +137,6 @@ public class Scheduler {
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket
 		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
@@ -253,40 +174,6 @@ public class Scheduler {
 		}
 		return new DataPacket(receivePacket.getData());
 	}
-
-
-	/**
-	 * Receive a request from another subsystem and add it to the queue of requests
-	 *
-	 * 
-	 */
-	//	private void receiveRequest(){
-	//		byte data[] = new byte[ARRAY_LEN];
-	//		receivePacket = new DatagramPacket(data, data.length);
-	//
-	//		System.out.println("Scheduler: Waiting for Packet.\n");
-	//
-	//		// Wait to receive a DatagramPacket
-	//		try {
-	//			System.out.println("Waiting..."); // so we know we're waiting
-	//			receiveSocket.receive(receivePacket);
-	//		} catch (IOException e) {
-	//			System.out.print("IO Exception: likely:");
-	//			System.out.println("Receive Socket Timed Out.\n" + e);
-	//			e.printStackTrace();
-	//			System.exit(1);
-	//		}
-	//
-	//		printDatagramPacket(receivePacket, "received");
-	//		
-	//		DataPacket p = new DataPacket(receivePacket.getData());
-	//		
-	//		if (p.getSubSystem() == SubsystemType.REQUEST){
-	//			this.requestBuffer.add(new ElevatorInputPacket(p.getStatus()));
-	//		}
-	//		
-	//		return new DataPacket(receivePacket.getData());
-	//	}
 
 	/**
 	 * Send a request through the sendReceiveSocket from the scheduler to the appropriate subsystem
@@ -335,7 +222,10 @@ public class Scheduler {
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 		
 		// Turn off lamp
-		// TODO: add function to turn on lamp
+		// Create Packet to turn off Up Floor Lamp
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.getPosition(), SubsystemType.FLOORLAMP, new byte[] {(byte) this.carStatus.getPosition(), this.carStatus.getTripDir().getByte()});
+		// Send packet
+		this.sendRequest(p, OriginType.FLOOR, this.carStatus.getPosition());
 		
 		// Find direction to send elevator in
 		// Create DataPacket to request location from elevator
@@ -449,131 +339,7 @@ public class Scheduler {
 			throw new IOException("Request was not as expected");
 		}
 	}
-
-
-	/**
-	 * Algorithm for stopping the elevator if it is at the next destination floor
-	 */
-	private void stopAtFloor(){
-
-		// Tell elevator to stop.
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()});
-
-		try{
-			this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-		} catch (IOException e){
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-
-		// TODO: Tell floor to trigger direction lamp
-
-
-		// Tell elevator to open doors
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
-
-		try{
-			this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-		} catch (IOException e){
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-
-		this.receiveRequest(); // Try to receive a request from the floor
-
-		// Tell elevator to close doors
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
-
-		try{
-			this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-		} catch (IOException e){
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-
-		// Check if the elevator has a new destination
-		if (this.carStatus.getNextDestination() != this.carStatus.getPosition()){
-			// Tell elevator to close doors
-			p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
-
-			try{
-				this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-			} catch (IOException e){
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-			if (this.carStatus.getTripDir() == Direction.UP){
-				p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
-
-				try{
-					this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-				} catch (IOException e){
-					e.printStackTrace();
-					System.exit(1);
-				}
-
-				this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-			} else {
-				p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.DOWN.getByte()});
-
-				try{
-					this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-				} catch (IOException e){
-					e.printStackTrace();
-					System.exit(1);
-				}
-
-				this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-			}
-		}
-	}
-
-	/**
-	 * Algorithm for moving the elevator towards its next destination
-	 */
-	private void continueOneFloor(){
-		if(this.carStatus.getNextDestination() > this.carStatus.getPosition()){
-			DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
-
-			try{
-				this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-			} catch (IOException e){
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			this.carStatus.update(p); // Update the ElevatorStatus with the message
-
-		} else if (this.carStatus.getNextDestination() < this.carStatus.getPosition()){
-			DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.DOWN.getByte()});
-
-			try{
-				this.requestEchoed(p, OriginType.ELEVATOR, this.carStatus.id);
-			} catch (IOException e){
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			this.carStatus.update(p); // Update the ElevatorStatus with the message
-		} else if (this.carStatus.getNextDestination() == this.carStatus.getPosition()){
-			this.stopAtFloor();
-		}
-	}
-
+	
 
 	/**
 	 * Send a request to the elevator and check to see if it has been echoed back. Update the carStatus once the echo has been received
@@ -601,8 +367,14 @@ public class Scheduler {
 		// Set destination floor
 		this.carStatus.addFloor(2);
 		
+		
+		// Create Packet to turn off Up Floor Lamp
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.getPosition(), SubsystemType.FLOORLAMP, new byte[] {(byte) this.carStatus.getPosition(), this.carStatus.getTripDir().getByte()});
+		// Send packet
+		this.sendRequest(p, OriginType.FLOOR, this.carStatus.getPosition());
+		
 		// Create packet to tell elevator to Close doors
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 
@@ -611,7 +383,8 @@ public class Scheduler {
 
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-
+		
+		
 
 		// Wait to see if elevator is at destination floor
 		// Request location from elevator
@@ -643,31 +416,36 @@ public class Scheduler {
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 
-		//Turn on the lamp
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
-
-		// send packet
-		this.sendRequestAndUpdate(p, OriginType.FLOOR, (byte) this.carStatus.getPosition());
+		// Create Packet to turn off Up Floor Lamp
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.getPosition(), SubsystemType.FLOORLAMP, new byte[] {(byte) this.carStatus.getPosition(), this.carStatus.getTripDir().getByte()});
+		// Send packet
+		this.sendRequest(p, OriginType.FLOOR, this.carStatus.getPosition());
 
 		// Open doors
-
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 	}
 
-
+	
+	
+	/**
+	 * The Sequence of controlling the elevator. Function not yet complete
+	 * 
+	 * @throws InterruptedException
+	 */
 	private void elevatorControlLoop() throws InterruptedException{
-			// Get incoming request from floor
-			
-			// Start elevator
-			this.startElevator();
-			
-			// Continue elevator towards destination floor
-			this.continueMovingElevator();
-			
-			// Stop elevator at floor
-			this.stopElevator();
+		// Get incoming request from floor
+		this.scheduleElevator();
+	
+		// Start elevator
+		this.startElevator();
+		
+		// Continue elevator towards destination floor
+		this.continueMovingElevator();
+		
+		// Stop elevator at floor
+		this.stopElevator();
 	}
 
 
@@ -680,14 +458,14 @@ public class Scheduler {
 		//System.out.println(p.toString());
 		//s.sendRequest(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 		
-		s.carStatus.addFloor(4);
-		System.out.println("Next destination = " + s.carStatus.getNextDestination());
+//		s.carStatus.addFloor(4);
+//		System.out.println("Next destination = " + s.carStatus.getNextDestination());
+//		
+//		s.startElevator();
+//		s.continueMovingElevator();
+//		s.stopElevator();
 		
-		s.startElevator();
-		s.continueMovingElevator();
-		s.stopElevator();
-		
-		// s.moveUpOneFloor();
+		s.moveUpOneFloor();
 	}
 
 }
