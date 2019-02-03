@@ -1,3 +1,19 @@
+
+
+
+How to run the project:
+To run the project, please run the classes in the following order:
+FloorHandler.java
+ElevatorHandler.java
+Scheduler.java
+
+This will demonstrate how the scheduler is able to move the elevator up one floor. Currently, the scheduler is not complete so it cannot take inputs from the csv file and use them to schedule the elevator. The Test.java file will accept inputs from the csv and send them to the floorhandler but scheduler cannot currently handle those inputs. 
+
+Note: if there is an error saying that the java class version is too new, then make sure to compile the code before running it. 
+
+
+=============================================================================
+
 Files in Project:
 
 Button.java: A button class used to represent a button and its state. 
@@ -40,3 +56,16 @@ OriginType.java: an Enumerated type used in the DataPacket class that represents
 
 SubsystemType.java: an Enumerated type used in the DataPacket class that represents the element within the subsystem that the message is supposed to address (i.e. the motor element in elevator, or the FloorDirectionLamp on the floor). Also holds some methods for converting to and from byte values
 
+====================================================================
+
+Breakdown of responsibilities:
+
+Hongbo Pang: Elevator.java
+
+Rahul Patel: Button.java, Direction.java, ElevatorHandler.java, Floor.java, FloorButton.java, FloorHandler.java, FloorLamp.java, UML Class Diagram
+
+Michael Wilfred: Test.java
+
+Craig Worthington: DataPacket.java, DoorState.java, ElevatorInputPacket.java, ElevatorStatus.java, FloorLampState.java, MotorState.java, OriginType.java, Scheduler.java, SubsystemType.java, TimeStamp.java, README.txt
+
+Haohan Zhang:
