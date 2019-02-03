@@ -1,5 +1,4 @@
 Files in Project:
-
 Button.java: A button class used to represent a button and its state. 
 
 DataPacket.java: A DataPacket format used to communicate between each subclass. Holds the origin subsystem, its ID, the element within the subsystem to be addressed and the staus of that element. Also has methods to convert the information to and from bytes.
@@ -8,9 +7,7 @@ Elevator.java: The elevator class. Used to contol each element in the elevator
 
 ElevatorHandler.java: The handler class for the elevator subsystem. Creates each instance of the elevator and handles incoming requests.
 
-
 ElevatorInputPacket.java: A class that holds the format for the elevator input as it comes from the CSV file. Holds the timestamp, floor where request originated, the state of the floor buttons, and the button that was pressed within the car.
-
 
 ElevatorStatus.java: A class that holds information about each elevator for the scheduler. It holds the state of each elevator subsystem as well as a set of floors for the elevator to visit. 
 
