@@ -15,10 +15,6 @@ public class Floor {
 	private byte[][] requests;//list of requests
 	private int requestInsert = 0;//where to insert in list of requests
 	private boolean requested;//if an elevator has been requested for this floor
-	
-	
-	
-
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
 	DatagramSocket sendSocket;
@@ -89,10 +85,6 @@ public class Floor {
 			System.exit(1);
 		}
 		System.out.println("Sent\n");
-
-		//TODO:notice elevator arrival
-		//TODO:toggle direction lamp
-		//TODO:remove direction lamp when it leaves
 	}
 
 	/**

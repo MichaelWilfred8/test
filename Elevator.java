@@ -70,7 +70,7 @@ public class Elevator {
 		}
 
 		this.currentFloor = 1;
-		
+
 		this.id = id;
 	}
 
@@ -147,9 +147,9 @@ public class Elevator {
 		}
 
 		System.out.println("\n\n");
-		
-		
-		
+
+
+
 		// Echo back the packet if not from the motor or the location
 		if ((p.getSubSystem() != SubsystemType.MOTOR) && (p.getSubSystem() != SubsystemType.LOCATION)){
 			sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), packet.getSocketAddress());
