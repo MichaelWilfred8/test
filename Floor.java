@@ -184,8 +184,9 @@ public class Floor {
 	/**
 	 * @param lampTrigger: toggles the correct button and lamp
 	 */
-	public void elevatorArrived(byte lt) {
+	public void elevatorArrived(byte lt) { 
 		byte lampTrigger = (byte) (lt - 1);
+		System.out.println("lt = " + lt);
 		floorLamps[lampTrigger].toggle();
 		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
 		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
