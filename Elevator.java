@@ -91,7 +91,6 @@ public class Elevator {
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		String data = new String(p.getData(), 0, p.getLength());				// Create new string from data in DatagramPacket
 		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
@@ -264,7 +263,9 @@ public class Elevator {
 		objectInputStream.close();
 		return stringArray2;
 	}
-
+	
+	
+	// TODO: determine if this can be deleted
 	private static byte[] convertToBytes(String[] strings) throws IOException {
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		final ObjectOutputStream objectOutputStream =
@@ -320,12 +321,15 @@ public class Elevator {
 	public MotorState getMotorState() {
 		return motorState;
 	}
-
+	
+	// TODO: remove this from the function
+	/*
 	public static void main( String args[] ) throws IOException, ClassNotFoundException, InterruptedException {
 		while(true) {
 			Elevator c = new Elevator(10, 1);
 			//c.receiveAndEcho();
 		}
 	}
+	*/
 
 }
