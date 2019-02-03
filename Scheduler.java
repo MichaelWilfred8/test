@@ -439,13 +439,6 @@ public class Scheduler {
 		}
 	}
 
-<<<<<<< HEAD
-	
-	
-	
-	
-=======
-
 
 	/**
 	 * Algorithm for stopping the elevator if it is at the next destination floor
@@ -571,7 +564,6 @@ public class Scheduler {
 	}
 
 
->>>>>>> 7f6da9bb798703a987725f61f0277e4e8d610817
 	/**
 	 * Send a request to the elevator and check to see if it has been echoed back. Update the carStatus once the echo has been received
 	 * @param p				DataPacket to be sent
@@ -597,36 +589,13 @@ public class Scheduler {
 	private void moveUpOneFloor() throws InterruptedException{
 		// Set destination floor
 		this.carStatus.addFloor(2);
-<<<<<<< HEAD
 		
 		// Create packet to tell elevator to Close doors
-=======
-
-		// Close doors
->>>>>>> 7f6da9bb798703a987725f61f0277e4e8d610817
 		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-<<<<<<< HEAD
-		
-		
-		
+
 		// Create packet to tell elevator to Turn on motor up
-=======
-
-		//Turn on the lamp
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
-
-		// send packet
-		this.sendRequestAndUpdate(p, OriginType.FLOOR, (byte) this.carStatus.getPosition());
-
-
-		// wait to receive location from elevator and update car location
-		//		p = this.receiveRequest();
-		//		this.carStatus.update(p);
-
-		// Turn on motor up
->>>>>>> 7f6da9bb798703a987725f61f0277e4e8d610817
 		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
 
 		// send packet
@@ -670,13 +639,8 @@ public class Scheduler {
 		this.sendRequestAndUpdate(p, OriginType.FLOOR, (byte) this.carStatus.getPosition());
 
 		// Open doors
-<<<<<<< HEAD
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
-		
-=======
-		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()});
 
->>>>>>> 7f6da9bb798703a987725f61f0277e4e8d610817
+		p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()});
 		// send packet
 		this.sendRequestAndUpdate(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 	}
@@ -704,18 +668,12 @@ public class Scheduler {
 
 		//System.out.println(p.toString());
 		//s.sendRequest(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
-<<<<<<< HEAD
 		
 		s.carStatus.addFloor(4);
 		
 		s.startElevator();
 		s.continueMovingElevator();
 		s.stopElevator();
-=======
-
-		s.moveUpOneFloor();
->>>>>>> 7f6da9bb798703a987725f61f0277e4e8d610817
-
 	}
 
 }
