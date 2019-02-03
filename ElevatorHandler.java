@@ -20,7 +20,7 @@ public class ElevatorHandler implements Runnable{
 
 		// Construct a datagram socket and bind it to port 5000 
 		// on the local host machine. This socket will be used to
-		// receive UDP Datagram packets.
+		// receive UDP Datagram packets. 
 		try {
 			receiveSocket = new DatagramSocket(69);
 		} catch (SocketException e) {

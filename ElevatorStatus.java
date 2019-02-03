@@ -187,12 +187,13 @@ public class ElevatorStatus {
 
 
 	/**
-	 * Add a floor to the set of floors for this elevator to visit.
+	 * Add a floor to the set of floors for this elevator to visit. Also finds and sets the next destination floor
 	 *
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
 		this.floorsToVisit.add(floor);			// Add the new floor to the sorted set
+		this.nextDestination = this.getNextFloor();	// set the next destination floor
 	}
 
 

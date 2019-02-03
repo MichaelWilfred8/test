@@ -21,7 +21,7 @@ public class Scheduler {
 	private static final int MAX_FLOOR = 10;
 	private static final int MIN_FLOOR = 1;
 	private static final int ARRAY_LEN = 100;
-	private static final int DELAY_NANOS = 250000000;	// Delay 0.25 of a second
+	private static final int DELAY_MILLIS = 250;	// Delay 0.25 of a second
 
 	private ArrayList<Integer> upRequests;		// ArrayList for holding all requests from an elevator to move from its current position up
 	private ArrayList<Integer> downRequests;	// ArrayList for holding all requests from an elevator to move from its current position down
@@ -218,7 +218,7 @@ public class Scheduler {
 
 
 	/**
-	 * Receive a request from another subsystem
+	 * Receive a DataPacket request from another subsystem
 	 *
 	 * @return 	A
 	 */
@@ -240,7 +240,12 @@ public class Scheduler {
 		}
 
 		printDatagramPacket(receivePacket, "r");
-
+		DataPacket dp = new DataPacket(receivePacket.getData());
+		
+		// If the datapacket originated from an elevator
+		if (dp.getOrigin() == OriginType.ELEVATOR){
+			this.carStatus.update(dp);		// update the carStatus with this information
+		}
 		return new DataPacket(receivePacket.getData());
 	}
 
@@ -340,7 +345,7 @@ public class Scheduler {
 		// update carStatus with the position of the elevator
 		this.carStatus.update(p);
 		
-		
+		System.out.println("current position = " + this.carStatus.getPosition() + " destination = " + this.carStatus.getNextDestination());
 		// If the next destination is below this current floor, move elevator down
 		if (this.carStatus.getNextDestination() < this.carStatus.getPosition()){	// Turn on motor downwards
 			// Create packet to tell elevator to Turn on motor down
@@ -401,7 +406,8 @@ public class Scheduler {
 		if (this.carStatus.getPosition() != this.carStatus.getNextDestination()){
 			// Send a location request every quarter second until elevator gets to correct location
 			while(this.carStatus.getPosition() != this.carStatus.getNextDestination()){
-				TimeUnit.SECONDS.wait(0, DELAY_NANOS); // Delay a quarter of a second
+				Thread.sleep(DELAY_MILLIS);
+				//TimeUnit.SECONDS.wait(0, DELAY_NANOS); // Delay a quarter of a second
 				// Create a DataPacket to request location from elevator
 				p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.LOCATION, new byte[] {0x00});
 				// Send request to the elevator
@@ -670,10 +676,13 @@ public class Scheduler {
 		//s.sendRequest(p, OriginType.ELEVATOR, (byte) this.carStatus.id);
 		
 		s.carStatus.addFloor(4);
+		System.out.println("Next destination = " + s.carStatus.getNextDestination());
 		
 		s.startElevator();
 		s.continueMovingElevator();
 		s.stopElevator();
+		
+		// s.moveUpOneFloor();
 	}
 
 }
