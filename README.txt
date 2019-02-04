@@ -1,6 +1,3 @@
-
-
-
 How to run the project:
 To run the project, please run the classes in the following order:
 FloorHandler.java
@@ -54,7 +51,6 @@ OriginType.java: an Enumerated type used in the DataPacket class that represents
 SubsystemType.java: an Enumerated type used in the DataPacket class that represents the element within the subsystem that the message is supposed to address (i.e. the motor element in elevator, or the FloorDirectionLamp on the floor). Also holds some methods for converting to and from byte values
 
 ====================================================================
-
 Breakdown of responsibilities:
 
 Hongbo Pang: Elevator.java
