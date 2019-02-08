@@ -9,7 +9,6 @@ public enum SubsystemType {
 	INPUT(2),	// TODO: remove input since it is no longer used
 	REQUEST(1);
 	
-	// test coment
 	
 	private static final int MOTOR_INT = 7;
 	private static final byte MOTOR_BYTE = (byte) MOTOR_INT;

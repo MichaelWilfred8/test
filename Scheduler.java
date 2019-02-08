@@ -37,7 +37,6 @@ public class Scheduler {
 
 	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
 		try {
-			// floorHandler.run();
 			// Construct a datagram socket and bind it to any available port on the local host machine
 			// used to send and receive packets as echos
 			sendReceiveSocket = new DatagramSocket(2300);
