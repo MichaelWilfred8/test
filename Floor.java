@@ -7,7 +7,7 @@ import java.net.*;
 import java.util.Arrays;
 import Enums.Direction;
 
-public class Floor {
+public class Floor implements Runnable{
 
 	private int floorNumber;//floor number, unique id
 	private FloorButton[] floorButtons;//list of buttons on floor
@@ -15,6 +15,7 @@ public class Floor {
 	private byte[][] requests;//list of requests
 	private int requestInsert = 0;//where to insert in list of requests
 	private boolean requested;//if an elevator has been requested for this floor
+	private boolean endFloor;//ends the thread of floor
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
 	DatagramSocket sendSocket;
@@ -52,6 +53,7 @@ public class Floor {
 
 		requests = new byte[highestFloor][];//can only have as many requests as there are floors
 		requested = false;
+		endFloor = false;
 	}
 	
 	/**
@@ -233,6 +235,13 @@ public class Floor {
 	 */
 	public boolean getReqested() {
 		return requested;
+	}
+
+	@Override
+	public void run() {
+		while (!endFloor) {
+			
+		}		
 	}
 
 }
