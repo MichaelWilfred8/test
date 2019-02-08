@@ -4,9 +4,11 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Arrays;
 
-public class FloorHandler implements Runnable {
+public class FloorHandler {
 	
 	private static FloorHandler instance = null;
+	
+	private static final int MAX_FLOORS = 10;
 
 	Floor[] floors;
 	Scheduler scheduler;
@@ -16,6 +18,8 @@ public class FloorHandler implements Runnable {
 	
 	private static final int DIRECTION_BYTE = 4;
 	private static final int FLOOR_NUM_BYTE = 3;
+	
+	private boolean notDone = true;
 	
 	private FloorHandler(int numFloors){
 		floors = new Floor[numFloors];
@@ -32,9 +36,9 @@ public class FloorHandler implements Runnable {
 	}
 	
 	// static method to create instance of class 
-    public static FloorHandler getHandler(int numFloors){ 
+    public static FloorHandler getHandler(){ 
         if (instance == null) 
-            instance = new FloorHandler(numFloors); 
+            instance = new FloorHandler(MAX_FLOORS); 
         return instance; 
     }
 
@@ -44,12 +48,20 @@ public class FloorHandler implements Runnable {
 	public Floor[] getFloors() {
 		return floors;
 	}
+	
+	public void forwardRequest(String[] input) {
+		for (int i=0;i<floors.length;i++) {
+			if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
+				floors[i].newRequest(input);
+			}
+		}
+	}
 
 	/**
 	 * listen for incoming requests, listens on port 32
 	 */
 	private void listen(){
-		boolean notDone = true;
+		
 		//Test t = new Test();
 		//t.runTest();
 		while(notDone) {
@@ -91,20 +103,11 @@ public class FloorHandler implements Runnable {
 		}
 
 	}
-
-	/**
-	 * Thread run class
-	 */
-	@Override
-	public void run() {
-		listen();
-
-	}
 	
 	public static void main(String args[]){
-		FloorHandler fh = FloorHandler.getHandler(10);
+		FloorHandler fh = FloorHandler.getHandler();
 		
-		fh.run();
+		fh.listen();
 	}
 
 }

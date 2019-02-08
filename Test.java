@@ -13,7 +13,7 @@ public class Test{
 
 	Test(){
 		
-		handler = FloorHandler.getHandler(10);
+		handler = FloorHandler.getHandler();
 
 	}
 
@@ -22,18 +22,12 @@ public class Test{
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		Floor [] floors = handler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
-			for (int j=0;j<floors.length;j++) {
-				//System.out.println(Arrays.toString(testLines[i]));
-				if(Integer.parseInt(testLines[i][1])==floors[j].getFloorNumber()) {
-					floors[j].newRequest(testLines[i]);
-				}
-			}
+			handler.forwardRequest(testLines[i]);
 
 		}
-
-		//for (int i=0;i<floors.length;i++) {
-		//	floors[i].purgeRequests();
-		//} for testing
+		/*for (int i=0;i<floors.length;i++) {
+			floors[i].purgeRequests();
+		}*/
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
@@ -77,7 +71,6 @@ public class Test{
 
 	}
 
-
 	public void sendReceive(String passenger) throws IOException{
 
 		byte[] pass = passenger.getBytes();
@@ -85,12 +78,12 @@ public class Test{
 		DatagramSocket toserver;
 		toserver = new DatagramSocket();
 		InetAddress intserver = InetAddress.getByName("localhost");
-		int intserverSocket = 33;
+		int intserverSocket = 32;
 
 		// Creates a Datagram packet sending the request in bytes, with the length of the request array(beginning), to address localhost, and using port 69
 		DatagramPacket send = new DatagramPacket(pass,pass.length,intserver,intserverSocket);
 		toserver.send(send);
-		System.out.println("Sending the following to the Server: " +new String(send.getData()));
+		System.out.println("Sending the following to the Server: " + new String(send.getData()));
 		toserver.close();
 
 	}

@@ -1,6 +1,3 @@
-
-
-
 How to run the project:
 To run the project, please run the classes in the following order:
 FloorHandler.java
@@ -15,7 +12,6 @@ Note: if there is an error saying that the java class version is too new, then m
 =============================================================================
 
 Files in Project:
-
 Button.java: A button class used to represent a button and its state. 
 
 DataPacket.java: A DataPacket format used to communicate between each subclass. Holds the origin subsystem, its ID, the element within the subsystem to be addressed and the staus of that element. Also has methods to convert the information to and from bytes.
@@ -24,9 +20,7 @@ Elevator.java: The elevator class. Used to contol each element in the elevator
 
 ElevatorHandler.java: The handler class for the elevator subsystem. Creates each instance of the elevator and handles incoming requests.
 
-
 ElevatorInputPacket.java: A class that holds the format for the elevator input as it comes from the CSV file. Holds the timestamp, floor where request originated, the state of the floor buttons, and the button that was pressed within the car.
-
 
 ElevatorStatus.java: A class that holds information about each elevator for the scheduler. It holds the state of each elevator subsystem as well as a set of floors for the elevator to visit. 
 
@@ -57,7 +51,6 @@ OriginType.java: an Enumerated type used in the DataPacket class that represents
 SubsystemType.java: an Enumerated type used in the DataPacket class that represents the element within the subsystem that the message is supposed to address (i.e. the motor element in elevator, or the FloorDirectionLamp on the floor). Also holds some methods for converting to and from byte values
 
 ====================================================================
-
 Breakdown of responsibilities:
 
 Hongbo Pang: Elevator.java
