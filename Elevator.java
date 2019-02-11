@@ -24,6 +24,7 @@
 
 //author Hongbo Pang
 
+// TODO: Make threadable, add in times for executing changes (i.e. 3 seconds between floors), echo response
 
 import java.io.*;
 import java.net.*;

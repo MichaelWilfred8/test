@@ -15,6 +15,9 @@ import Enums.*;
  * @author Craig Worthington
  *
  */
+
+// TODO: rewrite completely
+
 public class Scheduler {
 
 	DatagramPacket sendPacket;

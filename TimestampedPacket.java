@@ -8,14 +8,14 @@ import java.time.Instant;
  */
 public class TimestampedPacket {
 	private Instant timeStamp;
-	private DatagramPacket packet;
+	private DataPacket packet;
 	
 	/**
 	 * Creates a new Timestamped Packet and sets the timestamp to the moment it was created
 	 * 
 	 * @param p	DataPacket to be sent
 	 */
-	public TimestampedPacket(DatagramPacket p){
+	public TimestampedPacket(DataPacket p){
 		this.timeStamp = Instant.now();
 		this.packet = p;
 	}
@@ -37,14 +37,14 @@ public class TimestampedPacket {
 	/**
 	 * @return the packet
 	 */
-	public DatagramPacket getPacket() {
+	public DataPacket getPacket() {
 		return packet;
 	}
 
 	/**
 	 * @param packet the packet to set
 	 */
-	public void setPacket(DatagramPacket packet) {
+	public void setPacket(DataPacket packet) {
 		this.packet = packet;
 	}
 }

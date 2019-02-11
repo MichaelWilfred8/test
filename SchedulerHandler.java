@@ -1,4 +1,5 @@
 import java.net.*;
+import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -20,6 +21,8 @@ public class SchedulerHandler {
 	DatagramPacket receivePacket;
 	
 	PriorityBlockingQueue<TimestampedPacket> inputBuffer, outputBuffer, echoBuffer;
+	
+	ArrayList<SocketAddress> ElevatorAddress, FloorAddress;
 	
 	
 	public SchedulerHandler(){
@@ -108,5 +111,19 @@ public class SchedulerHandler {
 		this.echoBuffer = echoBuffer;
 	}
 	
+	public void checkForEchos(){
+		
+	}
+	
+	/**
+	 * Prepare a request for sending and place it in the Output buffer for SchedulerSender to send
+	 * 
+	 * @param packet		DataPacket to be sent
+	 * @param destination	Subsystem to send the packet to
+	 * @param id			ID of the element in the subsystem to send it to
+	 */
+	public void sendRequest(DataPacket packet, OriginType destination, int id){
+		
+	}
 	
 }

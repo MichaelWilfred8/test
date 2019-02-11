@@ -9,6 +9,9 @@ import Enums.*;
  * @author Craig Worthington
  *
  */
+
+// TODO: remove?
+
 public class ElevatorInputPacket {
 
 	private TimeStamp timeStamp;				// Timestamp for when request was sent
