@@ -6,6 +6,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Arrays;
 import Enums.Direction;
+import Enums.OriginType;
+import Enums.SubsystemType;
 
 public class Floor implements Runnable{
 
@@ -78,6 +80,10 @@ public class Floor implements Runnable{
 		System.out.println("Length: " + len);
 		System.out.print("Containing: ");
 		System.out.println("(Bytes)" + Arrays.toString(sendPacket.getData()));
+		
+		DataPacket dp = new DataPacket(message);
+		
+		System.out.println("FLOOR SENDING: " + dp.toString());
 
 		// Send the datagram packet to the server via the send/receive socket. 
 		try {
@@ -111,11 +117,14 @@ public class Floor implements Runnable{
 		for (int i=0;i<time.length;i++) {//write each time parameter
 			output.write(time[i]);
 		}
-		output.write(floorNumber);//write the floor number
+
 		output.write(directionCode);//write the direction
 		output.write(-1);//write -1 to signify this is not a button press within the elevator
 		returnBytes = output.toByteArray();//creates single byte array to be sent
-		return returnBytes;
+		
+		DataPacket message = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, returnBytes);
+		
+		return message.getBytes();
 	}
 
 	/**
@@ -131,21 +140,23 @@ public class Floor implements Runnable{
 		byte[] time = ts.getBytes();//get the bytes of the timestamp
 
 		if(request[2].equalsIgnoreCase("UP")) {//if requester wants to go up
-			directionCode = 1;
+			directionCode = 2;
 		}else {//if requester wants to go down
-			directionCode = 0;
+			directionCode = 1;
 		}
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
 		for (int i=0;i<time.length;i++) {//write each time parameter
 			output.write(time[i]);
 		}
-		output.write(floorNumber);//write the floor number
+		
 		output.write(directionCode);//write the direction
 		output.write(Integer.parseInt(request[3]));//write the destination floor
 		messageBytes = output.toByteArray();//creates single byte array to be sent
 
-		return messageBytes;
+		DataPacket message = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, messageBytes);
+
+		return message.getBytes();
 	}
 
 	/**
