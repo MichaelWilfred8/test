@@ -5,8 +5,12 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
 public class Test{
@@ -30,18 +34,22 @@ public class Test{
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		getStartTime(testLines[0]);
-		String[] output = organizer(getFile(fileToParse));
-		Floor [] floors = handler.getFloors();
-		while(output!=null){
-		for (int i=0; i<testLines.length;i++) {
-			handler.createRequest(testLines[i]);
-
+		String[] output;
+		try {
+			output = organizer(getFile(fileToParse));
+			while(output!=null){
+				for (int i=0; i<testLines.length;i++) {
+					handler.createRequest(testLines[i]);
+					System.out.println("Create");
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-	}
 
-		/*for (int i=0;i<floors.length;i++) {
-			floors[i].purgeRequests();
-		}*/
+
+		handler.listen();
+
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
@@ -103,20 +111,19 @@ public class Test{
 	}
 
 	public static String[] organizer(String x [][]) throws InterruptedException
-    {
-  	  SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
-  	  System.out.println(x[0][0]);
+	{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+		System.out.println(x[0][0]);
 
-  	    Date date = null;	//Variables used to compare timestamps
-  	    Date date1 = null;
+		Date date = null;	//Variables used to compare timestamps
+		Date date1 = null;
 
-  	    for(int i=0;i<x.length-1;i++) {
+		for(int i=0;i<x.length-1;i++) {
 			try {
 				date = dateFormat.parse(x[i][0]);
 				date1 = dateFormat.parse(x[i+1][0]);
 
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -124,10 +131,10 @@ public class Test{
 			long formattedDate=date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
 			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
-		return x[i]; //sends the request to the handler
-			}
-			return null; //end of the requests
-    }
+			return x[i]; //sends the request to the handler
+		}
+		return null; //end of the requests
+	}
 
 
 	public static void main(String[] args) {

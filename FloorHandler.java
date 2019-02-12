@@ -54,7 +54,7 @@ public class FloorHandler {
 	public void createRequest(String[] input) {
 		for (int i=0;i<floors.length;i++) {
 			if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
-				floors[i].newRequest(input);
+ 
 			}
 		}
 	}
