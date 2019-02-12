@@ -32,9 +32,12 @@ public class Test{
 		getStartTime(testLines[0]);
 		Floor [] floors = handler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
+			//System.out.println(Arrays.toString(testLines[i]));
 			handler.createRequest(testLines[i]);
 
 		}
+		
+		handler.listen();
 		/*for (int i=0;i<floors.length;i++) {
 			floors[i].purgeRequests();
 		}*/

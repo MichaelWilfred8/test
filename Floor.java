@@ -19,7 +19,7 @@ public class Floor implements Runnable{
 
 	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
 	DatagramSocket sendSocket;
-	
+
 	public Floor(int highestFloor, int floorNumber){
 		try {
 			sendSocket = new DatagramSocket();
@@ -55,7 +55,7 @@ public class Floor implements Runnable{
 		requested = false;
 		endFloor = false;
 	}
-	
+
 	/**
 	 * send byte array to scheduler
 	 * @param message, message to be sent
@@ -157,7 +157,7 @@ public class Floor implements Runnable{
 			sendRequest(requests[i]);//send request to scheduler
 			requests[i] = null;//clear request registry
 		}
-
+		requestInsert = 0;
 	}
 
 	/**
@@ -188,21 +188,26 @@ public class Floor implements Runnable{
 	 */
 	public void elevatorArrived(byte lt) { 
 		byte lampTrigger = (byte) (lt - 1);
-		System.out.println("lt = " + lt);
-		floorLamps[lampTrigger].toggle();
-		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
-		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
-		
-		floorButtons[lampTrigger].toggle();
-		System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[lampTrigger].getDirection().toString() + " button off.");
-		System.out.println("Floor lamp facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
+		//System.out.println("lt = " + lt);
+		try {
+			floorLamps[lampTrigger].toggle();
+			System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
+			System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
 
-		purgeRequests();
-		
-		floorLamps[lampTrigger].toggle();
-		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp off.");
-		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
-		
+			floorButtons[lampTrigger].toggle();
+			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[lampTrigger].getDirection().toString() + " button off.");
+			System.out.println("Floor lamp facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
+
+			purgeRequests();
+
+			floorLamps[lampTrigger].toggle();
+			System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp off.");
+			System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
+		} catch(NullPointerException e) {//catch the case what a lamp that does not exist gets triggered (ex. top floor up lamp) 
+			System.out.println("This button does not exist on this floor");
+		}
+
+
 	}
 
 	/**
@@ -240,7 +245,7 @@ public class Floor implements Runnable{
 	@Override
 	public void run() {
 		while (!endFloor) {
-			
+
 		}		
 	}
 

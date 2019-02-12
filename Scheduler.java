@@ -453,7 +453,7 @@ public class Scheduler {
 
 	public static void main(String args[]) throws UnknownHostException, InterruptedException{
 		Scheduler s = new Scheduler();
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) s.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 4, Direction.UP.getByte()});
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) s.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 1, Direction.DOWN.getByte()});
 
 		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
 

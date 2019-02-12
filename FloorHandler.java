@@ -59,7 +59,7 @@ public class FloorHandler {
 		}
 	}
 
-	private void listen() {
+	public void listen() {
 		while(listening) {
 			byte data[] = new byte[100];
 			receivePacket = new DatagramPacket(data, data.length);
@@ -84,19 +84,19 @@ public class FloorHandler {
 			System.out.println("Containing: ");
 			// Form a String from the byte array.
 			//System.out.println("(Bytes) " + Arrays.toString(data));
+			
+			if(data[0] == -1) {
+				listening = false;
+			}
 
 			DataPacket input = new DataPacket(data);
 
 			System.out.println("DATAPACKET: " + input.toString() + "\n");
 
 			if (input.getSubSystem() == SubsystemType.FLOORLAMP) {
-				Floor targetFloor = floors[input.getStatus()[FLOOR_NUM_BYTE]];
-				System.out.println("FLOOR " + targetFloor.getFloorNumber() + " is toggling its " + targetFloor.getFloorLamps()[input.getStatus()[DIRECTION_BYTE]-1].getDirection() + " lamp.");
-				targetFloor.getFloorLamps()[input.getStatus()[DIRECTION_BYTE]-1].toggle();
-				System.out.println("FLOOR " + targetFloor.getFloorNumber() + "'s " + targetFloor.getFloorLamps()[input.getStatus()[DIRECTION_BYTE]-1].getDirection() + " lamp is now " + targetFloor.getFloorLamps()[input.getStatus()[DIRECTION_BYTE]-1].getStateString());
-
+				Floor targetFloor = floors[input.getStatus()[FLOOR_NUM_BYTE]-1];
+				targetFloor.elevatorArrived(input.getStatus()[DIRECTION_BYTE]);
 			}
-
 
 		}
 	}
