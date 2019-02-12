@@ -17,13 +17,22 @@ public class Test{
 		handler = FloorHandler.getHandler();
 
 	}
+	
+	/**
+	 * @param input string of first line in csv
+	 * used to set start time of system
+	 */
+	public void getStartTime(String[] input) {
+		String time = input[0];
+	}
 
 	public void runTest() {
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
+		getStartTime(testLines[0]);
 		Floor [] floors = handler.getFloors();
 		for (int i=0; i<testLines.length;i++) {
-			handler.forwardRequest(testLines[i]);
+			handler.createRequest(testLines[i]);
 
 		}
 		/*for (int i=0;i<floors.length;i++) {
