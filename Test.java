@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
+
 public class Test{
 	FloorHandler handler;//Scheduler of 
 

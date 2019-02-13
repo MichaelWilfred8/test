@@ -9,6 +9,9 @@ import Enums.*;
  * @author craig
  *
  */
+
+// TODO: remove this
+
 public class NewScheduler {
 
 	DatagramPacket sendPacket;

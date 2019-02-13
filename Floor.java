@@ -7,7 +7,10 @@ import java.net.*;
 import java.util.Arrays;
 import Enums.Direction;
 
-public class Floor implements Runnable{
+
+// TODO: make not runnable?
+
+public class Floor implements Runnable {
 
 	private int floorNumber;//floor number, unique id
 	private FloorButton[] floorButtons;//list of buttons on floor
