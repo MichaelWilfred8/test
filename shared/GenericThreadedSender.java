@@ -1,21 +1,40 @@
-package testing;
+package shared;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
+
+import Enums.OriginType;
+import Enums.SubsystemType;
+
+// TODO: Have GenericThreadedSender use DataPacket output queue to send info?
 
 public class GenericThreadedSender implements Runnable {
 	DatagramSocket sendSocket;
 	DatagramPacket sendPacket;
 	
-	BlockingQueue<DatagramPacket> outputBuffer;
+	//BlockingQueue<DatagramPacket> outputBuffer;
+	BlockingQueue<DataPacket> outputBuffer;
 	
 	private static int BYTE_ARRAY_LENGTH = 100;
+	private SocketAddress elevatorAddress;
+	private SocketAddress schedulerAddress;
+	private SocketAddress floorAddress;
 	
-	public GenericThreadedSender(BlockingQueue<DatagramPacket> outputBuffer){
+	//public GenericThreadedSender(BlockingQueue<DatagramPacket> outputBuffer){
+	/**
+	 * Constructor for GenericThreadedSender object. Used to send objects stored in outputBuffer to other handlers.
+	 * 
+	 * @param outputBuffer		The output buffer shared by the handler and the sender
+	 * @param elevatorAddress	The SocketAddress of the elevator handler
+	 * @param schedulerAddress	The SocketAddress of the scheduler handler
+	 * @param floorAddress		The SocketAddress of the floor handler
+	 */
+	public GenericThreadedSender(BlockingQueue<DataPacket> outputBuffer, SocketAddress elevatorAddress, SocketAddress schedulerAddress, SocketAddress floorAddress){
 		try{
 			// Construct a datagram socket to send on
 			// used to receive packets
@@ -26,6 +45,10 @@ public class GenericThreadedSender implements Runnable {
 		}
 		
 		this.outputBuffer = outputBuffer;
+		
+		this.floorAddress = floorAddress;
+		this.elevatorAddress = elevatorAddress;
+		this.schedulerAddress = schedulerAddress;
 	}
 	
 	
@@ -58,16 +81,34 @@ public class GenericThreadedSender implements Runnable {
 	private void send() {
 		byte[] buf = new byte[BYTE_ARRAY_LENGTH];
 		this.sendPacket = new DatagramPacket(buf, buf.length);	// create new packet to receive information in
-		
+		DataPacket tempPacket = null;
 		while(true){
 			
+			// Get the data to send from the output buffer
 			System.out.println("GenericThreadedSender Trying to take a packet from the output queue");
-			
 			try {
-				this.sendPacket = outputBuffer.take();	// Take the packet at the head of the output queue
+				tempPacket = new DataPacket(outputBuffer.take());	// Take the packet at the head of the output queue
 			} catch (InterruptedException ie){
 				System.err.println(ie);
 				System.exit(0);
+			}
+			
+			// Set the data in sendPacket to the DataPacket taken from the queue
+			this.sendPacket.setData(tempPacket.getBytes());
+			
+			// Find the destination address of the DataPacket
+			if ((tempPacket.getSubSystem() == SubsystemType.DOOR) || (tempPacket.getSubSystem() == SubsystemType.MOTOR) || (tempPacket.getSubSystem() == SubsystemType.LOCATION)){
+				if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for an elevator and originated from the scheduler
+					this.sendPacket.setSocketAddress(elevatorAddress);		// Send to the elevatorHandler
+				} else if (tempPacket.getOrigin() == OriginType.ELEVATOR){	// If the data if for an elevator and originated from an elevator
+					this.sendPacket.setSocketAddress(schedulerAddress);		// Send to the scheduler handler
+				}
+			} else if ((tempPacket.getSubSystem() == SubsystemType.REQUEST) || (tempPacket.getSubSystem() == SubsystemType.FLOORLAMP)){
+				if (tempPacket.getOrigin() == OriginType.FLOOR){				// If the data is for a floor and originated from a floor
+					this.sendPacket.setSocketAddress(schedulerAddress);			// Send to the scheduler
+				} else if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for a floor and originated from an elevator
+					this.sendPacket.setSocketAddress(floorAddress);				// Send to the floor handler
+				}
 			}
 			
 			// Print the packet to be sent

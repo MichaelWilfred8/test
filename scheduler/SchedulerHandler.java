@@ -3,6 +3,7 @@ package scheduler;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import Enums.DoorState;
@@ -22,113 +23,75 @@ import shared.*;
 public class SchedulerHandler {
 	
 	
-	DatagramPacket sendPacket;
-	DatagramPacket receivePacket;
+	BlockingQueue<DataPacket> rawInputBuffer, rawOutputBuffer;					// Buffer for DataPackets that have not been processed by the handler
+	BlockingQueue<DataPacket> processedInputBuffer, processedOutputBuffer;		// Buffer for DataPackets that have been processed by the handler and are ready to be sent
+	BlockingQueue<TimestampedPacket> echoBuffer;								// Buffer for DataPackets that the scheduler has not received an echo for yet.
+	// TODO: Does echoBuffer need to be a blockingqueue?
 	
-	PriorityBlockingQueue<TimestampedPacket> inputBuffer, outputBuffer, echoBuffer;
-	
-	ArrayList<SocketAddress> ElevatorAddress, FloorAddress;
+	GenericThreadedSender schedulerSender;		// Sender thread that sends all processed DataPackets to their destination
+	GenericThreadedListener schedulerListener;	// Listener thread that listens for DataPackets and places them in the rawInputBuffer
 	
 	
 	public SchedulerHandler(){
-		this.inputBuffer = new PriorityBlockingQueue<TimestampedPacket>();
-		this.outputBuffer = new PriorityBlockingQueue<TimestampedPacket>();
+		this.rawInputBuffer = new PriorityBlockingQueue<DataPacket>();
+		this.rawOutputBuffer = new PriorityBlockingQueue<DataPacket>();
+		this.processedInputBuffer = new PriorityBlockingQueue<DataPacket>();
+		this.processedOutputBuffer = new PriorityBlockingQueue<DataPacket>();
 		this.echoBuffer = new PriorityBlockingQueue<TimestampedPacket>();
 	}
-
-
-	/**
-	 * @return the sendPacket
-	 */
-	public DatagramPacket getSendPacket() {
-		return sendPacket;
-	}
-
-
-	/**
-	 * @param sendPacket the sendPacket to set
-	 */
-	public void setSendPacket(DatagramPacket sendPacket) {
-		this.sendPacket = sendPacket;
-	}
-
-
-	/**
-	 * @return the receivePacket
-	 */
-	public DatagramPacket getReceivePacket() {
-		return receivePacket;
-	}
-
-
-	/**
-	 * @param receivePacket the receivePacket to set
-	 */
-	public void setReceivePacket(DatagramPacket receivePacket) {
-		this.receivePacket = receivePacket;
-	}
-
-
-	/**
-	 * @return the inputBuffer
-	 */
-	public PriorityBlockingQueue<TimestampedPacket> getInputBuffer() {
-		return inputBuffer;
-	}
-
-
-	/**
-	 * @param inputBuffer the inputBuffer to set
-	 */
-	public void setInputBuffer(PriorityBlockingQueue<TimestampedPacket> inputBuffer) {
-		this.inputBuffer = inputBuffer;
-	}
-
-
-	/**
-	 * @return the outputBuffer
-	 */
-	public PriorityBlockingQueue<TimestampedPacket> getOutputBuffer() {
-		return outputBuffer;
-	}
-
-
-	/**
-	 * @param outputBuffer the outputBuffer to set
-	 */
-	public void setOutputBuffer(PriorityBlockingQueue<TimestampedPacket> outputBuffer) {
-		this.outputBuffer = outputBuffer;
-	}
-
-
-	/**
-	 * @return the echoBuffer
-	 */
-	public PriorityBlockingQueue<TimestampedPacket> getEchoBuffer() {
-		return echoBuffer;
-	}
-
-
-	/**
-	 * @param echoBuffer the echoBuffer to set
-	 */
-	public void setEchoBuffer(PriorityBlockingQueue<TimestampedPacket> echoBuffer) {
-		this.echoBuffer = echoBuffer;
-	}
+	
 	
 	public void checkForEchos(){
 		
 	}
 	
 	/**
-	 * Prepare a request for sending and place it in the Output buffer for SchedulerSender to send
-	 * 
-	 * @param packet		DataPacket to be sent
-	 * @param destination	Subsystem to send the packet to
-	 * @param id			ID of the element in the subsystem to send it to
+	 * Process one outgoing request from the rawOutputBuffer
 	 */
-	public void sendRequest(DataPacket packet, OriginType destination, int id){
+	private void processOutgoingRequest(){
+		DataPacket tempPacket = null;
 		
+		try {
+			tempPacket = new DataPacket(rawOutputBuffer.take());	// Take the first element in the raw output queue
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// Create a TimeStampedPacket from the DataPacket and add it to the echo buffer
+		this.echoBuffer.add(new TimestampedPacket(tempPacket));
+		
+		
+		// Add tempPacket to the processedOutputBuffer to be sent
+		try {
+			this.processedOutputBuffer.put(tempPacket);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
+	
+	private void processIncomingRequest(){
+		DataPacket tempPacket = null;
+		
+		try {
+			tempPacket = new DataPacket(rawInputBuffer.take());	// Take the first element in the raw input queue
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// Create a TimeStampedPacket from the DataPacket and add it to the echo buffer
+		this.echoBuffer.add(new TimestampedPacket(tempPacket));
+		
+		
+		// Add tempPacket to the processedOutputBuffer to be sent
+		try {
+			this.processedOutputBuffer.put(tempPacket);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

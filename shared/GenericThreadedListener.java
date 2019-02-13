@@ -1,4 +1,4 @@
-package testing;
+package shared;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -22,6 +22,7 @@ public class GenericThreadedListener implements Runnable {
 	
 	DataPacket packet;
 	
+	//BlockingQueue<DatagramPacket> inputBuffer;
 	BlockingQueue<DataPacket> inputBuffer;
 	
 	private static final int BYTE_ARRAY_LENGTH = 100;
@@ -83,31 +84,20 @@ public class GenericThreadedListener implements Runnable {
 			// Print the Received DatagramPacket to the console
 			printDatagramPacket(receivePacket, "r");
 			
+			
+			
 			// Convert the DatagramPacket into a DataPacket
 			DataPacket p = new DataPacket(this.receivePacket.getData());
 			
 			// Try to add to DataPacket the queue
-			System.out.println("GenericThreadedListener trying to put into the inputBuffer");
 			try {
 				inputBuffer.put(p);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 			System.out.println("GenericThreadedListener successfully added info to the inputBuffer");
-			
-			/*
-			while(inputBuffer.add(receivePacket) != true){
-				
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			*/
-			//inputBuffer.notifyAll();
 		}
 	}
 	

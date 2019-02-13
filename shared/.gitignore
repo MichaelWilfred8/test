@@ -3,3 +3,5 @@
 /Test.class
 /TimeStamp.class
 /DataPacket.class
+/GenericThreadedSender.class
+/GenericThreadedListener.class

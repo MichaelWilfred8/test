@@ -29,9 +29,11 @@ import shared.*;
 public class Client {
 	DatagramSocket sendReceiveSocket;
 	DatagramPacket sendPacket;
+	//DatagramPacket receivePacket;
 	DataPacket receivePacket;
 	
 	BlockingQueue<DataPacket> inputBuffer;
+	//BlockingQueue<DatagramPacket> inputBuffer;
 	BlockingQueue<DatagramPacket> outputBuffer;
 	
 	
@@ -57,6 +59,7 @@ public class Client {
 		}
 		
 		this.inputBuffer = new ArrayBlockingQueue<DataPacket>(21);
+		//this.inputBuffer = new ArrayBlockingQueue<DatagramPacket>(21);
 		//this.outputBuffer = new ArrayBlockingQueue<DataPacket>(21);
 		this.outputBuffer = new ArrayBlockingQueue<DatagramPacket>(21);
 	}
@@ -182,14 +185,14 @@ public class Client {
 		return listToArray(data);	// Convert the ArrayList to a byte array and return that
 	}
 	
-	/*
+	/**
 	 * Main algorithm for the Client server
 	 * 
 	 * @param 	requestType A string that indicates the format of the request (read, write or invalid)
 	 * 			filename	A string containing the filename to be encoded
 	 * 			mode		A string containing the name of the format used to encode the characters 
 	 */
-	private void sendAndReceive(String requestType, String filename, String mode){
+	private void send(String requestType, String filename, String mode){
 		byte[] request = createRequest(requestType, filename, mode);
 		
 		// The Client creates a DatagramPacket to send to the destination port on the local host
@@ -200,20 +203,7 @@ public class Client {
 			System.exit(1);
 		}
 		
-		
-		// The client prints the information in the DatagramPacket it has created
-		//printDatagramPacket(this.sendPacket, SENT);
-		
-		/*
-		// The client tries to send the DatagramPacket it created to port 23 on the intermediate host
-		try {
-			this.sendReceiveSocket.send(this.sendPacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		*/
-		
+		// Put the packet in the output buffer
 		try {
 			this.outputBuffer.put(this.sendPacket);
 		} catch (InterruptedException e1) {
@@ -221,49 +211,38 @@ public class Client {
 			e1.printStackTrace();
 		}
 		
-		/*
-		byte data[] = new byte[DATA_LEN];							// Create an empty byte array to store data in the DatagramPacket
-		this.receivePacket = new DatagramPacket(data, data.length); // create a new DatagramPacket to receive the information from the server
-		*/
-		
+		// Sleep for half a second
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
 		
+		
+	
+	
+	private void receive(){
 		try {
 			System.out.println("Client Trying to take from inputBuffer");
 			System.out.println("inputBuffer = " + this.inputBuffer.toString());
 			//System.out.println("receivePacket = " + this.receivePacket.toString());
+			
+			// create the new info for the datagrampacket at the head of the queue
 			this.receivePacket = new DataPacket(this.inputBuffer.take());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		/*
-		// Wait to receive data through send/receive socket
-		try {
-			System.out.println("Waiting to receive...");
-			this.sendReceiveSocket.receive(this.receivePacket); 	// Wait to receive the DatagramPacket through the sendReceiveSocket and store it in the receivePacket
-		} catch (IOException e){
-			e.printStackTrace();
-			System.exit(1);
-		}
-		*/
+		
 		System.out.println("inputBuffer = " + this.inputBuffer.toString());
 		System.out.println("receivePacket = " + this.receivePacket.toString());
 		System.out.println("packet info " + this.receivePacket.getOrigin());
-		System.out.println("sucessfully retrieved packet");
-		
-		// When it receives a DatagramPacket from the intermediate host, 
-		// Print out the information received, including the byte array
-		//trimToLength(this.receivePacket); 					// trim the data in the byte array down to the appropriate length
-		System.out.println("sucessfully trimmed packet");
-		//printDatagramPacket(this.receivePacket, RECEIVED);	// Print the data in the DatagramPacket to the console
+		System.out.println("sucessfully retrieved packet\n\n");
 	}
 	
-	/*
+	
+	/**
 	 * Loops through the Client algorithm 11 times, selecting different types of requests each time
 	 */
 	private void clientLoop(){
@@ -273,12 +252,16 @@ public class Client {
 		// Loop through the Client Server Algorithm 11 times, alternating between read and write requests (five each) with #11 an invalid request
 		for (int i = 0; i < 11; ++i){
 			if (i == 10){ 									
-				this.sendAndReceive(READ_REQ, filename, "BadMode");		// on the 11th iteration of the loop, create an invalid request
+				this.send(READ_REQ, filename, "BadMode");		// on the 11th iteration of the loop, create an invalid request
 			} else if (i % 2 == 1){ // read requests
-				this.sendAndReceive(READ_REQ, filename, mode);	// create a read request on odd iterations of the loop
+				this.send(READ_REQ, filename, mode);	// create a read request on odd iterations of the loop
 			} else if (i % 2 == 0){ // write requests
-				this.sendAndReceive(WRITE_REQ, filename, mode);	// create a write request on even iterations of the loop
+				this.send(WRITE_REQ, filename, mode);	// create a write request on even iterations of the loop
 			} 
+		}
+		
+		for(int i = 0; i < 11; ++i){
+			this.receive();
 		}
 	}
 	
