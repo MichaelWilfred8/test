@@ -2,10 +2,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.Arrays;
 import Enums.SubsystemType;
 
-public class FloorHandler {
+public class FloorHandler{
 
 	private static FloorHandler handlerInstance = null;//singleton instance of this class
 
@@ -54,7 +53,7 @@ public class FloorHandler {
 	public void createRequest(String[] input) {
 		for (int i=0;i<floors.length;i++) {
 			if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
- 
+				floors[i].newRequest(input);	
 			}
 		}
 	}
@@ -84,7 +83,7 @@ public class FloorHandler {
 			System.out.println("Containing: ");
 			// Form a String from the byte array.
 			//System.out.println("(Bytes) " + Arrays.toString(data));
-			
+
 			if(data[0] == -1) {
 				listening = false;
 			}

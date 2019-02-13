@@ -461,6 +461,8 @@ public class Scheduler {
 		
 		s.sendRequest(p, OriginType.FLOOR, (byte) s.carStatus.id);
 		
+		p = new DataPacket(OriginType.SCHEDULER, (byte) s.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 1, Direction.UP.getByte()});
+		
 		s.sendRequest(p, OriginType.FLOOR, (byte) s.carStatus.id);
 		
 //		s.carStatus.addFloor(4);

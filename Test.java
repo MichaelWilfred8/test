@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -31,25 +29,24 @@ public class Test{
 	}
 
 	public void runTest() {
+		
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		getStartTime(testLines[0]);
 		String[] output;
 		try {
-			output = organizer(getFile(fileToParse));
-			while(output!=null){
-				for (int i=0; i<testLines.length;i++) {
-					handler.createRequest(testLines[i]);
-					System.out.println("Create");
-				}
-			}
+			organizer(getFile(fileToParse), handler);
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-
+		
 		handler.listen();
+		
 
+		/*for (int i=0;i<floors.length;i++) {
+			floors[i].purgeRequests();
+		}*/
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
@@ -110,8 +107,7 @@ public class Test{
 
 	}
 
-	public static String[] organizer(String x [][]) throws InterruptedException
-	{
+	public static void organizer(String x [][], FloorHandler handler) throws InterruptedException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 		System.out.println(x[0][0]);
 
@@ -124,16 +120,19 @@ public class Test{
 				date1 = dateFormat.parse(x[i+1][0]);
 
 			} catch (ParseException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 
 			long formattedDate=date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
-
-			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
-			return x[i]; //sends the request to the handler
+			
+			handler.createRequest(x[i]);
+			System.out.println("WAITING");
+			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			System.out.println("DONE WAITING");
+			
 		}
-		return null; //end of the requests
 	}
 
 
