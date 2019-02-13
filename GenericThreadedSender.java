@@ -5,7 +5,7 @@ import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
-public class GenericThreadedSender {
+public class GenericThreadedSender implements Runnable {
 	DatagramSocket sendSocket;
 	DatagramPacket sendPacket;
 	
@@ -35,16 +35,16 @@ public class GenericThreadedSender {
 	 */
 	private static void printDatagramPacket(DatagramPacket p, String mode){
 		if (mode == "s"){
-			System.out.println("SchedulerSender sent:");
+			System.out.println("GenericThreadedSender sent:");
 			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		} else if (mode == "r") {
-			System.out.println("SchedulerSender received:");
+			System.out.println("GenericThreadedSender received:");
 			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
+		System.out.println("Data (String): " + p.getData().toString()); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
 	}
@@ -59,6 +59,8 @@ public class GenericThreadedSender {
 		
 		while(true){
 			
+			System.out.println("GenericThreadedSender Trying to take a packet from the output queue");
+			
 			try {
 				this.sendPacket = outputBuffer.take();	// Take the packet at the head of the output queue
 			} catch (InterruptedException ie){
@@ -66,13 +68,13 @@ public class GenericThreadedSender {
 				System.exit(0);
 			}
 			
-			
 			// Print the packet to be sent
 			printDatagramPacket(this.sendPacket, "s");
 			
 			
 			// Try to send the packet
 			try {
+				System.out.println("GenericThreadedSender: Sending on port " + this.sendSocket.getLocalPort() + ".\n");
 				this.sendSocket.send(this.sendPacket);
 			} catch (IOException e){
 				e.printStackTrace();
@@ -86,6 +88,7 @@ public class GenericThreadedSender {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run(){
+		System.out.println("Starting sender");
 		send();
 	}
 }
