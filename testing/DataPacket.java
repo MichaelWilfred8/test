@@ -1,6 +1,9 @@
+package testing;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import Enums.*;
+
 
 /**
  * DataPacket object for sending information between subsystems. Includes the source of the message (elevator, floor, or scheduler),
@@ -11,7 +14,7 @@ import Enums.*;
  *
  */
 
-public class DataPacket {
+public class DataPacket implements Cloneable {
 
 	OriginType origin;
 	byte id;
@@ -51,9 +54,32 @@ public class DataPacket {
 		this.subSystem = SubsystemType.convertFromByte(b[SUBSYSTEM_INDEX]);
 		this.status = Arrays.copyOfRange(b, STATUS_INDEX, b.length); 
 	}
+	
+	
+	/**
+	 * Copy Constructor for DataPacket. Creates a brand new DataPacket object with the same values as p but 
+	 * @param p	DataPacket to create a deep copy of
+	 */
+	public DataPacket(DataPacket packet){
+		this.origin = packet.getOrigin();
+		this.id = packet.getId();
+		this.subSystem = packet.getSubSystem();
+		this.status = new byte[packet.getStatus().length];
+		System.arraycopy(packet.getStatus(), 0, this.status, 0, packet.getStatus().length);
+	}
 
-
-
+	/**
+	 * Contains a reference of DataPacket and implements clone with a deep copy
+	 * @return A deep copy of a DatagramPacket
+	 * @see java.lang.Object#clone()
+	 */
+	public Object clone() throws CloneNotSupportedException{
+		// Assign the shallow copy to new reference variable packet
+		DataPacket p = (DataPacket) super.clone();
+		
+		return super.clone();
+	}
+	
 	/**
 	 * @return the origin
 	 */
@@ -170,7 +196,7 @@ public class DataPacket {
 	
 	
 
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -178,6 +204,15 @@ public class DataPacket {
 	public String toString() {
 		return "DataPacket [origin=" + origin + ", id=" + id + ", subSystem=" + subSystem + ", status="
 				+ Arrays.toString(status) + "]";
+	}
+	
+	// TODO: remove this
+	public static void main(String args[]){
+		DataPacket p1 = new DataPacket(OriginType.FLOOR, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{0x00, 0x01});
+		DataPacket p2 = new DataPacket(p1);
+		
+		System.out.println("p1 = " + p1.toString() + System.identityHashCode(p1));
+		System.out.println("p2 = " + p2.toString() + System.identityHashCode(p2));
 	}
 	
 	

@@ -1,3 +1,5 @@
+package testing;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -17,11 +19,13 @@ public class GenericThreadedListener implements Runnable {
 	DatagramSocket receiveSocket;
 	DatagramPacket receivePacket;
 	
-	BlockingQueue<DatagramPacket> inputBuffer;
+	DataPacket packet;
+	
+	BlockingQueue<DataPacket> inputBuffer;
 	
 	private static final int BYTE_ARRAY_LENGTH = 100;
 	
-	public GenericThreadedListener(BlockingQueue<DatagramPacket> inputBuffer, int port){
+	public GenericThreadedListener(BlockingQueue<DataPacket> inputBuffer, int port){
 		try{
 			// Construct a datagram socket to receive on and bind it to port 23 on the local host machine.
 			// used to receive packets
@@ -78,11 +82,13 @@ public class GenericThreadedListener implements Runnable {
 			// Print the Received DatagramPacket to the console
 			printDatagramPacket(receivePacket, "r");
 			
-			// Try to add to the queue
+			// Convert the DatagramPacket into a DataPacket
+			DataPacket p = new DataPacket(this.receivePacket.getData());
 			
+			// Try to add to DataPacket the queue
 			System.out.println("GenericThreadedListener trying to put into the inputBuffer");
 			try {
-				inputBuffer.put(receivePacket);
+				inputBuffer.put(p);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

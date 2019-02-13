@@ -26,9 +26,12 @@ import java.util.concurrent.BlockingQueue;
 
 public class Client {
 	DatagramSocket sendReceiveSocket;
-	DatagramPacket sendPacket, receivePacket;
+	DatagramPacket sendPacket;
+	DataPacket receivePacket;
 	
-	BlockingQueue<DatagramPacket> inputBuffer, outputBuffer;
+	BlockingQueue<DataPacket> inputBuffer;
+	BlockingQueue<DatagramPacket> outputBuffer;
+	
 	
 	private static final int RECEIVE_PORT = 100;
 	private static final int SEND_PORT = 104;
@@ -51,7 +54,8 @@ public class Client {
 			System.exit(1);
 		}
 		
-		this.inputBuffer = new ArrayBlockingQueue<DatagramPacket>(21);
+		this.inputBuffer = new ArrayBlockingQueue<DataPacket>(21);
+		//this.outputBuffer = new ArrayBlockingQueue<DataPacket>(21);
 		this.outputBuffer = new ArrayBlockingQueue<DatagramPacket>(21);
 	}
 	
@@ -221,19 +225,17 @@ public class Client {
 		*/
 		
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(500);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
 		try {
-			DatagramPacket tempPacket;
 			System.out.println("Client Trying to take from inputBuffer");
 			System.out.println("inputBuffer = " + this.inputBuffer.toString());
 			//System.out.println("receivePacket = " + this.receivePacket.toString());
-			tempPacket = this.inputBuffer.take();
-			this.receivePacket = (DatagramPacket) this.inputBuffer.take().clone();
+			this.receivePacket = new DataPacket(this.inputBuffer.take());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -249,14 +251,14 @@ public class Client {
 		*/
 		System.out.println("inputBuffer = " + this.inputBuffer.toString());
 		System.out.println("receivePacket = " + this.receivePacket.toString());
-		System.out.println("packet address " + this.receivePacket.getSocketAddress().toString());
+		System.out.println("packet info " + this.receivePacket.getOrigin());
 		System.out.println("sucessfully retrieved packet");
 		
 		// When it receives a DatagramPacket from the intermediate host, 
 		// Print out the information received, including the byte array
 		//trimToLength(this.receivePacket); 					// trim the data in the byte array down to the appropriate length
 		System.out.println("sucessfully trimmed packet");
-		printDatagramPacket(this.receivePacket, RECEIVED);	// Print the data in the DatagramPacket to the console
+		//printDatagramPacket(this.receivePacket, RECEIVED);	// Print the data in the DatagramPacket to the console
 	}
 	
 	/*

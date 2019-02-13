@@ -88,65 +88,8 @@ public class Server {
 		System.out.println();
 	}
 	
-	/*
-	 * Parses the information contained in a DatagramPacket to determine if it is of valid format
-	 * 
-	 * @param	p 	DatagramPacket to be parsed
-	 * @throws		an InvalidFormatException is thrown if the data in the DatagramPacket is not of a valid format
-	 */
-	private void isPacketValid (DatagramPacket p) throws InvalidFormatException {
-		byte[] buf = p.getData();	// Create a byte array to contain the data in the DatagramPacket
-		
-		// Check if first byte in the data is 0x00
-		if (buf[0] != 0x00){
-			throw new InvalidFormatException("First byte is not 0x00");
-		}
-		
-		// Check if the format byte is a valid read byte (1) or write byte (2)
-		if ((buf[FORMAT_BYTE_INDEX] != READ_BYTE) && (buf[FORMAT_BYTE_INDEX] != WRITE_BYTE)){
-			throw new InvalidFormatException("Format byte " + Integer.toHexString(buf[FORMAT_BYTE_INDEX] & 0xFF) + " is not valid read or write byte");
-		}
-		
-		// Check if last byte in the data is a zero
-		if (buf[buf.length-1] != 0x00){
-			throw new InvalidFormatException("Final byte is not 0x00");
-		}
-		
-		// Check if strings are valid
-		// Loop through all text characters to find the 0x00 separator between the file name and mode
-		boolean foundZeroByte = false;
-		int separatorIndex = 0;
-		
-		for (int i = 2; i < p.getLength() - 1; i++){
-			if ((buf[i] == 0x00) && foundZeroByte == true){
-				System.out.println("Second zero byte found, format is invalid");
-				throw new InvalidFormatException("Extra 0x00 separator byte found"); // If a second 0x00 separator byte is found, throw an expection
-			} else if (buf[i] == 0x00 && foundZeroByte == false){
-				foundZeroByte = true; // zero byte found, format is valid
-				separatorIndex = i;
-			}
-		}
-		
-		if (foundZeroByte == false){
-			throw new InvalidFormatException("Zero byte separator between file name and mode was not found");
-		}
-		
-		// TODO: debug this and find correct formatting
-		// Check if mode is of correct format
-		StringBuilder sb = new StringBuilder();		// create a string builder to store the mode string inside
-		for(int i = separatorIndex+1; i < p.getLength()-1; ++i){ 	// iterate through the string from the index of the separator until the end of the data
-			sb.append((char)p.getData()[i]);	// cast the byte to a char and append each character from the mode section to the string builder
-		}
-		String mode = sb.toString(); 	// convert the StringBuilder to a string
-		mode = mode.toLowerCase(); 		// convert the string to all lower case characters
-		
-		if ((!mode.equals(OCTET_FORMAT)) && (!mode.equals(NETASCII_FORMAT))){
-			throw new InvalidFormatException("Mode given by data string was did not match any valid modes");
-		}
-	}
 	
-	
-	/*
+	/**
 	 * The main algorithm for the Server
 	 */
 	private void sendAndReceive(){
@@ -170,14 +113,6 @@ public class Server {
 			trimToLength(this.receivePacket); 					// trim the byte array in receivePacket to the correct length
 			printDatagramPacket(this.receivePacket, RECEIVED);	// Print the information in the datagramPacket to the console
 			
-			// Parse the data to determine if the format is valid
-			// If the packet is invalid throw an exception and quit
-			try {
-				this.isPacketValid(this.receivePacket);
-			} catch (InvalidFormatException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
 			
 			// Create a DatagramPacket to return the information to the SocketAddress from the received packet
 			// Initialize sendPacket with the data to be returned for a valid read request
@@ -194,7 +129,7 @@ public class Server {
 			
 			System.out.println("Sleep for one second");
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
