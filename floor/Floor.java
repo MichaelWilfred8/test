@@ -2,6 +2,8 @@
 // This class represents the floors in the buildings
 // Stores the scheduler that it communicates with, its floor number and the buttons on each floor
 
+package floor;
+
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;

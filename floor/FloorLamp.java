@@ -1,3 +1,5 @@
+package floor;
+
 import Enums.Direction;
 
 public class FloorLamp {

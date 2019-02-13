@@ -1,5 +1,7 @@
 // Button class used for the buttons in the elevator and on the floors
 
+package shared;
+
 public class Button {
 
 	boolean state;	// state of the button. If the button is depressed or has been depressed, state is true. 

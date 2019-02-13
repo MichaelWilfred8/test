@@ -26,6 +26,8 @@
 
 // TODO: Make threadable, add in times for executing changes (i.e. 3 seconds between floors), echo response
 
+package elevator;
+
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
