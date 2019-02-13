@@ -1,32 +1,49 @@
-import java.io.BufferedReader; 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
-
 public class Test{
-	FloorHandler handler;//Scheduler of 
+	FloorHandler handler;//Scheduler of
 
 	Test(){
-		
+
 		handler = FloorHandler.getHandler();
 
 	}
 
+	/**
+	 * @param input string of first line in csv
+	 * used to set start time of system
+	 */
+	public void getStartTime(String[] input) {
+		String time = input[0];
+	}
+
 	public void runTest() {
+
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
-		Floor [] floors = handler.getFloors();
-		for (int i=0; i<testLines.length;i++) {
-			handler.forwardRequest(testLines[i]);
-
+		getStartTime(testLines[0]);
+		String[] output;
+		try {
+			organizer(getFile(fileToParse), handler);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
+		handler.listen();
+
+
 		/*for (int i=0;i<floors.length;i++) {
 			floors[i].purgeRequests();
 		}*/
@@ -36,7 +53,7 @@ public class Test{
 
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
-		BufferedReader fileReader = null;//instantiate file reader	
+		BufferedReader fileReader = null;//instantiate file reader
 		final String DELIMITER = " ";//Delimiter used in CSV file
 		try{
 			String line = "";//build string into line
@@ -89,6 +106,35 @@ public class Test{
 		toserver.close();
 
 	}
+
+	public static void organizer(String x [][], FloorHandler handler) throws InterruptedException {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+		System.out.println(x[0][0]);
+
+		Date date = null;	//Variables used to compare timestamps
+		Date date1 = null;
+
+		for(int i=0;i<x.length-1;i++) {
+			try {
+				date = dateFormat.parse(x[i][0]);
+				date1 = dateFormat.parse(x[i+1][0]);
+
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+
+			long formattedDate=date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
+
+			handler.createRequest(x[i]);
+			System.out.println("WAITING");
+			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			System.out.println("DONE WAITING");
+
+		}
+	}
+
 
 	public static void main(String[] args) {
 		Test t = new Test();
