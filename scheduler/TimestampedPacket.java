@@ -1,5 +1,7 @@
 package scheduler;
 
+import shared.*;
+
 import java.net.DatagramPacket;
 import java.time.Instant;
 

@@ -2,7 +2,7 @@ package floor;
 
 import Enums.Direction;
 
-public class FloorButton extends Button {
+public class FloorButton extends shared.Button {
 
 	private Direction direction;//direction of the button
 

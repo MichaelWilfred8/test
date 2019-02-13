@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import shared.*;
+
 // TODO: Input and output queue, Listener and Sender, make not threaded
 
 public class ElevatorHandler implements Runnable{

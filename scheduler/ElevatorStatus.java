@@ -9,6 +9,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import Enums.*;
+import shared.*;
 
 // Class for the scheduler to hold information about the elevator and its current position
 

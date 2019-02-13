@@ -1,4 +1,4 @@
-package testing;
+package shared;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import Enums.*;
-
+import shared.*;
 
 public class Elevator {
 	private static int idCounter = 1;		// ID for this elevator

@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import Enums.*;
 
+import shared.*;
+
 /**
  * 
  * Scheduler class. Holds information about the state of 

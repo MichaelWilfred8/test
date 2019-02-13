@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import shared.*;
+
 public class Client {
 	DatagramSocket sendReceiveSocket;
 	DatagramPacket sendPacket;
