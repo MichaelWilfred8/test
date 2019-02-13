@@ -80,10 +80,10 @@ public class GenericThreadedSender implements Runnable {
 	 */
 	private void send() {
 		byte[] buf = new byte[BYTE_ARRAY_LENGTH];
-		this.sendPacket = new DatagramPacket(buf, buf.length);	// create new packet to receive information in
+		this.sendPacket = new DatagramPacket(buf, buf.length);	// create new packet to send information in
 		DataPacket tempPacket = null;
+		
 		while(true){
-			
 			// Get the data to send from the output buffer
 			System.out.println("GenericThreadedSender Trying to take a packet from the output queue");
 			try {
