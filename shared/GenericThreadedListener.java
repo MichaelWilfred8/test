@@ -29,7 +29,7 @@ public class GenericThreadedListener implements Runnable {
 	
 	public GenericThreadedListener(BlockingQueue<DataPacket> inputBuffer, int port){
 		try{
-			// Construct a datagram socket to receive on and bind it to port 23 on the local host machine.
+			// Construct a datagram socket to receive on and bind it to port on the local host machine.
 			// used to receive packets
 			receiveSocket = new DatagramSocket(port);
 		} catch (SocketException se) {
@@ -58,7 +58,7 @@ public class GenericThreadedListener implements Runnable {
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		System.out.println("Data (String): " + p.getData().toString()); // Print the data in the packet as a String
+		System.out.println("Data (String): " + p); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
 	}
@@ -92,6 +92,7 @@ public class GenericThreadedListener implements Runnable {
 			// Try to add to DataPacket the queue
 			try {
 				inputBuffer.put(p);
+				System.out.println("GOT THIS MESSAGE " + p);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

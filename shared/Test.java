@@ -132,9 +132,9 @@ public class Test{
 			long formattedDate=date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
 			handler.createRequest(x[i]);
-			System.out.println("WAITING");
-			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
-			System.out.println("DONE WAITING");
+			/*System.out.println("WAITING");
+			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			System.out.println("DONE WAITING");*/
 
 		}
 	}

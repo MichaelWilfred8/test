@@ -1,6 +1,7 @@
 package floor;
 
 import Enums.Direction;
+import shared.Button;
 
 public class FloorButton extends shared.Button {
 

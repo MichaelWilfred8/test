@@ -3,8 +3,10 @@ package shared;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
@@ -69,7 +71,7 @@ public class GenericThreadedSender implements Runnable {
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		System.out.println("Data (String): " + p.getData().toString()); // Print the data in the packet as a String
+		System.out.println("Data (String): " + p); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
 	}
@@ -100,14 +102,38 @@ public class GenericThreadedSender implements Runnable {
 			if ((tempPacket.getSubSystem() == SubsystemType.DOOR) || (tempPacket.getSubSystem() == SubsystemType.MOTOR) || (tempPacket.getSubSystem() == SubsystemType.LOCATION)){
 				if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for an elevator and originated from the scheduler
 					this.sendPacket.setSocketAddress(elevatorAddress);		// Send to the elevatorHandler
+					try {
+						this.sendPacket.setAddress(InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else if (tempPacket.getOrigin() == OriginType.ELEVATOR){	// If the data if for an elevator and originated from an elevator
 					this.sendPacket.setSocketAddress(schedulerAddress);		// Send to the scheduler handler
+					try {
+						this.sendPacket.setAddress(InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			} else if ((tempPacket.getSubSystem() == SubsystemType.REQUEST) || (tempPacket.getSubSystem() == SubsystemType.FLOORLAMP)){
 				if (tempPacket.getOrigin() == OriginType.FLOOR){				// If the data is for a floor and originated from a floor
 					this.sendPacket.setSocketAddress(schedulerAddress);			// Send to the scheduler
+					try {
+						this.sendPacket.setAddress(InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for a floor and originated from an elevator
 					this.sendPacket.setSocketAddress(floorAddress);				// Send to the floor handler
+					try {
+						this.sendPacket.setAddress(InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			

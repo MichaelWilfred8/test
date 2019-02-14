@@ -457,7 +457,7 @@ public class Scheduler {
 
 	public static void main(String args[]) throws UnknownHostException, InterruptedException{
 		Scheduler s = new Scheduler();
-		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) s.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 1, Direction.DOWN.getByte()});
+		DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) 1, SubsystemType.FLOORLAMP, new byte[]{Direction.UP.getByte()});
 
 		//DataPacket p = new DataPacket(OriginType.SCHEDULER, (byte) this.carStatus.id, SubsystemType.MOTOR, new byte[] {MotorState.UP.getByte()});
 
@@ -465,7 +465,9 @@ public class Scheduler {
 		
 		s.sendRequest(p, OriginType.FLOOR, (byte) s.carStatus.id);
 		
-		p = new DataPacket(OriginType.SCHEDULER, (byte) s.carStatus.id, SubsystemType.FLOORLAMP, new byte[]{(byte) 1, Direction.UP.getByte()});
+		Thread.sleep(10);
+		
+		p = new DataPacket(OriginType.SCHEDULER, (byte) 5, SubsystemType.FLOORLAMP, new byte[]{Direction.UP.getByte()});
 		
 		s.sendRequest(p, OriginType.FLOOR, (byte) s.carStatus.id);
 		

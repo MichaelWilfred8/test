@@ -3,7 +3,12 @@ package floor;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import Enums.SubsystemType;
 import shared.*;
 
@@ -15,25 +20,41 @@ public class FloorHandler{
 
 	private Floor[] floors =  new Floor[MAX_FLOORS];//list of floors within the building
 
-	private DatagramPacket receivePacket;//packets and socket used to receive information
-	private DatagramSocket receiveSocket;
+	private static final int DIRECTION_BYTE = 0;//location of direction byte in incoming message
 
-	private static final int DIRECTION_BYTE = 1;//location of direction byte in incoming message
-	private static final int FLOOR_NUM_BYTE = 0;//location of floor number bytes in incoming message
+	private static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(32);//Floor port number
+	private static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(69);//Elevator port number
+	private static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(23);//Scheduler port number
 
 	private boolean listening = true;//whether the FloorHandler is listening for incoming messages
 
+	GenericThreadedSender floorSender;		// Sender thread that sends all processed DataPackets to their destination
+	GenericThreadedListener floorListener;	// Listener thread that listens for DataPackets and places them in the rawInputBuffer
+
+	BlockingQueue<DataPacket> inputBuffer;
+	//BlockingQueue<DatagramPacket> inputBuffer;
+	BlockingQueue<DataPacket> outputBuffer;
+
 	private FloorHandler() {//private constructor used because this class follows singleton design pattern
 
-		for (int i=0; i<floors.length; i++) {//create each floor object
-			floors[i] = new Floor(MAX_FLOORS, i+1);//send the floor constructor the max floor and floor number
-		}
+		this.inputBuffer = new ArrayBlockingQueue<DataPacket>(21);
+		this.outputBuffer = new ArrayBlockingQueue<DataPacket>(21);
 
-		try {//create the receive socket on port 32
-			receiveSocket = new DatagramSocket(32);
-		} catch (SocketException e) {
-			e.printStackTrace();
+		floorSender = new GenericThreadedSender(outputBuffer, ELEVATOR_PORT_NUMBER, SCHEDULER_PORT_NUMBER, FLOOR_PORT_NUMBER);		
+		floorListener = new GenericThreadedListener(inputBuffer, new InetSocketAddress(32).getPort());
+
+		Thread sender = new Thread(floorSender);
+		Thread receiver = new Thread(floorListener);
+
+
+
+		for (int i=0; i<floors.length; i++) {//create each floor object
+			floors[i] = new Floor(MAX_FLOORS, i+1, outputBuffer);//send the floor constructor the max floor and floor number
 		}
+		
+		sender.start();
+		receiver.start();
+		
 	}
 
 	/**
@@ -62,42 +83,24 @@ public class FloorHandler{
 	}
 
 	public void listen() {
+		
 		while(listening) {
-			byte data[] = new byte[100];
-			receivePacket = new DatagramPacket(data, data.length);
+			
+			DataPacket input = inputBuffer.poll();
 
-			try {
-				// Block until a datagram is received via sendReceiveSocket.
-				System.out.println("FloorHandler: Waiting for Packet.\n");
-				receiveSocket.receive(receivePacket);
-			} catch(IOException e) {
-				System.out.print("IO Exception: likely:");
-				System.out.println("Receive Socket Timed Out.\n");
-				e.printStackTrace();
-				System.exit(1);
-			}
-
-			// Process the received datagram.
-			System.out.println("FloorHandler: Packet received:");
-			System.out.println("From host: " + receivePacket.getAddress());
-			System.out.println("Host port: " + receivePacket.getPort());
-			int len = receivePacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.println("Containing: ");
-			// Form a String from the byte array.
-			//System.out.println("(Bytes) " + Arrays.toString(data));
-
-			if(data[0] == -1) {
-				listening = false;
-			}
-
-			DataPacket input = new DataPacket(data);
-
-			System.out.println("DATAPACKET: " + input.toString() + "\n");
-
-			if (input.getSubSystem() == SubsystemType.FLOORLAMP) {
-				Floor targetFloor = floors[input.getStatus()[FLOOR_NUM_BYTE]-1];
+			if (input != null && input.getSubSystem() == SubsystemType.FLOORLAMP) {
+				System.out.println("DATAPACKET: " + input.toString() + "\n");
+				
+				Floor targetFloor = floors[input.getId()-1];
 				targetFloor.elevatorArrived(input.getStatus()[DIRECTION_BYTE]);
+				
+			} else {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 		}

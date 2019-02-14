@@ -5,8 +5,8 @@
 package floor;
 
 import java.io.*;
-import java.net.*;
-import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
+
 import Enums.Direction;
 import Enums.OriginType;
 import Enums.SubsystemType;
@@ -19,22 +19,16 @@ public class Floor implements Runnable {
 	private int floorNumber;//floor number, unique id
 	private FloorButton[] floorButtons;//list of buttons on floor
 	private FloorLamp[] floorLamps;//list of lamps on floor
-	private byte[][] requests;//list of requests
+	private DataPacket [] requests;//list of requests
 	private int requestCount = 0;//where to insert in list of requests
 	private boolean requested;//if an elevator has been requested for this floor
 	private boolean endFloor;//ends the thread of floor
+	private BlockingQueue<DataPacket> output;//threaded sender
 
-	DatagramPacket sendPacket, receivePacket; //packets and socket used to send information
-	DatagramSocket sendSocket;
-
-	public Floor(int highestFloor, int floorNumber){
-		try {
-			sendSocket = new DatagramSocket();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-
-		//this.scheduler = scheduler;
+	public Floor(int highestFloor, int floorNumber, BlockingQueue<DataPacket> output){
+		
+		this.output = output;
+		
 		this.floorNumber = floorNumber;
 
 		if (floorNumber == highestFloor) {//if the floor is the top floor
@@ -58,7 +52,7 @@ public class Floor implements Runnable {
 			floorLamps[1] = new FloorLamp(Direction.UP);
 		}
 
-		requests = new byte[highestFloor][];//can only have as many requests as there are floors
+		requests = new DataPacket[highestFloor];//can only have as many requests as there are floors
 		requested = false;
 		endFloor = false;
 	}
@@ -67,37 +61,17 @@ public class Floor implements Runnable {
 	 * send byte array to scheduler
 	 * @param message, message to be sent
 	 */
-	public void sendRequest(byte[] message){
-
-		// Construct a datagram packet that is to be sent to a specified port on a specified host.
+	public void sendRequest(DataPacket requests){
+		
+		
 		try {
-			sendPacket = new DatagramPacket(message, message.length, InetAddress.getLocalHost(), 23);
-		} catch (UnknownHostException e) {
+			output.put(requests);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.exit(1);
 		}
-
-		//print details of outgoing packet
-		System.out.println("Floor: Sending packet:");
-		System.out.println("To host: " + sendPacket.getAddress());
-		System.out.println("Destination host port: " + sendPacket.getPort());
-		int len = sendPacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		System.out.println("(Bytes)" + Arrays.toString(sendPacket.getData()));
-
-		DataPacket dp = new DataPacket(message);
-
-		System.out.println("FLOOR SENDING: " + dp.toString());
-
-		// Send the datagram packet to the server via the send/receive socket. 
-		try {
-			sendSocket.send(sendPacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		System.out.println("Sent\n");
+		
+		System.out.println("Floor "+ floorNumber +" placed item in send queue\n");
 	}
 
 	/**
@@ -105,7 +79,7 @@ public class Floor implements Runnable {
 	 * @param request request data from csv
 	 * @return byte array message
 	 */
-	private byte[] requestElevator(String[] request){
+	private DataPacket requestElevator(String[] request){
 		byte[] returnBytes=null;//instantiate array to be returned
 		int directionCode;//direction code
 
@@ -129,7 +103,7 @@ public class Floor implements Runnable {
 
 		DataPacket message = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, returnBytes);
 
-		return message.getBytes();
+		return message;
 	}
 
 	/**
@@ -137,7 +111,7 @@ public class Floor implements Runnable {
 	 * @param request request data from csv
 	 * @return byte array message
 	 */
-	private byte[] destinationRequest(String[] request) {
+	private DataPacket destinationRequest(String[] request) {
 		byte[] messageBytes = null;
 		int directionCode;//direction code
 
@@ -161,7 +135,7 @@ public class Floor implements Runnable {
 
 		DataPacket message = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, messageBytes);
 
-		return message.getBytes();
+		return message;
 	}
 
 	/**
@@ -181,27 +155,27 @@ public class Floor implements Runnable {
 	 * @param request String containing request information (time, floor, direction)
 	 */
 	public void newRequest(String[] request) {
-		byte[] message = requestElevator(request);
-		byte[] destination = destinationRequest(request);
+		DataPacket message = requestElevator(request);
+		DataPacket destination = destinationRequest(request);
 
-		System.out.println("FLOOR MESSAGE: " + Arrays.toString(message));
+		System.out.println("FLOOR MESSAGE: " + message.toString());
 
-		if(!floorButtons[message[19]-1].getState()) {//if the button indicating the direction the elevator travelling is not yet on
-			floorButtons[message[19]-1].toggle();//switch it on
-			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message[19]-1].getDirection().toString() + " button on.");
-			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message[19]-1].getDirection().toString() + " is now " + floorButtons[message[19]-1].getStateString());	
+		if(!floorButtons[message.getStatus()[16]-1].getState()) {//if the button indicating the direction the elevator travelling is not yet on
+			floorButtons[message.getStatus()[16]-1].toggle();//switch it on
+			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " button on.");
+			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " is now " + floorButtons[message.getStatus()[16]-1].getStateString());	
 		}
 
 		if(!requested) {//if no request has been made for this floor
 			sendRequest(message);//request an elevator
-			if (requests[message[1]]!=null){
-				requests[message[1]] = destination;
+			if (requests[message.getId()]!=null){//if there is not already a destination request
+				requests[message.getId()] = destination;
 				requestCount++;
 			}
 			requested = true;//a request now has been made
 		}else {
-			if (requests[message[1]]!=null){
-				requests[message[1]] = destination;
+			if (requests[message.getId()]!=null){//if there is not already a destination request
+				requests[message.getId()] = destination;
 				requestCount++;
 			}
 		}
@@ -212,7 +186,6 @@ public class Floor implements Runnable {
 	 */
 	public void elevatorArrived(byte lt) { 
 		byte lampTrigger = (byte) (lt - 1);
-		//System.out.println("lt = " + lt);
 		try {
 			floorLamps[lampTrigger].toggle();
 			System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
@@ -230,8 +203,6 @@ public class Floor implements Runnable {
 		} catch(NullPointerException e) {//catch the case what a lamp that does not exist gets triggered (ex. top floor up lamp) 
 			System.out.println("This button does not exist on this floor");
 		}
-
-
 	}
 
 	/**

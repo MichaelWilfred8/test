@@ -4,7 +4,7 @@ package shared;
 
 public class Button {
 
-	boolean state;	// state of the button. If the button is depressed or has been depressed, state is true. 
+	protected boolean state;	// state of the button. If the button is depressed or has been depressed, state is true. 
 
 	// Constructor for base button class
 	public Button(){
