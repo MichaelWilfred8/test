@@ -92,7 +92,7 @@ public class GenericThreadedListener implements Runnable {
 			// Try to add to DataPacket the queue
 			try {
 				inputBuffer.put(p);
-				System.out.println("GOT THIS MESSAGE " + p);
+				//System.out.println("GOT THIS MESSAGE " + p);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -46,11 +46,6 @@ public class Test{
 		}
 
 		handler.listen();
-
-
-		/*for (int i=0;i<floors.length;i++) {
-			floors[i].purgeRequests();
-		}*/
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
@@ -132,9 +127,9 @@ public class Test{
 			long formattedDate=date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
 			handler.createRequest(x[i]);
-			/*System.out.println("WAITING");
-			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
-			System.out.println("DONE WAITING");*/
+			//System.out.println("WAITING");
+			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			//System.out.println("DONE WAITING\n");
 
 		}
 	}
