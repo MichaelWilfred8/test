@@ -29,7 +29,7 @@ public class SchedulerHandler {
 	
 	public BlockingQueue<DataPacket> rawInputBuffer, rawOutputBuffer;					// Buffer for DataPackets that have not been processed by the handler
 	public BlockingQueue<DataPacket> processedInputBuffer, processedOutputBuffer;		// Buffer for DataPackets that have been processed by the handler and are ready to be sent
-	List<TimestampedPacket> echoBuffer;								// Buffer for DataPackets that the scheduler has not received an echo for yet.
+	private List<TimestampedPacket> echoBuffer;								// Buffer for DataPackets that the scheduler has not received an echo for yet.
 	// TODO: Does echoBuffer need to be a blockingqueue?
 	
 	GenericThreadedSender schedulerSender;		// Sender thread that sends all processed DataPackets to their destination
@@ -37,6 +37,15 @@ public class SchedulerHandler {
 	
 	private static final int TIMEOUT_MILLIS = 1000;
 	
+	public static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(32);		// Floor port number
+	public static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(69);		// Elevator port number
+	public static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(23);	// Scheduler port number
+	
+	
+	
+	/**
+	 * SchedulerHandler constructor
+	 */
 	public SchedulerHandler(){
 		this.rawInputBuffer = new PriorityBlockingQueue<DataPacket>();
 		this.rawOutputBuffer = new PriorityBlockingQueue<DataPacket>();
@@ -61,7 +70,7 @@ public class SchedulerHandler {
 			e.printStackTrace();
 		}
 		
-		// TODO: convert the packet into a replica of the packet it is meant to receive
+		// Convert the packet into a replica of the packet it is meant to receive
 		switch(tempPacket.getSubSystem()){
 			case MOTOR:
 				echoPacket = new DataPacket(OriginType.ELEVATOR, tempPacket.getId(), tempPacket.getSubSystem(), tempPacket.getStatus());
@@ -96,7 +105,7 @@ public class SchedulerHandler {
 	
 	/**
 	 * Check if the packet is an echo from another subsystem. 
-	 * @param p	The datapacket to be tested
+	 * @param p	The DataPacket to be tested
 	 * @return	True if the packet is an echo from another subsystem. 
 	 */
 	private boolean checkIfEcho(DataPacket p){
@@ -166,15 +175,17 @@ public class SchedulerHandler {
 	}
 	
 	public void mainLoop(){
-		this.processIncomingRequest();
-		
-		this.processOutgoingRequest();
-		
+		while(true){
+			this.processIncomingRequest();
+			this.getTimedOutMessage();
+			this.processOutgoingRequest();
+		}
 	}
 	
 	public static void main(String args[]){
 		SchedulerHandler s = new SchedulerHandler();
-		GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, 43);
-		GenericThreadedSender sender = new GenericThreadedSender(s.rawOutputBuffer, )
+		GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, 23);
+		GenericThreadedSender sender = new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER);
+		s.mainLoop();
 	}
 }

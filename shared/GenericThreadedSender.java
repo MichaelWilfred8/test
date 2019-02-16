@@ -27,7 +27,7 @@ public class GenericThreadedSender implements Runnable {
 	private SocketAddress schedulerAddress;
 	private SocketAddress floorAddress;
 	
-	//public GenericThreadedSender(BlockingQueue<DatagramPacket> outputBuffer){
+	
 	/**
 	 * Constructor for GenericThreadedSender object. Used to send objects stored in outputBuffer to other handlers.
 	 * 
@@ -52,6 +52,7 @@ public class GenericThreadedSender implements Runnable {
 		this.elevatorAddress = elevatorAddress;
 		this.schedulerAddress = schedulerAddress;
 	}
+	
 	
 	
 	/**
