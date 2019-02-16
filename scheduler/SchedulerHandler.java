@@ -1,7 +1,11 @@
 package scheduler;
 
 import java.net.*;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -25,19 +29,20 @@ public class SchedulerHandler {
 	
 	public BlockingQueue<DataPacket> rawInputBuffer, rawOutputBuffer;					// Buffer for DataPackets that have not been processed by the handler
 	public BlockingQueue<DataPacket> processedInputBuffer, processedOutputBuffer;		// Buffer for DataPackets that have been processed by the handler and are ready to be sent
-	BlockingQueue<TimestampedPacket> echoBuffer;								// Buffer for DataPackets that the scheduler has not received an echo for yet.
+	List<TimestampedPacket> echoBuffer;								// Buffer for DataPackets that the scheduler has not received an echo for yet.
 	// TODO: Does echoBuffer need to be a blockingqueue?
 	
 	GenericThreadedSender schedulerSender;		// Sender thread that sends all processed DataPackets to their destination
 	GenericThreadedListener schedulerListener;	// Listener thread that listens for DataPackets and places them in the rawInputBuffer
 	
+	private static final int TIMEOUT_MILLIS = 1000;
 	
 	public SchedulerHandler(){
 		this.rawInputBuffer = new PriorityBlockingQueue<DataPacket>();
 		this.rawOutputBuffer = new PriorityBlockingQueue<DataPacket>();
 		this.processedInputBuffer = new PriorityBlockingQueue<DataPacket>();
 		this.processedOutputBuffer = new PriorityBlockingQueue<DataPacket>();
-		this.echoBuffer = new PriorityBlockingQueue<TimestampedPacket>();
+		this.echoBuffer = new ArrayList<TimestampedPacket>();
 	}
 	
 	
@@ -47,7 +52,8 @@ public class SchedulerHandler {
 	 */
 	private void processOutgoingRequest(){
 		DataPacket tempPacket = null;
-		
+		DataPacket echoPacket = null;
+				
 		try {
 			tempPacket = new DataPacket(rawOutputBuffer.take());	// Take the first element in the raw output queue
 		} catch (InterruptedException e) {
@@ -56,9 +62,26 @@ public class SchedulerHandler {
 		}
 		
 		// TODO: convert the packet into a replica of the packet it is meant to receive
+		switch(tempPacket.getSubSystem()){
+			case MOTOR:
+				echoPacket = new DataPacket(OriginType.ELEVATOR, tempPacket.getId(), tempPacket.getSubSystem(), tempPacket.getStatus());
+				break;
+			case DOOR:
+				echoPacket = new DataPacket(OriginType.ELEVATOR, tempPacket.getId(), tempPacket.getSubSystem(), tempPacket.getStatus());
+				break;
+			case CARLAMP:
+				echoPacket = new DataPacket(OriginType.ELEVATOR, tempPacket.getId(), tempPacket.getSubSystem(), tempPacket.getStatus());
+				break;
+			case FLOORLAMP:
+				echoPacket = new DataPacket(OriginType.FLOOR, tempPacket.getId(), tempPacket.getSubSystem(), tempPacket.getStatus());
+				break;
+			default:
+				echoPacket = new DataPacket(null, (Byte) null, null, null);
+				break;
+		}
 		
 		// Create a TimeStampedPacket from the DataPacket and add it to the echo buffer
-		this.echoBuffer.add(new TimestampedPacket(tempPacket));
+		this.echoBuffer.add(new TimestampedPacket(echoPacket));
 		
 		
 		// Add tempPacket to the processedOutputBuffer to be sent
@@ -69,6 +92,53 @@ public class SchedulerHandler {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	/**
+	 * Check if the packet is an echo from another subsystem. 
+	 * @param p	The datapacket to be tested
+	 * @return	True if the packet is an echo from another subsystem. 
+	 */
+	private boolean checkIfEcho(DataPacket p){
+		Collections.sort(echoBuffer); //Sort 
+		for(int i = 0; i < echoBuffer.size(); ++i){
+			if (echoBuffer.get(i).getPacket().equals(p)){
+				echoBuffer.remove(i);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	private void resendTimedOutMessage(DataPacket p){
+		p.setOrigin(OriginType.SCHEDULER); // Set the origin type to scheduler
+		this.rawOutputBuffer.add(p);	// Add the datapacket to the raw output buffer to be reprocessed and resent
+	}
+	
+	/**
+	 * Find the next timed out message in the echoBuffer and resend it
+	 */
+	private void getTimedOutMessage(){
+		// Exit out of the function if there are no packets in the echo Buffer
+		if (echoBuffer.size() == 0){
+			return;
+		}
+		
+		Instant now = Instant.now();	// Get the current instant
+		
+		for(int i = 0; i < echoBuffer.size(); ++i){
+			Instant timeToCheck = echoBuffer.get(i).getTimeStamp();
+			timeToCheck = timeToCheck.plus(TIMEOUT_MILLIS, ChronoUnit.MILLIS);
+			
+			if (timeToCheck.isBefore(now)){
+				this.resendTimedOutMessage(echoBuffer.get(i).getPacket());
+				echoBuffer.remove(i);
+				return;
+			}
+		}
+	}
+	
 	
 	
 	/**
@@ -84,18 +154,22 @@ public class SchedulerHandler {
 			e.printStackTrace();
 		}
 		
-		
-		// Create a TimeStampedPacket from the DataPacket and add it to the echo buffer
-		this.echoBuffer.add(new TimestampedPacket(tempPacket));
-		
-		
-		// Add tempPacket to the processedOutputBuffer to be sent
-		try {
-			this.processedInputBuffer.put(tempPacket);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// Check if the received packet is an echo from another subsystem
+		if (!this.checkIfEcho(tempPacket)){
+			try {	// If not an echo, add tempPacket to the processedOutputBuffer to be sent
+				this.processedInputBuffer.put(tempPacket);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	public void mainLoop(){
+		this.processIncomingRequest();
+		
+		this.processOutgoingRequest();
+		
 	}
 	
 	public static void main(String args[]){

@@ -195,8 +195,49 @@ public class DataPacket implements Cloneable {
 	}
 	
 	
-
 	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
+		result = prime * result + Arrays.hashCode(status);
+		result = prime * result + ((subSystem == null) ? 0 : subSystem.hashCode());
+		return result;
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DataPacket other = (DataPacket) obj;
+		if (id != other.id)
+			return false;
+		if (origin != other.origin)
+			return false;
+		if (!Arrays.equals(status, other.status))
+			return false;
+		if (subSystem != other.subSystem)
+			return false;
+		return true;
+	}
+
+
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -214,6 +255,4 @@ public class DataPacket implements Cloneable {
 		System.out.println("p1 = " + p1.toString() + System.identityHashCode(p1));
 		System.out.println("p2 = " + p2.toString() + System.identityHashCode(p2));
 	}
-	
-	
 }	
