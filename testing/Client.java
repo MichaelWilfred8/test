@@ -26,6 +26,13 @@ import java.util.concurrent.BlockingQueue;
 
 import shared.*;
 
+
+/**
+ * Modified version of Client from Assignment 1 used to test the generic threaded sender and listener.
+ * 
+ * @author Craig Worthington
+ *
+ */
 public class Client {
 	DatagramSocket sendReceiveSocket;
 	DatagramPacket sendPacket;

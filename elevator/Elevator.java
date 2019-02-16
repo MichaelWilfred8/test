@@ -1,3 +1,5 @@
+package elevator;
+
 //This is elevator class, it will keep running and act like server
 //The logic is following
 //1. waiting a packet contains [orig_Type, id, subsystem, status], receiving port is 69
@@ -21,12 +23,11 @@
 //4. stop and send final packet [3,id,3,MotorOFF]
 
 
+//update: created three threads, listens to the information from handler, run and wait  
+
 
 //author Hongbo Pang
 
-// TODO: Make threadable, add in times for executing changes (i.e. 3 seconds between floors), echo response
-
-package elevator;
 
 import java.io.*;
 import java.net.*;
@@ -36,8 +37,9 @@ import java.util.concurrent.TimeUnit;
 import Enums.*;
 import shared.*;
 
-public class Elevator {
-	private static int idCounter = 1;		// ID for this elevator
+
+public class Elevator implements Runnable {
+	//private static int idCounter = 1;		// ID for this elevator
 
 	private DatagramPacket sendPacket;
 	private DatagramSocket sendSocket;
@@ -53,7 +55,7 @@ public class Elevator {
 	MotorState motorState;
 
 
-	public Elevator(int numFloors, int id){
+	public Elevator(int id){
 		try {
 
 			sendSocket = new DatagramSocket();
@@ -63,14 +65,14 @@ public class Elevator {
 			System.exit(1);
 		}
 
-		count = numFloors;
-		id = idCounter++;
+		//count = numFloors;
+		//id = idCounter++;
 
 		// initialize all floor lights to off
-		this.floorLights = new boolean[numFloors];
-		for(int i = 0; i < numFloors; ++i){
-			floorLights[i] = false;
-		}
+		//this.floorLights = new boolean[numFloors];
+		//for(int i = 0; i < numFloors; ++i){
+		//	floorLights[i] = false;
+	//	}
 
 		this.currentFloor = 1;
 
@@ -87,7 +89,7 @@ public class Elevator {
 		if (mode == "s"){
 			System.out.println("Elevator sent:");
 			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
-			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
+ 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		} else if (mode == "r") {
 			System.out.println("Elevator received:");
 			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
@@ -122,6 +124,7 @@ public class Elevator {
 				Motor(MotorState.UP, packet.getSocketAddress());		//motor up and send message
 				break;
 			default:
+				  
 				System.out.println("Invalid type");
 				break;
 			}
@@ -216,43 +219,35 @@ public class Elevator {
 	}
 
 	public void Motor(MotorState command, SocketAddress address) throws IOException, InterruptedException{
-		System.out.println("Elevator: I am at floor "+ currentFloor);
-
-		//		while(count != 5) {  //this condition is depends on the packet from scheduler  ***
-		//			if(command == MotorState.DOWN) {
-		//				this.motorState = MotorState.DOWN;
-		//				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
-		//				currentFloor--;
-		//				sendLocation();
-		//			} else if (command == MotorState.UP){
-		//				this.motorState = MotorState.UP;
-		//				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
-		//				currentFloor++;
-		//				sendLocation();
-		//			}
-		//
-		//			System.out.println("Elevator: I am at  "+ currentFloor);
-		//			count ++;
-		//		}
+		System.out.println("Elevator " + id + " : I am at floor "+ currentFloor);
 
 		if(command == MotorState.DOWN) {
+			while(currentFloor > 0) {
 			this.motorState = MotorState.DOWN;
 			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor--;
 			//sendLocation();
+			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
+			}
 		} else if (command == MotorState.UP){
+			while(currentFloor < 11) {
 			this.motorState = MotorState.UP;
-			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			
+			//changed the second byte from id to current floor, so that scheduler will get update of the current floor
+			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte)currentFloor, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			currentFloor++;
 			//sendLocation();
+			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
+			}
 		} else if (command == MotorState.OFF){
 			this.motorState = MotorState.OFF;
 			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-			//TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 		}
-		System.out.println("Elevator: I am at  "+ currentFloor);
+	
 	}
 
 	public String[] GetString(byte[] bytes) throws ClassNotFoundException, IOException
@@ -324,6 +319,12 @@ public class Elevator {
 	public MotorState getMotorState() {
 		return motorState;
 	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	// TODO: remove this from the function
 	/*
@@ -334,5 +335,6 @@ public class Elevator {
 		}
 	}
 	*/
+	
 
 }

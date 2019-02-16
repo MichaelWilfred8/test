@@ -4,31 +4,34 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Arrays;
-
+import java.util.List;
 import shared.*;
 
-// TODO: Input and output queue, Listener and Sender, make not threaded
-
 public class ElevatorHandler implements Runnable{
-	private static ElevatorHandler instance = null;
+
 
 	DatagramPacket receivePacket;
 	DatagramSocket receiveSocket;
 
-	private Elevator [] elevatorList;
+	private static List<Elevator> elevatorList = new ArrayList<Elevator>(3);
+    private boolean stopController;
 
-	private ElevatorHandler(int numElevators) {
-		elevatorList = new Elevator[numElevators];
-		for (int i=0;i<numElevators;i++) {
-			elevatorList[i] = new Elevator(10, i+1);
-		}
+	 private static final ElevatorHandler instance = new ElevatorHandler();
+	    private ElevatorHandler(){
+	        if(instance != null){
+	            throw new IllegalStateException("Already instantiated");
+	        }
+	        setStopController(false);
+	        initializeElevators();
+	    
 
-		// Construct a datagram socket and bind it to port 5000 
+		// Construct a datagram socket and bind it to port 69 
 		// on the local host machine. This socket will be used to
 		// receive UDP Datagram packets. 
 		try {
-			receiveSocket = new DatagramSocket(69);
+			receiveSocket = new DatagramSocket(68);
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -39,9 +42,7 @@ public class ElevatorHandler implements Runnable{
 	}
 
 	// static method to create instance of class 
-	public static ElevatorHandler getHandler(int numFloors){ 
-		if (instance == null) 
-			instance = new ElevatorHandler(numFloors); 
+	public static ElevatorHandler getHandler(){ 
 		return instance; 
 	}
 
@@ -54,7 +55,7 @@ public class ElevatorHandler implements Runnable{
 		while(notDone) {
 			// Construct a DatagramPacket for receiving packets up 
 			// to 100 bytes long (the length of the byte array).
-			byte data[] = new byte[100];
+			byte data[] = new byte[5];
 			receivePacket = new DatagramPacket(data, data.length);
 
 			try {
@@ -76,30 +77,45 @@ public class ElevatorHandler implements Runnable{
 			System.out.println("Length: " + len);
 			System.out.println("Containing: ");
 			// Form a String from the byte array.
-			System.out.println("(Bytes) " + Arrays.toString(data) + "\n");
+			System.out.println("(Bytes) " + Arrays.toString(data));
 
 			if(data[0]==-1) {
 				notDone = false;
 			} else {
+				 Elevator elevator = null;
 				DataPacket dp = new DataPacket(data);
-				
-				for (int i = 0; i<elevatorList.length;i++) {
-					if(elevatorList[i].getId() == dp.getId()) {
-						try {
-							elevatorList[i].receiveAndEcho(dp, receivePacket);//give the data to the elevator
-						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
+				int id = dp.getId();
+				  elevator = findElevator(id);
+				  System.out.println("calling elevator " + id + "\n");
+				  try {
+					elevator.receiveAndEcho(dp, receivePacket);
+				} catch (ClassNotFoundException | IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
+			
 		}
 
 	}
+    public synchronized Elevator selectElevator(int id) {
+        Elevator elevator = null;
+        
+        elevator = findElevator(id);
+        // So that elevators can start moving again.
+        notifyAll();
+        return elevator;
+    }
+	
+    private static void initializeElevators(){
+        for(int i=0; i<3; i++){
+            Elevator elevator = new Elevator(i);
+            Thread t = new Thread(elevator);
+            t.start();
+
+            elevatorList.add(elevator);
+        }
+    }
 
 	/**
 	 * Thread run class
@@ -109,10 +125,27 @@ public class ElevatorHandler implements Runnable{
 		listen();
 
 	}
+	
+	  /**
+     * Right now, the findElevator is only based on id
+     * TODO in the future, findElevator will take (movingDirection, DestinationFloor, RequestFloor) as param
+     * 		so we can use hash map
+     * @param id
+     * @return selected elevator
+     */
+    private static Elevator findElevator(int id) {
+        Elevator elevator = null;
+       elevator =  elevatorList.get(id);
+        return elevator;
+    }
+	
+	   public void setStopController(boolean stop){
+	        this.stopController = stop;
+
+	    }
 
 	public static void main(String args[]){
-		ElevatorHandler eh = new ElevatorHandler(10);
-		eh.run();
+		instance.run();
 	}
 
 }
