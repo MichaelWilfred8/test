@@ -32,6 +32,10 @@ FloorHandler.java: The handler class for the floor subsystem. Creates each insta
 
 FloorLamp.java: A class that represents the direction lamps on the floor. Holds their direction and state.
 
+GenericThreadedListener: A threaded class that will listen for requests and add them to a queue.
+
+GenericThreadedSender.java: A threaded class that will send requests placed within the queue. 
+
 Scheduler.java: The scheduler class. Gets requests from the floor and elevator subsystem and controls the elevators. 
 
 Test.java: Used to read the csv input file and send requests to the floor
@@ -53,13 +57,13 @@ SubsystemType.java: an Enumerated type used in the DataPacket class that represe
 ====================================================================
 Breakdown of responsibilities:
 
-Hongbo Pang: Elevator.java
+Hongbo Pang: Elevator.java, ElevatorHandler.java
 
 Rahul Patel: Button.java, Direction.java, ElevatorHandler.java, Floor.java, FloorButton.java, FloorHandler.java, FloorLamp.java, UML Class Diagram
 
-Michael Wilfred: Test.java
+Michael Wilfred: Test.java, Scheduler.java
 
-Craig Worthington: DataPacket.java, DoorState.java, ElevatorInputPacket.java, ElevatorStatus.java, FloorLampState.java, MotorState.java, OriginType.java, Scheduler.java, SubsystemType.java, TimeStamp.java, README.txt
+Craig Worthington: DataPacket.java, DoorState.java, ElevatorInputPacket.java, ElevatorStatus.java, FloorLampState.java, GenericThreadedListener.java, GenericThreadedSender.java, MotorState.java, OriginType.java, Scheduler.java, SubsystemType.java, TimeStamp.java, README.txt
 
 Haohan Zhang:
 

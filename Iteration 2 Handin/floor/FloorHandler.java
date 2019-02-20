@@ -22,14 +22,10 @@ public class FloorHandler{
 
 	private static final int DIRECTION_BYTE = 0;//location of direction byte in incoming message
 
-	//private static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(32);//Floor port number
-	//private static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(69);//Elevator port number
-	//
-	
-	private static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(SocketPort.FLOOR_LISTENER.getValue());//Floor port number
-	private static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(SocketPort.ELEVATOR_LISTENER.getValue());//Elevator port number
-	private static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(SocketPort.SCHEDULER_LISTENER.getValue());//Scheduler port number
-	
+	private static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(32);//Floor port number
+	private static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(69);//Elevator port number
+	private static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(23);//Scheduler port number
+
 	private boolean listening = true;//whether the FloorHandler is listening for incoming messages
 
 	GenericThreadedSender floorSender;		// Sender thread that sends all processed DataPackets to their destination
@@ -45,7 +41,7 @@ public class FloorHandler{
 		this.outputBuffer = new ArrayBlockingQueue<DataPacket>(21);
 
 		floorSender = new GenericThreadedSender(outputBuffer, ELEVATOR_PORT_NUMBER, SCHEDULER_PORT_NUMBER, FLOOR_PORT_NUMBER);		
-		floorListener = new GenericThreadedListener(inputBuffer, new InetSocketAddress(SocketPort.FLOOR_LISTENER.getValue()).getPort());
+		floorListener = new GenericThreadedListener(inputBuffer, new InetSocketAddress(32).getPort());
 
 		Thread sender = new Thread(floorSender);
 		Thread receiver = new Thread(floorListener);

@@ -30,6 +30,7 @@ public class ElevatorStatus {
 	private boolean[] floorButtonLights;		// boolean array containing the state of the lights of all the floor buttons in the elevator. Array is indexed from zero so the light for floor 3 is stored at floorButtonLight[2]
 	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
 	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
+	private SocketAddress address;				// SocketAddress of the elevator
 	public int id;
 
 	/**
@@ -40,7 +41,7 @@ public class ElevatorStatus {
 	 * @param doorState			State of the elevator doors (open, closed)
 	 * @param numFloors			Number of floors in the building
 	 */
-	public ElevatorStatus(int currentFloor, MotorState motorState, DoorState doorState, int numFloors, int id){
+	public ElevatorStatus(int currentFloor, MotorState motorState, DoorState doorState, int numFloors, SocketAddress address, int id){
 		this.position = currentFloor;
 		this.tripDir = Direction.UP;
 		this.floorsToVisit = new TreeSet<Integer>();	// TreeSet is an implementation of the SortedSet interface
@@ -56,6 +57,8 @@ public class ElevatorStatus {
 		for(int i = 0; i < numFloors; ++i){
 			floorButtonLights[i] = false;
 		}
+
+		this.address = address;
 		
 		this.id = id;
 	}
@@ -214,6 +217,24 @@ public class ElevatorStatus {
 
 
 
+	/**
+	 * @return the address
+	 */
+	public SocketAddress getAddress() {
+		return address;
+	}
+
+
+
+	/**
+	 * @param address the address to set
+	 */
+	public void setAddress(SocketAddress address) {
+		this.address = address;
+	}
+
+
+
 	//TODO: Determine if this function should be in the elevatorStatus class or in the scheduler class!
 	/**
 	 * Determines the next floor for this elevator to visit. Will try to find the nearest floor in the direction of the trip the
@@ -352,7 +373,7 @@ public class ElevatorStatus {
 	}
 
 	public static void main(String args[]) throws UnknownHostException{
-		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, new InetSocketAddress(InetAddress.getLocalHost(), 4000), 1);
 
 		System.out.println(e.toString());
 	}
