@@ -58,7 +58,7 @@ public class Elevator implements Runnable {
 	public Elevator(int id){
 		try {
 
-			sendSocket = new DatagramSocket();
+			sendSocket = new DatagramSocket(SocketPort.ELEVATOR_SENDER.getValue() + id);
 
 		} catch (SocketException se) {
 			se.printStackTrace();

@@ -2,6 +2,7 @@ package scheduler;
 
 import java.util.concurrent.BlockingQueue;
 
+import Enums.Direction;
 import Enums.DoorState;
 import Enums.MotorState;
 import Enums.OriginType;
@@ -52,8 +53,47 @@ public class NewNewScheduler {
 	}
 	
 	
-	private void handleNewRequest(DataPacket p){
+	/**
+	 * Find the nearest elevator to the given floor that is travelling in the correct direction
+	 * 
+	 * @param floor		The floor on which the request was made
+	 * @param dir		The direction in which the request is
+	 * @return			The elevator which can best serve this request
+	 */
+	private int findNearestElevator(int floor, Direction dir){
+		int carNum = 0;	// Current best candidate to serve the request
 		
+		// Cycle through all elevators
+		for(int i = 0; i < car.length; ++i){
+			if (dir == Direction.UP){
+				// If car is below the given floor and is traveling up
+				if ((car[i].getPosition() < floor) && (car[i].getTripDir() == Direction.UP)){
+					// If car is above the current best candidate
+					if (car[i].getPosition() > car[carNum].getPosition()){
+						carNum = i;
+					}
+				}
+			
+			} else if (dir == Direction.DOWN){
+				// If car is above the given floor and is traveling down
+				if ((car[i].getPosition() > floor) && (car[i].getTripDir() == Direction.DOWN)){
+					// If car is below the current best candidate
+					if (car[i].getPosition() > car[carNum].getPosition()){
+						carNum = i;
+					}
+				}
+			}
+			
+		}
+		
+		return carNum;
+	}
+	
+	private void handleNewRequest(DataPacket p){
+		// If request came from inside elevator, then add request to set inside elevatorStatus
+		
+		
+		// If request came from outside elevator, then findNearestElevator and add request to the queue
 	}
 	
 	

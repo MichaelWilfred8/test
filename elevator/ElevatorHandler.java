@@ -31,7 +31,7 @@ public class ElevatorHandler implements Runnable{
 		// on the local host machine. This socket will be used to
 		// receive UDP Datagram packets. 
 		try {
-			receiveSocket = new DatagramSocket(68);
+			receiveSocket = new DatagramSocket(SocketPort.ELEVATOR_LISTENER.getValue());
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
