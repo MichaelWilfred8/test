@@ -79,9 +79,11 @@ public class FloorHandler{
 	}
 
 	public void createRequest(String[] input) {
+		System.out.println("Input = " + input.toString());
 		for (int i=0;i<floors.length;i++) {
 			if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
 				floors[i].newRequest(input);
+				
 			}
 		}
 	}

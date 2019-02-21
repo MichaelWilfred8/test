@@ -53,7 +53,7 @@ public class Test{
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
 		BufferedReader fileReader = null;//instantiate file reader
-		final String DELIMITER = " ";//Delimiter used in CSV file
+		final String DELIMITER = ",";//Delimiter used in CSV file
 		try{
 			String line = "";//build string into line
 
@@ -124,7 +124,7 @@ public class Test{
 			}
 
 
-			long formattedDate=date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
+			long formattedDate = date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
 			handler.createRequest(x[i]);
 			//System.out.println("WAITING");

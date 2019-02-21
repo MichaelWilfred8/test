@@ -163,8 +163,17 @@ public class SchedulerHandler {
 			e.printStackTrace();
 		}
 		
+		// If the packet is a request then place it in the processedinputbuffer
+		if (tempPacket.getSubSystem() == SubsystemType.REQUEST){
+			try {
+				this.processedInputBuffer.put(tempPacket);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 		// Check if the received packet is an echo from another subsystem
-		if (!this.checkIfEcho(tempPacket)){
+		} else if (!this.checkIfEcho(tempPacket)){
 			try {	// If not an echo, add tempPacket to the processedOutputBuffer to be sent
 				this.processedInputBuffer.put(tempPacket);
 			} catch (InterruptedException e) {
