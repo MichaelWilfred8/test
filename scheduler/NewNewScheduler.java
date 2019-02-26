@@ -13,6 +13,8 @@ public class NewNewScheduler {
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
 	ElevatorStatus car[];
 	
+	//TODO: send messaage to open/close doors, send message to toggle motor
+	
 	public NewNewScheduler(BlockingQueue<DataPacket> inputBuffer, BlockingQueue<DataPacket> outputBuffer, int numElevators, int numFloors){
 		this.inputBuffer = inputBuffer;
 		this.outputBuffer = outputBuffer;

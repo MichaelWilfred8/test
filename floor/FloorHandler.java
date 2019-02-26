@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -79,7 +80,7 @@ public class FloorHandler{
 	}
 
 	public void createRequest(String[] input) {
-		System.out.println("Input = " + input.toString());
+		System.out.println("Input = " + Arrays.toString(input));
 		for (int i=0;i<floors.length;i++) {
 			if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
 				floors[i].newRequest(input);
