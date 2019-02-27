@@ -248,6 +248,9 @@ public class ElevatorStatus {
 		if (this.tripDir == Direction.UP){
 			// TODO: find more efficient way of looking through the sorted set
 			Integer[] tempFloorArray =  new Integer[this.floorsToVisit.size()];
+			System.out.println("FLOOR TO VISIT SIZE: " + this.floorsToVisit.size());
+			System.out.println("FLOORS TO VISIT: " + Arrays.toString(floorsToVisit.toArray()));
+			
 			tempFloorArray = this.floorsToVisit.toArray(tempFloorArray);
 
 			// iterate through all the floors in the list to find the nearest floor to visit above the current floor
@@ -263,7 +266,7 @@ public class ElevatorStatus {
 
 			// If there are no more floors to visit above the elevator's current floor then find the nearest floor below the elevator
 			// iterate through all the floors in the list to find the nearest floor to visit below the current floor
-			for(int i = tempFloorArray.length; i >= 0; --i){
+			for(int i = tempFloorArray.length-1; i >= 0; --i){
 				if (tempFloorArray[i] < this.position){
 
 					this.setTripDir(Direction.UP); 			// Change direction to down

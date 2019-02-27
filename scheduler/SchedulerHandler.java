@@ -6,11 +6,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import Enums.DoorState;
 import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.*;
@@ -47,10 +46,10 @@ public class SchedulerHandler {
 	 * SchedulerHandler constructor
 	 */
 	public SchedulerHandler(){
-		this.rawInputBuffer = new PriorityBlockingQueue<DataPacket>();
-		this.rawOutputBuffer = new PriorityBlockingQueue<DataPacket>();
-		this.processedInputBuffer = new PriorityBlockingQueue<DataPacket>();
-		this.processedOutputBuffer = new PriorityBlockingQueue<DataPacket>();
+		this.rawInputBuffer = new LinkedBlockingQueue<DataPacket>();
+		this.rawOutputBuffer = new LinkedBlockingQueue<DataPacket>();
+		this.processedInputBuffer = new LinkedBlockingQueue<DataPacket>();
+		this.processedOutputBuffer = new LinkedBlockingQueue<DataPacket>();
 		this.echoBuffer = new ArrayList<TimestampedPacket>();
 	}
 	
