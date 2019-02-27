@@ -23,23 +23,13 @@ public class Test{
 		handler = FloorHandler.getHandler();
 
 	}
-
-	/**
-	 * @param input string of first line in csv
-	 * used to set start time of system
-	 */
-	public void getStartTime(String[] input) {
-		String time = input[0];
-	}
-
+	
 	public void runTest() {
 
 		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
-		getStartTime(testLines[0]);
-		String[] output;
 		try {
-			organizer(getFile(fileToParse), handler);
+			organizer(testLines, handler);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -127,9 +117,9 @@ public class Test{
 			long formattedDate = date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
 			handler.createRequest(x[i]);
-			//System.out.println("WAITING");
-			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
-			//System.out.println("DONE WAITING\n");
+			System.out.println("WAITING");
+			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			System.out.println("DONE WAITING\n");
 
 		}
 	}
