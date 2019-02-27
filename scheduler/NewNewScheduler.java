@@ -118,9 +118,10 @@ public class NewNewScheduler implements Runnable {
 		
 		System.out.println("IN HERE: " + p.toString());
 		// check if request came from the floor (up/down)
-		if (p.getBytes()[FLOOR_INDEX] == -1){
+		if ((int) p.getStatus()[FLOOR_INDEX] == -1){
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		} else {
+			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
 			// Find elevator that is on the same floor as the request
 			for(int i = 0; i < car.length; ++i){
 				if (car[i].getPosition() == (int) p.getId()){
