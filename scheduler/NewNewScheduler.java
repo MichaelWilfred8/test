@@ -10,65 +10,69 @@ import Enums.SubsystemType;
 import shared.DataPacket;
 
 public class NewNewScheduler implements Runnable {
-	
+
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
 	ElevatorStatus car[];
-	
+
 	private static final int FLOOR_INDEX = 17;
 	private static final int DIR_INDEX = 16;
-	
+
 	//TODO: send messaage to open/close doors, send message to toggle motor
-	
+
 	// TODO: send message to floors to update lamp
-	
+
 	public NewNewScheduler(BlockingQueue<DataPacket> inputBuffer, BlockingQueue<DataPacket> outputBuffer, int numElevators, int numFloors){
 		this.inputBuffer = inputBuffer;
 		this.outputBuffer = outputBuffer;
 		this.car = new ElevatorStatus[numElevators];
-		
+
 		// Initialize each ElevatorStatus to being on the first floor with the motors off and the doors closed
 		for(int i = 0; i < numElevators; ++i){
 			this.car[i] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, numFloors, i);
 		}
 	}
-	
+
 	/*
 	 * To access info from the inputBuffer:
 	 * DataPacket packet = new DataPacket(inputBuffer.take());
-	 * 
+	 *
 	 */
-	
+
 	/**
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
+		System.out.println("WAITING FOR AN INPUT");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-		
+
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-		
+		System.out.println("INPUT RETRIEVED");
+
+
+
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if (input.getSubSystem() == SubsystemType.REQUEST) {
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
-		
-		
+
+
 		// If the input came from an elevator
 		if (input.getOrigin() == OriginType.ELEVATOR){
 			this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
 			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
 		}
 	}
-	
-	
+
+
 	/**
 	 * Find the nearest elevator to the given floor that is travelling in the correct direction
-	 * 
+	 *
 	 * @param floor		The floor on which the request was made
 	 * @param dir		The direction in which the request is
 	 * @return			The elevator which can best serve this request
@@ -76,7 +80,7 @@ public class NewNewScheduler implements Runnable {
 	// TODO: look for idle elevators
 	private int findNearestElevator(int floor, Direction dir){
 		int carNum = 0;	// Current best candidate to serve the request
-		
+
 		// Cycle through all elevators
 		for(int i = 0; i < car.length; ++i){
 			if (dir == Direction.UP){
@@ -87,7 +91,7 @@ public class NewNewScheduler implements Runnable {
 						carNum = i;
 					}
 				}
-			
+
 			} else if (dir == Direction.DOWN){
 				// If car is above the given floor and is traveling down
 				if ((car[i].getPosition() > floor) && (car[i].getTripDir() == Direction.DOWN)){
@@ -97,12 +101,12 @@ public class NewNewScheduler implements Runnable {
 					}
 				}
 			}
-			
+
 		}
-		
+
 		return carNum;
 	}
-	
+
 	/**
 	 * Handle a new request for an elevator to visit a floor
 	 * @param p	The DataPacket that contains the request
@@ -111,24 +115,24 @@ public class NewNewScheduler implements Runnable {
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
-		
+			System.out.println("IN HERE: " + p.toString());
 		// check if request came from the floor (up/down)
 		if (p.getBytes()[FLOOR_INDEX] == -1){
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		}
-		
+
 		else if (p.getOrigin() == OriginType.ELEVATOR) {
 			car[(int) p.getId()].addFloor((int) p.getStatus());
 		}
 	}
-	
+
 	/**
 	 * Send the next step in the process back to the elevator
 	 * @param 	p	The DataPacket retrieved from the inputBuffer
 	 */
 	private void sendNextStep(DataPacket p) {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Packet to return to the elevator.
-		
+
 		// If the echo was from the motor system
 		if (p.getSubSystem() == SubsystemType.MOTOR) {
 			// If the echo was the motor turning off and the elevator has arrived at its destination floor
@@ -137,7 +141,7 @@ public class NewNewScheduler implements Runnable {
 				returnPacket.setSubSystem(SubsystemType.DOOR);
 				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
 			}
-			
+
 		} // If the echo was from the door system
 		  else if (p.getSubSystem() == SubsystemType.DOOR) {
 			// If elevator has successfully closed its doors
@@ -158,14 +162,14 @@ public class NewNewScheduler implements Runnable {
 		} else if (p.getSubSystem() == SubsystemType.LOCATION) {
 			// Update the car status with the location
 			car[(int) p.getId()].update(p);
-			
+
 			// if car has reached destination
 			if ((int) p.getStatus()[0] == car[(int) p.getId()].getNextDestination()) {
 				returnPacket.setSubSystem(SubsystemType.MOTOR);
 				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
 			}
 		}
-		
+
 		// If the returnPacket has been modified, then add it to the output buffer to be sent
 		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {
 			try {
@@ -185,5 +189,5 @@ public class NewNewScheduler implements Runnable {
 			handleInput();
 		}
 	}
-	
+
 }
