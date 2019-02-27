@@ -343,13 +343,18 @@ public class ElevatorStatus {
 
 	@Override
 	public String toString() {
-		return "ElevatorStatus [position=" + position + ", tripDir=" + tripDir + ", floorsToVisit=" + floorsToVisit
+		/*return "ElevatorStatus [position=" + position + ", tripDir=" + tripDir + ", floorsToVisit=" + floorsToVisit
 				+ ", motorState=" + motorState + ", doorState=" + doorState + ", floorButtonLights="
-				+ Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR + ", MAX_FLOOR=" + MAX_FLOOR + "]";
+				+ Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR + ", MAX_FLOOR=" + MAX_FLOOR + "]";*/
+		return "ElevatorStatus [position=" + position + ", tripDir=" + tripDir + ", floorsToVisit=" + floorsToVisit
+				+ ", motorState=" + motorState + ", doorState=" + doorState;
 	}
 
 	public static void main(String args[]) throws UnknownHostException{
 		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		
+		ElevatorStatus[3] = new ElevatorStatus[3];
+		{new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1)}
 		
 		System.out.println(e.toString());
 	}
