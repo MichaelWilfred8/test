@@ -53,7 +53,7 @@ public class ElevatorStatus {
 		for(int i = 0; i < numFloors; ++i){
 			floorButtonLights[i] = false;
 		}
-		
+
 		this.id = id;
 	}
 
@@ -352,10 +352,10 @@ public class ElevatorStatus {
 
 /*	public static void main(String args[]) throws UnknownHostException{
 		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
-		
+
 		ElevatorStatus[3] = new ElevatorStatus[3];
 		{new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1)}
-		
+
 		System.out.println(e.toString());
 	}*/
 
