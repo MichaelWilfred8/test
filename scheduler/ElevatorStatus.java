@@ -350,13 +350,13 @@ public class ElevatorStatus {
 				+ ", motorState=" + motorState + ", doorState=" + doorState;
 	}
 
-	public static void main(String args[]) throws UnknownHostException{
+/*	public static void main(String args[]) throws UnknownHostException{
 		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
 		
 		ElevatorStatus[3] = new ElevatorStatus[3];
 		{new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1)}
 		
 		System.out.println(e.toString());
-	}
+	}*/
 
 }
