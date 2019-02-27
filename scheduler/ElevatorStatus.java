@@ -53,7 +53,7 @@ public class ElevatorStatus {
 		for(int i = 0; i < numFloors; ++i){
 			floorButtonLights[i] = false;
 		}
-		
+
 		this.id = id;
 	}
 
@@ -187,7 +187,7 @@ public class ElevatorStatus {
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
-		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set			
+		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
 		this.nextDestination = this.getNextFloor();		// set the next destination floor
 	}
 
@@ -309,17 +309,17 @@ public class ElevatorStatus {
 
 		return this.position;	// if a new floor cannot be determined then stay on this floor
 	}
-	
-	
+
+
 	/**
 	 * Get the next destination floor above the current floor
 	 * @return The closest floor above the elevator's current floor that is to be visited. Returns null if there are no floors to be visited above
 	 */
 	private Integer getNextDestFloorAbove(){
 		SortedSet<Integer> tempSet;	// Temporary set to store head sets and tail sets
-		
+
 		tempSet = this.floorsToVisit.tailSet(this.position); // Create a set of all floors to be visited above this current floor
-		
+
 		// If there are no floors to visit above this current floor then return null
 		if(tempSet.isEmpty()){
 			return null;
@@ -327,17 +327,17 @@ public class ElevatorStatus {
 			return tempSet.first();	// Return the closest floor to be visited that is above the current floor
 		}
 	}
-	
-	
+
+
 	/**
 	 * Get the next destination floor below the current floor
 	 * @return The closest floor below the elevator's current floor that is to be visited. Returns null if there are no floors to be visited below
 	 */
 	private Integer getNextDestFloorBelow(){
 		SortedSet<Integer> tempSet;	// Temporary set to store head sets and tail sets
-		
+
 		tempSet = this.floorsToVisit.headSet(this.position); // Create a set of all floors to be visited above this current floor
-		
+
 		// If there are no floors to visit above this current floor then return null
 		if(tempSet.isEmpty()){
 			return null;
@@ -345,54 +345,54 @@ public class ElevatorStatus {
 			return tempSet.last();	// Return the closest floor to be visited that is above the current floor
 		}
 	}
-	
+
 	/**
 	 * Get the next floor for this elevator to visit
 	 * @return The next floor this elevator has to stop at
 	 */
 	private Integer newgetNextFloor(){
 		Integer nextFloor = 1;
-		
-		// Check if floorsToVisit is empty (no floors for this elevator to visit) 
+
+		// Check if floorsToVisit is empty (no floors for this elevator to visit)
 		if (this.floorsToVisit.isEmpty()){	// If true
 			return this.getPosition();		// Return the current position of the elevator
 		}
-		
+
 		// check if the elevator is on an upwards trip
 		if (this.getTripDir() == Direction.UP){
 			// check if the elevator is at the top floor
 			if (this.position == this.MAX_FLOOR){
 				// Change the trip direction of the elevator
 				this.setTripDir(Direction.DOWN);
-				
+
 				nextFloor = getNextDestFloorBelow();	// set nextFloor equal to the closest destination floor below the elevator
-				
+
 				// check if there are no destination floors below to visit
 				if (nextFloor == null){
 					return this.getPosition();	// remain at this position
 				}
 			} else {
 				nextFloor = getNextDestFloorAbove();	// set nextFloor equal to the closest destination floor above the current floor
-				
+
 				if (nextFloor == null){
 					// TODO: find out what to do here
 				} else {
 					return nextFloor;
 				}
-				
+
 			}
 		} else if (this.getTripDir() == Direction.DOWN) {
 			// Check if elevator is at the bottom floor
 			if(this.position == this.MIN_FLOOR){
 				this.tripDir = Direction.UP;	// change trip direction
-				
+
 				nextFloor = getNextDestFloorAbove();	// set nextFloor equal to the nearest destination floor above the current floor
-				
+
 				// if nextFloor is null, there are no destination floors above the current floor
 				if(nextFloor == null){
 					this.tripDir = Direction.DOWN; // Change the trip direction to down
 					nextFloor = getNextDestFloorBelow();
-					
+
 					// If there are no destination floors below
 					if (nextFloor == null){
 						return this.getPosition();	// remain at current floor
@@ -402,12 +402,12 @@ public class ElevatorStatus {
 				}
 			} else {
 				nextFloor = getNextDestFloorBelow();
-				
+
 				// if nextFloor is null, there are no destination floors above the current floor
 				if(nextFloor == null){
 					this.tripDir = Direction.DOWN; // Change the trip direction to down
 					nextFloor = getNextDestFloorBelow();
-					
+
 					// If there are no destination floors below
 					if (nextFloor == null){
 						return this.getPosition();	// remain at current floor
@@ -419,7 +419,7 @@ public class ElevatorStatus {
 				}
 			}
 		}
-		
+
 		return nextFloor;
 	}
 
@@ -444,11 +444,11 @@ public class ElevatorStatus {
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				// If the elevator is at its destination floor, remove it from the 
+				// If the elevator is at its destination floor, remove it from the
 				if (this.position == this.nextDestination){
 					this.floorsToVisit.remove(this.position);	// remove the current position from floors to visit
 				}
-				
+
 				System.out.println("position was updated to " + this.getPosition());
 				break;
 			default:
@@ -465,27 +465,27 @@ public class ElevatorStatus {
 				+ ", floorButtonLights=" + Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR
 				+ ", MAX_FLOOR=" + MAX_FLOOR + ", id=" + id + "]";
 	}
-	
-	
+
+
 
 	public static void main(String args[]) throws UnknownHostException{
 		ElevatorStatus car[] = new ElevatorStatus[3];
-		
+
 		car[0] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
 		car[1] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
 		car[2] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
-		
+
 		System.out.println("car[0] = " + car[0].toString());
 		//System.out.println("car[1] = " + car[1].toString());
 		//System.out.println("car[2] = " + car[2].toString() + "\n");
-		
+
 		car[0].addFloor(4);
 		car[0].addFloor(5);
-		
+
 		ElevatorStatus test1 = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
 		//test1.addFloor(4);
 		//System.out.println(test1.toString());
-		
+
 		System.out.println("car[0] = " + car[0].toString());
 		//System.out.println("car[1] = " + car[1].toString());
 		//System.out.println("car[2] = " + car[2].toString() + "\n");

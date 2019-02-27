@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.*;
 
@@ -26,11 +27,11 @@ public class FloorHandler{
 	//private static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(32);//Floor port number
 	//private static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(69);//Elevator port number
 	//
-	
+
 	private static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(SocketPort.FLOOR_LISTENER.getValue());//Floor port number
 	private static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(SocketPort.ELEVATOR_LISTENER.getValue());//Elevator port number
 	private static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(SocketPort.SCHEDULER_LISTENER.getValue());//Scheduler port number
-	
+
 	private boolean listening = true;//whether the FloorHandler is listening for incoming messages
 
 	GenericThreadedSender floorSender;		// Sender thread that sends all processed DataPackets to their destination
@@ -56,10 +57,10 @@ public class FloorHandler{
 		for (int i=0; i<floors.length; i++) {//create each floor object
 			floors[i] = new Floor(MAX_FLOORS, i+1, outputBuffer);//send the floor constructor the max floor and floor number
 		}
-		
+
 		sender.start();
 		receiver.start();
-		
+
 	}
 
 	/**
@@ -81,26 +82,32 @@ public class FloorHandler{
 
 	public void createRequest(String[] input) {
 		System.out.println("Input = " + Arrays.toString(input));
-		for (int i=0;i<floors.length;i++) {
-			if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
-				floors[i].newRequest(input);
-				
+		if (input[2].equalsIgnoreCase("ERROR")) {//if an error is sent from the .csv file
+			byte[] errorPacketContents = {(byte) Integer.parseInt(input[3]), 1};//adds the byte of the integer representation of the Enum of the system that has failed
+			DataPacket errorPacket = new DataPacket(OriginType.ELEVATOR, (byte) Integer.parseInt(input[1]),SubsystemType.ERROR, errorPacketContents); //forms error packet to be sent
+			floors[0].sendRequest(errorPacket);//places error message in queue to be sent to scheudler	
+		} else {
+			for (int i=0;i<floors.length;i++) {
+				if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
+					floors[i].newRequest(input);
+
+				}
 			}
 		}
 	}
 
 	public void listen() {
-		
+
 		while(listening) {
-			
+
 			DataPacket input = inputBuffer.poll();
 
 			if (input != null && input.getSubSystem() == SubsystemType.FLOORLAMP) {
 				System.out.println("DATAPACKET: " + input.toString() + "\n");
-				
+
 				Floor targetFloor = floors[input.getId()-1];
 				targetFloor.elevatorArrived(input.getStatus()[DIRECTION_BYTE]);
-				
+
 			} else {
 				try {
 					Thread.sleep(100);
