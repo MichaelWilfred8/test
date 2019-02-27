@@ -1,8 +1,5 @@
 package scheduler;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.SortedSet;
@@ -331,7 +328,7 @@ public class ElevatorStatus {
 				System.out.println("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
-				//TODO: handle updates from elevator about floor lights
+				//TODO: handle updates from elevator about floor lights. Remove?
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);

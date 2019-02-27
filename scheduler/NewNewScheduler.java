@@ -6,6 +6,7 @@ import Enums.Direction;
 import Enums.DoorState;
 import Enums.MotorState;
 import Enums.OriginType;
+import Enums.SubsystemType;
 import shared.DataPacket;
 
 public class NewNewScheduler {
@@ -32,6 +33,9 @@ public class NewNewScheduler {
 	 * 
 	 */
 	
+	/**
+	 * Handle an input from the inputBuffer
+	 */
 	private void handleInput(){
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
 		
@@ -41,10 +45,17 @@ public class NewNewScheduler {
 			System.err.println(ie);
 		}
 		
+		// TODO: Where does request come from? Elevator or Floor?
+		// If the input was a request
+		if (input.getSubSystem() == SubsystemType.REQUEST) {
+			this.handleNewRequest(input); 	// Send request to handleNewRequest
+		}
+		
 		// If the input came from an elevator
 		if (input.getOrigin() == OriginType.ELEVATOR){
 			this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
 			// TODO: get next step from elevatorStatus
+			this.sendNextStep(input);
 		}
 		
 		// If the input was a request from a floor
@@ -62,6 +73,7 @@ public class NewNewScheduler {
 	 * @param dir		The direction in which the request is
 	 * @return			The elevator which can best serve this request
 	 */
+	// TODO: look for idle elevators
 	private int findNearestElevator(int floor, Direction dir){
 		int carNum = 0;	// Current best candidate to serve the request
 		
@@ -91,12 +103,81 @@ public class NewNewScheduler {
 		return carNum;
 	}
 	
+	/**
+	 * Handle a new request for an elevator to visit a floor
+	 * @param p	The DataPacket that contains the request
+	 */
+	// TODO: Ensure that this fits the format used for requests
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
-		
-		
+		if (p.getOrigin() == OriginType.ELEVATOR) {
+			car[(int) p.getId()].addFloor((int) p.getStatus()[0]);
+		}
 		// If request came from outside elevator, then findNearestElevator and add request to the queue
+		else if (p.getOrigin() == OriginType.FLOOR) {
+			car[findNearestElevator((int) p.getStatus()[0], Direction.convertFromByte(p.getStatus()[1]))].addFloor((int) p.getStatus()[0]);
+		}
 	}
 	
+	/**
+	 * Send the next step in the process back to the elevator
+	 * @param 	p	The DataPacket retrieved from the inputBuffer
+	 */
+	private void sendNextStep(DataPacket p) {
+		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Packet to return to the elevator.
+		
+		// If the echo was from the motor system
+		if (p.getSubSystem() == SubsystemType.MOTOR) {
+			// If the echo was the motor turning off and the elevator has arrived at its destination floor
+			if((p.getStatus()[0] == MotorState.OFF.getByte()) && (car[(int) p.getId()].getPosition() == car[(int) p.getId()].getNextDestination())){
+				// create a DataPacket to open the doors for the elevator
+				returnPacket.setSubSystem(SubsystemType.DOOR);
+				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
+			}
+			
+		} // If the echo was from the door system
+		  else if (p.getSubSystem() == SubsystemType.DOOR) {
+			// If elevator has successfully closed its doors
+			if(p.getStatus()[0] == DoorState.CLOSED.getByte()) {
+				// TODO: make sure elevator is going in correct direction
+				// send new motor direction to the elevator
+				// If elevator is on an upwards trip
+				if(car[(int) p.getId()].getTripDir() == Direction.UP) {
+					returnPacket.setSubSystem(SubsystemType.MOTOR);
+					returnPacket.setStatus(new byte[] {MotorState.UP.getByte()});
+				} // If elevator is on a downwards trip
+				else if (car[(int) p.getId()].getTripDir() == Direction.DOWN) {
+					returnPacket.setSubSystem(SubsystemType.MOTOR);
+					returnPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
+				}
+			}
+		// If the packet is the current location of the elevator
+		} else if (p.getSubSystem() == SubsystemType.LOCATION) {
+			// Update the car status with the location
+			car[(int) p.getId()].update(p);
+			
+			// if car has reached destination
+			if ((int) p.getStatus()[0] == car[(int) p.getId()].getNextDestination()) {
+				returnPacket.setSubSystem(SubsystemType.MOTOR);
+				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+			}
+		}
+		
+		// If the returnPacket has been modified, then add it to the output buffer to be sent
+		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {
+			try {
+				outputBuffer.add(returnPacket);
+			} catch (IllegalStateException ise) {
+				ise.printStackTrace();
+				System.exit(0);
+			}
+		}
+	}
+	
+	public void mainLoop() {
+		while(true) {
+			handleInput();
+		}
+	}
 	
 }

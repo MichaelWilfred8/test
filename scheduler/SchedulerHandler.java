@@ -37,9 +37,9 @@ public class SchedulerHandler {
 	
 	private static final int TIMEOUT_MILLIS = 1000;
 	
-	public static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(32);		// Floor port number
-	public static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(69);		// Elevator port number
-	public static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(23);	// Scheduler port number
+	public static final SocketAddress FLOOR_PORT_NUMBER = new InetSocketAddress(SocketPort.FLOOR_LISTENER.getValue());			// Floor port number
+	public static final SocketAddress ELEVATOR_PORT_NUMBER = new InetSocketAddress(SocketPort.ELEVATOR_LISTENER.getValue());	// Elevator port number
+	public static final SocketAddress SCHEDULER_PORT_NUMBER = new InetSocketAddress(SocketPort.SCHEDULER_LISTENER.getValue());	// Scheduler port number
 	
 	
 	
@@ -184,6 +184,7 @@ public class SchedulerHandler {
 	}
 	
 	public void mainLoop(){
+		System.out.println("Running schedulerHandler");
 		while(true){
 			this.processIncomingRequest();
 			this.getTimedOutMessage();
@@ -193,8 +194,15 @@ public class SchedulerHandler {
 	
 	public static void main(String args[]){
 		SchedulerHandler s = new SchedulerHandler();
-		GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, 23);
-		GenericThreadedSender sender = new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER);
+		NewNewScheduler scheduler = new NewNewScheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
+		//GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, 23);
+		//GenericThreadedSender sender = new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER);
+		
+		Thread listener = new Thread(new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue()));
+		Thread sender = new Thread(new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER));
+		listener.start();
+		sender.start();
+		scheduler.mainLoop();
 		s.mainLoop();
 	}
 }
