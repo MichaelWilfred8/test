@@ -43,6 +43,7 @@ public class ElevatorStatus {
 		this.floorsToVisit = new TreeSet<Integer>();	// TreeSet is an implementation of the SortedSet interface
 		this.motorState = motorState;
 		this.doorState = doorState;
+		this.nextDestination = 1;
 
 		this.MAX_FLOOR = numFloors;		// set the highest floor in the elevator to the number of all floors in the building
 		this.MIN_FLOOR = 1;				// set the lowest floor in the elevator to 1
@@ -77,6 +78,7 @@ public class ElevatorStatus {
 		if (this.getFloorsToVisit().contains(Integer.valueOf(position))){
 			this.floorsToVisit.remove(Integer.valueOf(position));
 			System.out.println("Removed " + position + " from floorsToVisit");
+			this.setNextDestination(this.getNextFloor());
 		}
 	}
 
@@ -388,6 +390,9 @@ public class ElevatorStatus {
 		car.addFloor(3);
 		System.out.println("car = " + car.toString() + "\n");
 		
+		car.addFloor(7);
+		System.out.println("car = " + car.toString() + "\n");
+		
 		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
 		System.out.println("car = " + car.toString() + "\n");
 		
@@ -401,6 +406,12 @@ public class ElevatorStatus {
 		System.out.println("car = " + car.toString() + "\n");
 		
 		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 5}));
+		System.out.println("car = " + car.toString() + "\n");
+		
+		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 6}));
+		System.out.println("car = " + car.toString() + "\n");
+		
+		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 7}));
 		System.out.println("car = " + car.toString() + "\n");
 	}
 

@@ -16,6 +16,8 @@ public class NewNewScheduler implements Runnable {
 	
 	//TODO: send messaage to open/close doors, send message to toggle motor
 	
+	// TODO: send message to floors to update lamp
+	
 	public NewNewScheduler(BlockingQueue<DataPacket> inputBuffer, BlockingQueue<DataPacket> outputBuffer, int numElevators, int numFloors){
 		this.inputBuffer = inputBuffer;
 		this.outputBuffer = outputBuffer;
@@ -56,8 +58,7 @@ public class NewNewScheduler implements Runnable {
 		// If the input came from an elevator
 		if (input.getOrigin() == OriginType.ELEVATOR){
 			this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
-			// TODO: get next step from elevatorStatus
-			this.sendNextStep(input);
+			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
 		}
 	}
 	
