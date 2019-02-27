@@ -14,6 +14,9 @@ public class NewNewScheduler implements Runnable {
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
 	ElevatorStatus car[];
 	
+	private static final int FLOOR_INDEX = 17;
+	private static final int DIR_INDEX = 16;
+	
 	//TODO: send messaage to open/close doors, send message to toggle motor
 	
 	// TODO: send message to floors to update lamp
@@ -107,13 +110,15 @@ public class NewNewScheduler implements Runnable {
 	// TODO: Ensure that this fits the format used for requests
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
-		// TODO: Request for an elevator to floor has -1 in status[0]
-		if (p.getOrigin() == OriginType.ELEVATOR) {
-			car[(int) p.getId()].addFloor((int) p.getStatus()[0]);
+		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
+		
+		// check if request came from the floor (up/down)
+		if (p.getBytes()[FLOOR_INDEX] == -1){
+			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		}
-		// If request came from outside elevator, then findNearestElevator and add request to the queue
-		else if (p.getOrigin() == OriginType.FLOOR) {
-			car[findNearestElevator((int) p.getStatus()[0], Direction.convertFromByte(p.getStatus()[1]))].addFloor((int) p.getStatus()[0]);
+		
+		else if (p.getOrigin() == OriginType.ELEVATOR) {
+			car[(int) p.getId()].addFloor((int) p.getStatus());
 		}
 	}
 	
