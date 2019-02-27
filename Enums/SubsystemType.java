@@ -1,6 +1,7 @@
 package Enums;
 
 public enum SubsystemType {
+	ERROR(8),
 	MOTOR(7),
 	DOOR(6),
 	CARLAMP(5),
@@ -9,7 +10,8 @@ public enum SubsystemType {
 	INPUT(2),	// TODO: remove input since it is no longer used
 	REQUEST(1);
 	
-	
+	private static final int ERROR_INT = 8;
+	private static final byte ERROR_BYTE = (byte) ERROR_INT;
 	private static final int MOTOR_INT = 7;
 	private static final byte MOTOR_BYTE = (byte) MOTOR_INT;
 	private static final int DOOR_INT = 6;
@@ -38,6 +40,8 @@ public enum SubsystemType {
 	
 	public String toString(){
 		switch(this.value) {
+			case ERROR_INT:
+				return "ERROR";
 			case MOTOR_INT:
 				return "MOTOR";
 			case DOOR_INT:
@@ -65,6 +69,8 @@ public enum SubsystemType {
 	 */
 	public byte getByte(){
 		switch(this.value) {
+			case ERROR_INT:
+				return ERROR_BYTE;
 			case MOTOR_INT:
 				return MOTOR_BYTE;
 			case DOOR_INT:
@@ -93,6 +99,8 @@ public enum SubsystemType {
 	 */
 	public static SubsystemType convertFromByte(byte b){
 		switch(b){
+			case ERROR_BYTE:
+				return ERROR;
 			case MOTOR_BYTE:
 				return MOTOR;
 			case DOOR_BYTE:
