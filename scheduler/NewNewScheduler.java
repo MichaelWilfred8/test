@@ -115,14 +115,19 @@ public class NewNewScheduler implements Runnable {
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
-			System.out.println("IN HERE: " + p.toString());
+		
+		System.out.println("IN HERE: " + p.toString());
 		// check if request came from the floor (up/down)
 		if (p.getBytes()[FLOOR_INDEX] == -1){
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
-		}
-
-		else if (p.getOrigin() == OriginType.ELEVATOR) {
-			car[(int) p.getId()].addFloor((int) p.getStatus());
+		} else {
+			// Find elevator that is on the same floor as the request
+			for(int i = 0; i < car.length; ++i){
+				if (car[i].getPosition() == (int) p.getId()){
+					car[i].addFloor((int) p.getStatus()[FLOOR_INDEX]);
+					break;
+				}
+			}
 		}
 	}
 
