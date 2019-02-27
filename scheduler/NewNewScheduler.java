@@ -37,6 +37,7 @@ public class NewNewScheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
+		System.out.println("WAITING FOR AN INPUT");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
 		
 		try {
@@ -44,6 +45,9 @@ public class NewNewScheduler implements Runnable {
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
+		System.out.println("INPUT RETRIEVED");
+
+
 		
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
@@ -107,6 +111,8 @@ public class NewNewScheduler implements Runnable {
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to floor has -1 in status[0]
+
+		System.out.println("IN HERE: " + p.toString());
 		if (p.getOrigin() == OriginType.ELEVATOR) {
 			car[(int) p.getId()].addFloor((int) p.getStatus()[0]);
 		}

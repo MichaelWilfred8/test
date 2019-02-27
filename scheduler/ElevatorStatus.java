@@ -249,8 +249,6 @@ public class ElevatorStatus {
 		if (this.tripDir == Direction.UP){
 			// TODO: find more efficient way of looking through the sorted set
 			Integer[] tempFloorArray =  new Integer[this.floorsToVisit.size()];
-			System.out.println("FLOOR TO VISIT SIZE: " + this.floorsToVisit.size());
-			System.out.println("FLOORS TO VISIT: " + Arrays.toString(floorsToVisit.toArray()));
 			
 			tempFloorArray = this.floorsToVisit.toArray(tempFloorArray);
 

@@ -200,6 +200,12 @@ public class SchedulerHandler {
 		listener.start();
 		sender.start();
 		scheduler.start();
+		
+		/*sender.setPriority(1);
+		listener.setPriority(2);
+		scheduler.setPriority(3);*/
+		
+		
 		s.mainLoop();
 	}
 }

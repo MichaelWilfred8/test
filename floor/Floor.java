@@ -15,7 +15,7 @@ import shared.*;
 
 // TODO: make not runnable?
 
-public class Floor implements Runnable {
+public class Floor {
 
 	private int floorNumber;//floor number, unique id
 	private FloorButton[] floorButtons;//list of buttons on floor
@@ -23,7 +23,6 @@ public class Floor implements Runnable {
 	private DataPacket [] requests;//list of requests
 	private int requestCount = 0;//where to insert in list of requests
 	private boolean requested;//if an elevator has been requested for this floor
-	private boolean endFloor;//ends the thread of floor
 	private BlockingQueue<DataPacket> output;//threaded sender
 
 	public Floor(int highestFloor, int floorNumber, BlockingQueue<DataPacket> output){
@@ -55,7 +54,6 @@ public class Floor implements Runnable {
 
 		requests = new DataPacket[highestFloor];//can only have as many requests as there are floors
 		requested = false;
-		endFloor = false;
 	}
 
 	/**
@@ -236,11 +234,5 @@ public class Floor implements Runnable {
 		return requested;
 	}
 
-	@Override
-	public void run() {
-		while (!endFloor) {
-
-		}		
-	}
 
 }
