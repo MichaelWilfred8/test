@@ -9,7 +9,7 @@ import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.DataPacket;
 
-public class NewNewScheduler {
+public class NewNewScheduler implements Runnable {
 	
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
 	ElevatorStatus car[];
@@ -45,11 +45,13 @@ public class NewNewScheduler {
 			System.err.println(ie);
 		}
 		
-		// TODO: Where does request come from? Elevator or Floor?
-		// If the input was a request
-		if (input.getSubSystem() == SubsystemType.REQUEST) {
-			this.handleNewRequest(input); 	// Send request to handleNewRequest
+		// If the input was a request from a floor
+		if(input.getOrigin() == OriginType.FLOOR){
+			if (input.getSubSystem() == SubsystemType.REQUEST) {
+				this.handleNewRequest(input); 	// Send request to handleNewRequest
+			}
 		}
+		
 		
 		// If the input came from an elevator
 		if (input.getOrigin() == OriginType.ELEVATOR){
@@ -57,12 +59,6 @@ public class NewNewScheduler {
 			// TODO: get next step from elevatorStatus
 			this.sendNextStep(input);
 		}
-		
-		// If the input was a request from a floor
-		if(input.getOrigin() == OriginType.FLOOR){
-			this.handleNewRequest(input);
-		}
-		
 	}
 	
 	
@@ -110,6 +106,7 @@ public class NewNewScheduler {
 	// TODO: Ensure that this fits the format used for requests
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
+		// TODO: Request for an elevator to floor has -1 in status[0]
 		if (p.getOrigin() == OriginType.ELEVATOR) {
 			car[(int) p.getId()].addFloor((int) p.getStatus()[0]);
 		}
@@ -173,8 +170,11 @@ public class NewNewScheduler {
 			}
 		}
 	}
-	
-	public void mainLoop() {
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		System.out.println("Starting scheduler");
 		while(true) {
 			handleInput();
 		}

@@ -350,7 +350,7 @@ public class ElevatorStatus {
 
 	public static void main(String args[]) throws UnknownHostException{
 		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
-
+		
 		System.out.println(e.toString());
 	}
 

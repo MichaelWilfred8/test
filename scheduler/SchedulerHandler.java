@@ -194,15 +194,13 @@ public class SchedulerHandler {
 	
 	public static void main(String args[]){
 		SchedulerHandler s = new SchedulerHandler();
-		NewNewScheduler scheduler = new NewNewScheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
-		//GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, 23);
-		//GenericThreadedSender sender = new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER);
 		
 		Thread listener = new Thread(new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue()));
 		Thread sender = new Thread(new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER));
+		Thread scheduler = new Thread(new NewNewScheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10));
 		listener.start();
 		sender.start();
-		scheduler.mainLoop();
+		scheduler.start();
 		s.mainLoop();
 	}
 }
