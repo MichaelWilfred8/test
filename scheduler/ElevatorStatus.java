@@ -351,12 +351,12 @@ public class ElevatorStatus {
 	}
 
 	public static void main(String args[]) throws UnknownHostException{
-		ElevatorStatus e = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		ElevatorStatus car[] = new ElevatorStatus[3];
+		car[0] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		car[1] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		car[2] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
 		
-		ElevatorStatus[3] = new ElevatorStatus[3];
-		{new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1), new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1)}
-		
-		System.out.println(e.toString());
+		System.out.println("car[0] = " + car[0].toString());
 	}
 
 }
