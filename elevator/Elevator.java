@@ -1,5 +1,5 @@
 package elevator;
-
+//change
 //This is elevator class, it will keep running and act like server
 //The logic is following
 //1. waiting a packet contains [orig_Type, id, subsystem, status], receiving port is 69
