@@ -9,6 +9,9 @@ import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.DataPacket;
 
+//TODO: Fix Scheduler not handling floor requests after the first one
+//TODO: Fix Scheduler not handling idle elevator
+
 public class NewNewScheduler implements Runnable {
 
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
@@ -42,15 +45,15 @@ public class NewNewScheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		System.out.println("WAITING FOR AN INPUT");
+		System.out.println("WAITING FOR AN INPUT\n");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-
+		System.out.println("FOO: " + inputBuffer.toString());
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-		System.out.println("INPUT RETRIEVED");
+		System.out.println("INPUT RETRIEVED: " + input.toString());
 
 
 
@@ -116,7 +119,7 @@ public class NewNewScheduler implements Runnable {
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
 		
-		System.out.println("IN HERE: " + p.toString());
+		System.out.println("IN HERE");
 		// check if request came from the floor (up/down)
 		if ((int) p.getStatus()[FLOOR_INDEX] == -1){
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
