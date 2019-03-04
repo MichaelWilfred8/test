@@ -50,7 +50,8 @@ public class ElevatorHandler implements Runnable{
 	 * listen for incoming requests, listens on port 69
 	 */
 	private void listen(){
-
+//v
+		
 		boolean notDone = true;
 		while(notDone) {
 			// Construct a DatagramPacket for receiving packets up 
