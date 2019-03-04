@@ -9,6 +9,7 @@ import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.DataPacket;
 
+// TODO: Add state where elevator is at first floor waiting with doors open for elevator to visit
 public class NewNewScheduler implements Runnable {
 
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
@@ -48,6 +49,10 @@ public class NewNewScheduler implements Runnable {
 
 	public ElevatorStatus[] getCar() {
 		return car;
+	}
+	
+	public ElevatorStatus getCar(int index) {
+		return car[index];
 	}
 
 	public void setCar(ElevatorStatus[] car) {

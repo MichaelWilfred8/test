@@ -377,16 +377,54 @@ public class ElevatorStatus {
 
 
 
-	public static void main(String args[]) throws UnknownHostException{
+	public static void main(String args[]) throws UnknownHostException, InterruptedException{
 		
-		ElevatorStatus car = new ElevatorStatus(0, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		//ElevatorStatus car = new ElevatorStatus(0, MotorState.OFF, DoorState.CLOSED, 7, 1);
 		
 		LinkedBlockingQueue<DataPacket> input = new LinkedBlockingQueue<DataPacket>();
 		LinkedBlockingQueue<DataPacket> output = new LinkedBlockingQueue<DataPacket>();
 		
-		Thread scheduler = new Thread(new NewNewScheduler(input, output, 1, 7));
-
-		System.out.println("car = " + car.toString() + "\n");
+		NewNewScheduler scheduler = new NewNewScheduler(input, output, 1, 7);
+		Thread schThread = new Thread(scheduler);
+		
+		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
+		
+		final int dirIndex = 
+		
+		schThread.start();
+		
+		
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 1}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		
+		// Floor Request:
+		// new DataPacket(OriginType.
+		
+		
+		// Set floor to 1
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 1}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		// Add floor 4 to visit
+		tempReq[]
+		try {
+			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		/*
 		car.addFloor(4);
