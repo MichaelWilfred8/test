@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import Enums.DoorState;
 import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.*;
@@ -183,6 +184,7 @@ public class SchedulerHandler {
 	}
 	
 	public void mainLoop(){
+		
 		System.out.println("Running schedulerHandler");
 		while(true){
 			this.processIncomingRequest();
@@ -194,12 +196,19 @@ public class SchedulerHandler {
 	public static void main(String args[]){
 		SchedulerHandler s = new SchedulerHandler();
 		
+		NewNewScheduler scheduler = new NewNewScheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
+		Thread schedulerThread = new Thread(scheduler);
+		
 		Thread listener = new Thread(new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue()));
 		Thread sender = new Thread(new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER));
-		Thread scheduler = new Thread(new NewNewScheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10));
+		
 		listener.start();
 		sender.start();
-		scheduler.start();
+		schedulerThread.start();
+		
+		for (int i = 0; i < scheduler.car.length; ++i){
+			s.rawOutputBuffer.add(new DataPacket(OriginType.SCHEDULER, (byte) i, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()}));
+		}
 		
 		/*sender.setPriority(1);
 		listener.setPriority(2);
