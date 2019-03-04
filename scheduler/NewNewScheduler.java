@@ -12,7 +12,7 @@ import shared.DataPacket;
 public class NewNewScheduler implements Runnable {
 
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
-	ElevatorStatus car[];
+	public ElevatorStatus car[];
 
 	private static final int FLOOR_INDEX = 17;
 	private static final int DIR_INDEX = 16;
@@ -20,7 +20,14 @@ public class NewNewScheduler implements Runnable {
 	//TODO: send messaage to open/close doors, send message to toggle motor
 
 	// TODO: send message to floors to update lamp
-
+	
+	/**
+	 * Constructor for Scheduler 
+	 * @param inputBuffer	BlockingQueue used in SchedulerHandler for storing messages to be sent to the scheduler
+	 * @param outputBuffer	BlockingQueue used in SchedulerHandler for storing messages that were sent by the handler
+	 * @param numElevators	Number of elevators in the system
+	 * @param numFloors		Number of floors in the system
+	 */
 	public NewNewScheduler(BlockingQueue<DataPacket> inputBuffer, BlockingQueue<DataPacket> outputBuffer, int numElevators, int numFloors){
 		this.inputBuffer = inputBuffer;
 		this.outputBuffer = outputBuffer;
@@ -31,12 +38,21 @@ public class NewNewScheduler implements Runnable {
 			this.car[i] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, numFloors, i);
 		}
 	}
+	
 
 	/*
 	 * To access info from the inputBuffer:
 	 * DataPacket packet = new DataPacket(inputBuffer.take());
 	 *
 	 */
+
+	public ElevatorStatus[] getCar() {
+		return car;
+	}
+
+	public void setCar(ElevatorStatus[] car) {
+		this.car = car;
+	}
 
 	/**
 	 * Handle an input from the inputBuffer

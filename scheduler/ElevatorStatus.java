@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import Enums.*;
 import shared.*;
@@ -377,10 +378,17 @@ public class ElevatorStatus {
 
 
 	public static void main(String args[]) throws UnknownHostException{
-		ElevatorStatus car = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		
+		ElevatorStatus car = new ElevatorStatus(0, MotorState.OFF, DoorState.CLOSED, 7, 1);
+		
+		LinkedBlockingQueue<DataPacket> input = new LinkedBlockingQueue<DataPacket>();
+		LinkedBlockingQueue<DataPacket> output = new LinkedBlockingQueue<DataPacket>();
+		
+		Thread scheduler = new Thread(new NewNewScheduler(input, output, 1, 7));
 
 		System.out.println("car = " + car.toString() + "\n");
-
+		
+		/*
 		car.addFloor(4);
 		System.out.println("car = " + car.toString() + "\n");
 
@@ -392,8 +400,14 @@ public class ElevatorStatus {
 
 		car.addFloor(7);
 		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
+		
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		
+		//car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
 		System.out.println("car = " + car.toString() + "\n");
 
 		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 3}));
@@ -413,6 +427,7 @@ public class ElevatorStatus {
 
 		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 7}));
 		System.out.println("car = " + car.toString() + "\n");
+		*/
 	}
 
 }
