@@ -384,12 +384,13 @@ public class ElevatorStatus {
 		LinkedBlockingQueue<DataPacket> input = new LinkedBlockingQueue<DataPacket>();
 		LinkedBlockingQueue<DataPacket> output = new LinkedBlockingQueue<DataPacket>();
 		
-		NewNewScheduler scheduler = new NewNewScheduler(input, output, 1, 7);
+		Scheduler scheduler = new Scheduler(input, output, 1, 7);
 		Thread schThread = new Thread(scheduler);
 		
 		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
 		
-		final int dirIndex = 
+		final int dirIndex = 16;
+		final int floorIndex = 17;
 		
 		schThread.start();
 		
