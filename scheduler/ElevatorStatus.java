@@ -11,6 +11,8 @@ import shared.*;
 
 // Class for the scheduler to hold information about the elevator and its current position
 
+// TODO: Add idle state for elevator
+
 /**
  * Class for the scheduler to hold information about a single elevator car
  *
@@ -337,7 +339,25 @@ public class ElevatorStatus {
 		return nextFloor;	// if logic fails, return 1 to send elevator back to ground floor
 	}
 
-
+	
+	/**
+	 * Test if the elevator is in an idle state
+	 * Idle State is when elevator is stopped at a floor with the motor off and doors open and no pending requests for this elevator
+	 * @return True if elevator is idle, false if not
+	 */
+	public boolean testIfIdle(){
+		if (this.motorState != MotorState.OFF){
+			return false;
+		} else if (this.doorState != DoorState.OPEN) {
+			return false;
+		} else if (this.floorsToVisit.isEmpty() != true) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState
 	 *
@@ -418,7 +438,7 @@ public class ElevatorStatus {
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		// Add floor 4 to visit
-		tempReq[]
+		tempReq[floorIndex] = 4;
 		try {
 			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
 		} catch (IllegalArgumentException e){
@@ -426,6 +446,40 @@ public class ElevatorStatus {
 		}
 		Thread.sleep(100);
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		
+		// Add floor 5 to visit
+		tempReq[floorIndex] = 5;
+		try {
+			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		
+		// Add floor 3 to visit
+		tempReq[floorIndex] = 3;
+		try {
+			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+
+		// Add floor 7 to visit
+		tempReq[floorIndex] = 7;
+		try {
+			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
 		
 		/*
 		car.addFloor(4);
