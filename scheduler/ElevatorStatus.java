@@ -97,6 +97,7 @@ public class ElevatorStatus {
 			this.floorsToVisit.remove(Integer.valueOf(position));
 			System.out.println("Removed " + position + " from floorsToVisit");
 			this.setNextDestination(this.getNextFloor());
+			System.out.println("New destination is " + this.getNextDestination());
 		}
 	}
 
@@ -445,6 +446,7 @@ public class ElevatorStatus {
 		
 		System.out.println("output = " + output.toString() + "\n");
 		
+		
 		// Add floor 4 to visit
 		tempReq[floorIndex] = 4;
 		try {
@@ -507,15 +509,17 @@ public class ElevatorStatus {
 		
 		for(int i = 0; i < 10; ++i){
 			
+			System.out.println("\n\n\ninside 1st loop");
+			
 			tempPacket = new DataPacket(output.take().getBytes());
 			
-			System.out.println("tempPacket = " + tempPacket.toString());
+			System.out.println("removed packet = " + tempPacket.toString());
 			
 			// change tempPacket to elevator
 			tempPacket.setOrigin(OriginType.ELEVATOR);
 			
 			// print tempPacket
-			System.out.println("tempPacket now = " + tempPacket.toString());
+			System.out.println("adding packet = " + tempPacket.toString());
 			
 			// change location if necessary
 			if ((tempPacket.getSubSystem() == SubsystemType.MOTOR) && (tempPacket.getStatus()[0] != MotorState.OFF.getByte())){
@@ -538,6 +542,7 @@ public class ElevatorStatus {
 				locationFlag = false;
 				
 				for(int j = scheduler.getCar(0).getPosition(); j <= scheduler.getCar(0).MAX_FLOOR; ++j) {
+					System.out.println("\n\n\ninside 2nd loop");
 					// create location packet
 					if(tempPacket.getStatus()[0] == MotorState.UP.getByte()){
 						// if motor is going up then set locationPacket to be one higher then current
@@ -548,7 +553,7 @@ public class ElevatorStatus {
 					}
 					
 					// sending location packet
-					System.out.println("sending locationPacket = " + locationPacket.toString() + "\n");
+					System.out.println("adding locationPacket = " + locationPacket.toString() + "\n");
 					input.add(new DataPacket(locationPacket.getBytes()));
 					
 					// print input
