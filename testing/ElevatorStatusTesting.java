@@ -27,8 +27,9 @@ public class ElevatorStatusTesting {
 		}
 		
 		requestPacket.setStatus(req);
-		
+		System.out.println("createElevator");
 		return requestPacket;
+		
 	}
 	
 	public static DataPacket createFloorRequest(int floor, Direction dir){
@@ -43,7 +44,7 @@ public class ElevatorStatusTesting {
 		tempReq[floorIndex] = (byte) -1;
 		
 		requestPacket.setStatus(tempReq);
-		
+		System.out.println("createFloor");
 		return requestPacket;
 	}
 	
@@ -177,7 +178,12 @@ public class ElevatorStatusTesting {
 			System.out.println("removed packet = " + tempPacket.toString());
 			
 			// change tempPacket to elevator
-			tempPacket.setOrigin(OriginType.ELEVATOR);
+			if (tempPacket.getSubSystem() == SubsystemType.FLOORLAMP){
+				tempPacket.setOrigin(OriginType.FLOOR);
+			} else {
+				tempPacket.setOrigin(OriginType.ELEVATOR);
+			}
+			
 			
 			// print tempPacket
 			System.out.println("adding packet = " + tempPacket.toString());
