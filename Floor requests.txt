@@ -27,3 +27,11 @@ Origin:		Scheduler
 ID: (byte)	Target floor
 Subsystem:	FloorLamp
 Status: 	((byte) direction, (byte) carID of elevator that arrived)
+
+
+Request from inside elevator: DataPacket 
+Origin: Floor
+ID: (byte) Floor number (floor that elevator is at)
+Subsystem: Input
+Status: (targetElevator, 	#of requests, 	floor#, floor#, ...)
+Index:	(0, 				1, 				2, 		3, 		4, ...)

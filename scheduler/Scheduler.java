@@ -144,10 +144,12 @@ public class Scheduler implements Runnable {
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
 		
 		System.out.println("IN HERE: " + p.toString());
+		// TODO: this if statement broken, fix for new request format. What format is test sending?
 		// check if request came from the floor (up/down)
-		if ((int) p.getStatus()[FLOOR_INDEX] == -1){
+		if (p.getSubSystem() == SubsystemType.REQUEST){
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
-		} else {
+		} 
+		else if (p.getSubSystem() == SubsystemType.INPUT){
 			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
 			// Find elevator that is on the same floor as the request
 			for (int i=2; i<p.getStatus()[1]+2; i++) {
@@ -168,6 +170,7 @@ public class Scheduler implements Runnable {
 		
 		if(car[(int) p.getId()].testIfIdle()){
 			System.err.println("elevator idle!");
+			// TODO: do something here when elevator idle
 		} else {
 			System.err.println("elevator not idle");
 		}
@@ -175,13 +178,7 @@ public class Scheduler implements Runnable {
 		// If the echo was from the motor system
 		if (p.getSubSystem() == SubsystemType.MOTOR) {
 			
-			// If the echo was the motor turning off and the elevator has arrived at its destination floor
-			if((p.getStatus()[0] == MotorState.OFF.getByte()) && (car[(int) p.getId()].getPosition() == car[(int) p.getId()].getNextDestination())){
-				// create a DataPacket to open the doors for the elevator
-				returnPacket.setSubSystem(SubsystemType.DOOR);
-				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
-			}
-			
+			// TODO: Find way to test if elevator is at correct floor?
 			// If elevator was told to stop, open the doors
 			if (p.getStatus()[0] == MotorState.OFF.getByte()) {
 				// create a DataPacket to open the doors for the elevator

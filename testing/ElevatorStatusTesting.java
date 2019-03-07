@@ -1,7 +1,9 @@
 package testing;
 
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import Enums.Direction;
 import Enums.MotorState;
 import Enums.OriginType;
 import Enums.SubsystemType;
@@ -9,7 +11,43 @@ import scheduler.Scheduler;
 import shared.DataPacket;
 
 public class ElevatorStatusTesting {
-
+	
+	
+	public static DataPacket createElevatorRequest(ArrayList<Integer> floors, int floorNo, int targetElevator){
+		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) floorNo, SubsystemType.INPUT, new byte[] {(byte) 0});
+		
+		// req[0] targetElevator, req[1] = # of requests, req[2..n] floors to be requested
+		byte[] req = new byte[2 + floors.size()];
+		
+		req[0] = (byte) targetElevator;
+		req[1] = (byte) floors.size();
+		
+		for(int i = 2; i < floors.size() + 2; ++i){
+			req[i] = floors.get(i-2).byteValue();
+		}
+		
+		requestPacket.setStatus(req);
+		
+		return requestPacket;
+	}
+	
+	public static DataPacket createFloorRequest(int floor, Direction dir){
+		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) floor, SubsystemType.REQUEST, new byte[] {(byte) 0});
+		
+		final int dirIndex = 16;
+		final int floorIndex = 17;
+		
+		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
+		
+		tempReq[dirIndex] = dir.getByte();
+		tempReq[floorIndex] = (byte) -1;
+		
+		requestPacket.setStatus(tempReq);
+		
+		return requestPacket;
+	}
+	
+	// TODO: test -1 for sending to floors
 	public static void main(String[] args) throws InterruptedException {
 		//ElevatorStatus car = new ElevatorStatus(0, MotorState.OFF, DoorState.CLOSED, 7, 1);
 
@@ -43,6 +81,7 @@ public class ElevatorStatusTesting {
 		System.out.println("output = " + output.toString() + "\n");
 		
 		
+		/*
 		// Add floor 4 to visit
 		tempReq[floorIndex] = 4;
 		try {
@@ -93,7 +132,33 @@ public class ElevatorStatusTesting {
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		System.out.println("output = " + output.toString() + "\n");
-
+		 */
+		
+		// Tell elevator to stop at floor 4 for upwards trip
+		try {
+			input.add(createFloorRequest(4, Direction.UP));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
+		
+		// Add floor 7 to visit
+		ArrayList<Integer> floors = new ArrayList<Integer>();
+		floors.add(7);
+		try {
+			input.add(createElevatorRequest(floors, scheduler.getCar(0).getPosition(), scheduler.getCar(0).getId()));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
 		
 		DataPacket tempPacket, locationPacket;
 		

@@ -196,7 +196,7 @@ public class SchedulerHandler {
 	public static void main(String args[]){
 		SchedulerHandler s = new SchedulerHandler();
 
-		NewNewScheduler scheduler = new NewNewScheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
+		Scheduler scheduler = new Scheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
 		Thread schedulerThread = new Thread(scheduler);
 
 		Thread listener = new Thread(new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue()));
