@@ -146,7 +146,6 @@ public class Floor {
 	 */
 	public void purgeRequests() {
 		System.out.println("Floor " + floorNumber + " is purging");
-		byte[] message = null;
 		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
 		output.write(targetElevator);
 		output.write(requestCount);
@@ -158,7 +157,7 @@ public class Floor {
 		}
 		requestCount = 0;
 		
-		DataPacket destReq = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, output.toByteArray());
+		DataPacket destReq = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.INPUT, output.toByteArray());
 		sendRequest(destReq);
 	}
 

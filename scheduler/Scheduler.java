@@ -187,6 +187,12 @@ public class Scheduler implements Runnable {
 				// create a DataPacket to open the doors for the elevator
 				returnPacket.setSubSystem(SubsystemType.DOOR);
 				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
+				try {
+					outputBuffer.put(new DataPacket(OriginType.SCHEDULER, (byte) car[(int) p.getId()].getPosition(), SubsystemType.FLOORLAMP,new byte[] {car[(int) p.getId()].getTripDir().getByte(),p.getId()}));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 		} // If the echo was from the door system
