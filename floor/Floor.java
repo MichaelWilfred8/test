@@ -18,9 +18,10 @@ import shared.*;
 public class Floor {
 
 	private int floorNumber;//floor number, unique id
+	private int targetElevator;//
 	private FloorButton[] floorButtons;//list of buttons on floor
 	private FloorLamp[] floorLamps;//list of lamps on floor
-	private DataPacket [] requests;//list of requests
+	private int [] requests;//list of requests
 	private int requestCount = 0;//where to insert in list of requests
 	private boolean requested;//if an elevator has been requested for this floor
 	private BlockingQueue<DataPacket> output;//threaded sender
@@ -52,8 +53,12 @@ public class Floor {
 			floorLamps[1] = new FloorLamp(Direction.UP);
 		}
 
-		requests = new DataPacket[highestFloor];//can only have as many requests as there are floors
+		requests = new int[highestFloor];//can only have as many requests as there are floors
+		for (int i=0;i<requests.length;i++) {
+			requests[i]=-1;
+		}
 		requested = false;
+		targetElevator = -1;
 	}
 
 	/**
@@ -90,14 +95,14 @@ public class Floor {
 			directionCode = 1;
 		}
 
-		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
+		ByteArrayOutputStream out = new ByteArrayOutputStream();//output can be dynamically written to
 		for (int i=0;i<time.length;i++) {//write each time parameter
-			output.write(time[i]);
+			out.write(time[i]);
 		}
 
-		output.write(directionCode);//write the direction
-		output.write(-1);//write -1 to signify this is not a button press within the elevator
-		returnBytes = output.toByteArray();//creates single byte array to be sent
+		out.write(directionCode);//write the direction
+		out.write(-1);//write -1 to signify this is not a button press within the elevator
+		returnBytes = out.toByteArray();//creates single byte array to be sent
 
 		DataPacket message = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, returnBytes);
 
@@ -141,13 +146,20 @@ public class Floor {
 	 */
 	public void purgeRequests() {
 		System.out.println("Floor " + floorNumber + " is purging");
+		byte[] message = null;
+		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
+		output.write(targetElevator);
+		output.write(requestCount);
 		for (int i=0; i<requests.length; i++) {
-			if (requests[i]!=null) {
-				sendRequest(requests[i]);//send request to scheduler
-				requests[i] = null;//clear request registry
+			if (requests[i]!=-1) {
+				output.write(i);//send request to scheduler
+				requests[i] = -1;//clear request registry
 			}
 		}
 		requestCount = 0;
+		
+		DataPacket destReq = new DataPacket(OriginType.FLOOR, (byte) this.getFloorNumber(), SubsystemType.REQUEST, output.toByteArray());
+		sendRequest(destReq);
 	}
 
 	/**
@@ -167,14 +179,14 @@ public class Floor {
 
 		if(!requested) {//if no request has been made for this floor
 			sendRequest(message);//request an elevator
-			if (requests[destination.getStatus()[17]]==null){//if there is not already a destination request
-				requests[destination.getStatus()[17]] = destination;
+			if (requests[destination.getStatus()[17]]==-1){//if there is not already a destination request
+				requests[destination.getStatus()[17]] = 1;//indicate that the floor @ requests[i] is a destination
 				requestCount++;
 			}
 			requested = true;//a request now has been made
 		}else {
-			if (requests[destination.getStatus()[17]]==null){//if there is not already a destination request
-				requests[destination.getStatus()[17]] = destination;
+			if (requests[destination.getStatus()[17]]==-1){//if there is not already a destination request
+				requests[destination.getStatus()[17]] = 1;//indicate that the floor @ requests[i] is a destination
 				requestCount++;
 			}
 		}
@@ -183,8 +195,10 @@ public class Floor {
 	/**
 	 * @param lampTrigger: toggles the correct button and lamp
 	 */
-	public void elevatorArrived(byte lt) { 
-		byte lampTrigger = (byte) (lt-1);
+	public void elevatorArrived(byte[] input) { 
+		byte lampTrigger = input[0];
+		targetElevator = input[1];
+		
 
 		floorLamps[lampTrigger].toggle();
 		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
@@ -192,7 +206,7 @@ public class Floor {
 
 		floorButtons[lampTrigger].toggle();
 		System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[lampTrigger].getDirection().toString() + " button off.");
-		System.out.println("Floor lamp facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
+		System.out.println("Floor button facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
 
 		purgeRequests();
 

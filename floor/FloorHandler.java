@@ -106,7 +106,7 @@ public class FloorHandler{
 				System.out.println("DATAPACKET: " + input.toString() + "\n");
 
 				Floor targetFloor = floors[input.getId()-1];
-				targetFloor.elevatorArrived(input.getStatus()[DIRECTION_BYTE]);
+				targetFloor.elevatorArrived(input.getStatus());
 
 			} else {
 				try {
