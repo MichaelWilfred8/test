@@ -196,7 +196,7 @@ public class Floor {
 	 * @param lampTrigger: toggles the correct button and lamp
 	 */
 	public void elevatorArrived(byte[] input) { 
-		byte lampTrigger = input[0];
+		byte lampTrigger = (byte) (input[0]-1);
 		targetElevator = input[1];
 		
 
