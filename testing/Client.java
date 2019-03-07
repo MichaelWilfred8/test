@@ -274,12 +274,12 @@ public class Client {
 	
 	public static void main(String args[]) throws IOException{
 		Client c = new Client();
-		Thread sender = new Thread(new GenericThreadedSender(c.outputBuffer));
+		//Thread sender = new Thread(new GenericThreadedSender(c.outputBuffer));
 		Thread receiver = new Thread(new GenericThreadedListener(c.inputBuffer, RECEIVE_PORT));
 		
 		System.out.println("Client Console:");
 		
-		sender.start();
+		//sender.start();
 		receiver.start();
 		
 		c.clientLoop();

@@ -85,7 +85,13 @@ public class Scheduler implements Runnable {
 
 		// If the input came from an elevator
 		if (input.getOrigin() == OriginType.ELEVATOR){
-			this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
+			try {
+				this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
+			} catch(ArrayIndexOutOfBoundsException e){
+				e.printStackTrace();
+				System.out.println("Elevator with id " + input.getId() + " does not exist");
+			}
+			
 			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
 		}
 	}
@@ -184,6 +190,11 @@ public class Scheduler implements Runnable {
 					returnPacket.setSubSystem(SubsystemType.MOTOR);
 					returnPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
 				}
+			} // If elevator has opened the doors
+			else if (p.getStatus()[0] == DoorState.OPEN.getByte()){
+				// Tell elevator to close doors
+				returnPacket.setSubSystem(SubsystemType.DOOR);
+				returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
 			}
 		// If the packet is the current location of the elevator
 		} else if (p.getSubSystem() == SubsystemType.LOCATION) {
@@ -196,7 +207,10 @@ public class Scheduler implements Runnable {
 				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
 			}
 		}
-
+		
+		System.out.println("Input packet = " + p.toString());
+		System.out.println("Return packet = " + returnPacket.toString());
+		
 		// If the returnPacket has been modified, then add it to the output buffer to be sent
 		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {
 			try {
@@ -205,6 +219,8 @@ public class Scheduler implements Runnable {
 				ise.printStackTrace();
 				System.exit(0);
 			}
+		} else {
+			System.out.println("returnPacket is null, not creating return message");
 		}
 	}
 

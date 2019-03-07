@@ -12,6 +12,7 @@ import shared.*;
 // Class for the scheduler to hold information about the elevator and its current position
 
 // TODO: Add idle state for elevator
+// TODO: fix elevator buttons
 
 /**
  * Class for the scheduler to hold information about a single elevator car
@@ -414,28 +415,19 @@ public class ElevatorStatus {
 		
 		schThread.start();
 		
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
+		
+		// Tell elevator that motor is stopped
 		try {
-			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 1}));
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()}));
 		} catch (IllegalArgumentException e){
 			e.printStackTrace();
 		}
 		Thread.sleep(100);
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
-		
-		// Floor Request:
-		// new DataPacket(OriginType.
-		
-		
-		// Set floor to 1
-		try {
-			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 1}));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		System.out.println("output = " + output.toString() + "\n");
 		
 		// Add floor 4 to visit
 		tempReq[floorIndex] = 4;
@@ -446,6 +438,8 @@ public class ElevatorStatus {
 		}
 		Thread.sleep(100);
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
 		
 		
 		// Add floor 5 to visit
@@ -458,6 +452,8 @@ public class ElevatorStatus {
 		Thread.sleep(100);
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
+		System.out.println("output = " + output.toString() + "\n");
+		
 		
 		// Add floor 3 to visit
 		tempReq[floorIndex] = 3;
@@ -468,7 +464,10 @@ public class ElevatorStatus {
 		}
 		Thread.sleep(100);
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
+		
 		// Add floor 7 to visit
 		tempReq[floorIndex] = 7;
 		try {
@@ -480,47 +479,153 @@ public class ElevatorStatus {
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		System.out.println("output = " + output.toString() + "\n");
+
+		
+		DataPacket tempPacket, locationPacket;
+		
+		locationPacket = new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 0});
+		boolean locationFlag = false;
+		
+		System.out.println("Starting loop");
+		System.out.println("===================================================================================\n\n\n");
+		
+		for(int i = 0; i < 10; ++i){
+			
+			tempPacket = new DataPacket(output.take().getBytes());
+			
+			System.out.println("tempPacket = " + tempPacket.toString());
+			
+			// change tempPacket to elevator
+			tempPacket.setOrigin(OriginType.ELEVATOR);
+			
+			// print tempPacket
+			System.out.println("tempPacket now = " + tempPacket.toString());
+			
+			// change location if necessary
+			if ((tempPacket.getSubSystem() == SubsystemType.MOTOR) && (tempPacket.getStatus()[0] != MotorState.OFF.getByte())){
+				if(tempPacket.getStatus()[0] == MotorState.UP.getByte()){
+					// if motor is going up then set locationPacket to be one higher then current
+					locationPacket.setStatus(new byte[] {(byte) (scheduler.car[0].getPosition() + 1)});
+				} else if (tempPacket.getStatus()[0] == MotorState.DOWN.getByte()) {
+					// if motor is going down then set locationPacket to be one lower then current
+					locationPacket.setStatus(new byte[] {(byte) (scheduler.car[0].getPosition() - 1)});
+				}
+				locationFlag = true;
+			}
+			
+			// send echo back to scheduler
+			input.add(new DataPacket(tempPacket.getBytes()));
+			
+			// print input
+			System.out.println("input = " + input.toString());
+			
+			Thread.sleep(500);
+			System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+			
+			System.out.println("output = " + output.toString() + "\n");
+			
+			// If location needs to be sent...
+			if (locationFlag == true){
+				locationFlag = false;
+				
+				input.add(new DataPacket(locationPacket.getBytes()));
+				// print input
+				System.out.println("input = " + input.toString());
+				
+				Thread.sleep(500);
+				System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+				
+				System.out.println("output = " + output.toString() + "\n");
+				
+				// resend motorState
+				tempPacket.setSubSystem(SubsystemType.MOTOR);
+				tempPacket.setStatus(new byte[] {scheduler.getCar(0).getMotorState().getByte()});
+				
+				input.add(new DataPacket(tempPacket.getBytes()));
+				
+				// print input
+				System.out.println("input = " + input.toString());
+				
+				Thread.sleep(500);
+				System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+				
+				System.out.println("output = " + output.toString() + "\n");
+			}
+		}
+		
 		
 		/*
-		car.addFloor(4);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(5);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(3);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(7);
-		System.out.println("car = " + car.toString() + "\n");
-		
+		// Move up to 2
 		try {
-			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 2}));
 		} catch (IllegalArgumentException e){
 			e.printStackTrace();
 		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
-		//car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
-		System.out.println("car = " + car.toString() + "\n");
+		System.out.println("output = " + output.toString() + "\n");
+		
+		// Move up to 3
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 3}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
+		
+		// Move up to 4
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 4}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
+		
+		// Move up to 5
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 5}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
 
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 3}));
-		System.out.println("car = " + car.toString() + "\n");
+		// Move up to 6
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 6}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
+		
 
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 4}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(3);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 5}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 6}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 7}));
-		System.out.println("car = " + car.toString() + "\n");
+		// Move up to 5
+		try {
+			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.LOCATION, new byte[] {(byte) 7}));
+		} catch (IllegalArgumentException e){
+			e.printStackTrace();
+		}
+		Thread.sleep(100);
+		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		
+		System.out.println("output = " + output.toString() + "\n");
 		*/
+		
 	}
 
 }
