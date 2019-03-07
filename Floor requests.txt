@@ -2,12 +2,28 @@ Request to visit Floor
 Origin: Floor
 ID: (byte) Floor number (send to this floor)
 Subsystem: Request
-Status: (0, 0, 0, #, 0, 0, 0, #,  0, 0, 0, #,  0, 0, 0, #,  direction (up = 2, down = 1), destination floor = -1)
-index	(0, 1, 2, 3, 4, 5, 6, 7,  8, 9,10,11, 12,13,14,15,  16,                            17)
+Status: (0, 0, 0, #, 0, 0, 0, #,  0, 0, 0, #,  0, 0, 0, #,  direction (up = 2, down = 1), 	destination floor = -1)
+Index:	(0, 1, 2, 3, 4, 5, 6, 7,  8, 9,10,11, 12,13,14,15,	16, 							17)
 
 Request from inside elevator: DataPacket 
 Origin: Floor
 ID: (byte) Floor number (floor that elevator is at)
 Subsystem: Request
-Status: (0, 0, 0, #, 0, 0, 0, #,  0, 0, 0, #,  0, 0, 0, #,  direction (up = 2, down = 1), destination floor = #)
-index	(0, 1, 2, 3, 4, 5, 6, 7,  8, 9,10,11, 12,13,14,15,  16,                            17)
+Status: (0, 0, 0, #, 0, 0, 0, #,  0, 0, 0, #,  0, 0, 0, #,	direction (up = 2, down = 1),	destination floor = #)
+Index:	(0, 1, 2, 3, 4, 5, 6, 7,  8, 9,10,11, 12,13,14,15,	16,                            	17)
+
+Possible change
+Request from inside elevator: DataPacket 
+Origin: Floor
+ID: (byte) Floor number (floor that elevator is at)
+Subsystem: Request
+Status: (0, 0, 0, #, 0, 0, 0, #,  0, 0, 0, #,  0, 0, 0, #,	carID (byte),	destination floor = #)
+Index:	(0, 1, 2, 3, 4, 5, 6, 7,  8, 9,10,11, 12,13,14,15,	16,				17)
+
+
+
+Message to floor when elevator arrives
+Origin:		Scheduler
+ID: (byte)	Target floor
+Subsystem:	FloorLamp
+Status: 	((byte) direction, (byte) carID of elevator that arrived)

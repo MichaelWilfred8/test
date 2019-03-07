@@ -365,7 +365,7 @@ public class ElevatorStatus {
 	 * @param p	DataPacket from the elevator
 	 */
 	public void update(DataPacket p){
-		System.out.println("Updating elevatorState of car " + this.id + " with datapacket " + p.toString());
+		System.out.println("Updating elevatorState of car " + this.id + " with datapacket " + p.toString() + "\n");
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
