@@ -74,7 +74,7 @@ public class Scheduler implements Runnable {
 		System.out.println("INPUT RETRIEVED");
 
 
-
+		
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if (input.getSubSystem() == SubsystemType.REQUEST) {
@@ -196,15 +196,18 @@ public class Scheduler implements Runnable {
 				returnPacket.setSubSystem(SubsystemType.DOOR);
 				returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
 			}
-		// If the packet is the current location of the elevator
-		} else if (p.getSubSystem() == SubsystemType.LOCATION) {
-			// Update the car status with the location
-			car[(int) p.getId()].update(p);
-
+		
+		} // If the packet is the current location of the elevator
+		else if (p.getSubSystem() == SubsystemType.LOCATION) {
 			// if car has reached destination
+			System.out.println("testing if car is at destination");
+			System.out.println("p.getStatus[0] = " + p.getStatus()[0] + " car[(int) p.getId()].getNextDestination() = " + car[(int) p.getId()].getNextDestination());
 			if ((int) p.getStatus()[0] == car[(int) p.getId()].getNextDestination()) {
 				returnPacket.setSubSystem(SubsystemType.MOTOR);
 				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+				
+				// remove this destination from the list of destinations for the car to visit
+				car[(int) p.getId()].findNextDestination();
 			}
 		}
 		

@@ -79,13 +79,26 @@ public class ElevatorStatus {
 	 */
 	public void setPosition(int position) {
 		this.position = position;
+		/*
+		if (this.getFloorsToVisit().contains(Integer.valueOf(position))){
+			this.floorsToVisit.remove(Integer.valueOf(position));
+			System.out.println("Removed " + position + " from floorsToVisit");
+			this.setNextDestination(this.getNextFloor());
+		}
+		*/
+	}
+	
+	/**
+	 * Find the next destination for the elevator and set the next destination for the elevator
+	 * Remove the current floor from the list of floors to visit
+	 */
+	public void findNextDestination(){
 		if (this.getFloorsToVisit().contains(Integer.valueOf(position))){
 			this.floorsToVisit.remove(Integer.valueOf(position));
 			System.out.println("Removed " + position + " from floorsToVisit");
 			this.setNextDestination(this.getNextFloor());
 		}
 	}
-
 
 
 	/**
@@ -380,7 +393,7 @@ public class ElevatorStatus {
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				System.out.println("position was updated to " + this.getPosition());
+				System.out.println("position in elevatorStatus was updated to " + this.getPosition());
 				break;
 			default:
 				break;
@@ -410,6 +423,8 @@ public class ElevatorStatus {
 		Thread schThread = new Thread(scheduler);
 		
 		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
+		// byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, enum reqType = floor, (dir)2};
+		// byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, enum reqType = elev, floor 3, floor 4, floor 5, };
 		
 		final int dirIndex = 16;
 		final int floorIndex = 17;
@@ -521,9 +536,8 @@ public class ElevatorStatus {
 			// If location needs to be sent...
 			if (locationFlag == true){
 				locationFlag = false;
-				boolean exitFlag = false;
 				
-				while (exitFlag == false) {
+				for(int j = scheduler.getCar(0).getPosition(); j <= scheduler.getCar(0).MAX_FLOOR; ++j) {
 					// create location packet
 					if(tempPacket.getStatus()[0] == MotorState.UP.getByte()){
 						// if motor is going up then set locationPacket to be one higher then current
@@ -546,7 +560,7 @@ public class ElevatorStatus {
 					System.out.println("output = " + output.toString() + "\n");
 					
 					if (output.isEmpty() != true){
-						exitFlag = true;
+						break;
 					}
 				}
 			}
