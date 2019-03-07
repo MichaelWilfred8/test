@@ -77,7 +77,7 @@ public class Scheduler implements Runnable {
 		
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
-			if (input.getSubSystem() == SubsystemType.REQUEST) {
+			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
