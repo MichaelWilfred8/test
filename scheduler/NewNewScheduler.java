@@ -126,9 +126,7 @@ public class NewNewScheduler implements Runnable {
 			// Find elevator that is on the same floor as the request
 
 			for (int i=2; i<p.getStatus()[1]+2; i++) {
-				System.out.println(p.getStatus()[i]);
 				car[p.getStatus()[0]].addFloor(p.getStatus()[i]);
-
 			}
 		}
 	}
