@@ -29,8 +29,8 @@ public class ElevatorStatus {
 	private MotorState motorState;				// state of the elevator motor (up, down, off)
 	private DoorState doorState;				// state that the elevator door is (open/closed)
 	private boolean[] floorButtonLights;		// boolean array containing the state of the lights of all the floor buttons in the elevator. Array is indexed from zero so the light for floor 3 is stored at floorButtonLight[2]
-	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
-	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
+	public int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
+	public int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
 	public int id;
 
 	/**
@@ -379,7 +379,7 @@ public class ElevatorStatus {
 	 * @param p	DataPacket from the elevator
 	 */
 	public void update(DataPacket p){
-		System.out.println("Updating elevatorState of car " + this.id + " with datapacket " + p.toString() + "\n");
+		System.out.println("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n");
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
