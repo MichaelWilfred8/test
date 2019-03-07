@@ -1,0 +1,15 @@
+Errors to be handled
+
+Doors not opening - transient
+Doors not closing - trasient
+Door stuck - transient
+Stuck between floors - Not arriving at floor when expected - Hard error
+Packets being lost
+Arrival sensor at floor has failed - Hard error?
+
+
+Transient errors:
+Lock out elevator from receiving commands until error fixed
+
+Hard Error:
+Wait until resolved 

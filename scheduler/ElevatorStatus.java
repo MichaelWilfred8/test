@@ -11,6 +11,9 @@ import shared.*;
 
 // Class for the scheduler to hold information about the elevator and its current position
 
+// TODO: Add idle state for elevator
+// TODO: fix elevator buttons
+
 /**
  * Class for the scheduler to hold information about a single elevator car
  *
@@ -26,9 +29,28 @@ public class ElevatorStatus {
 	private MotorState motorState;				// state of the elevator motor (up, down, off)
 	private DoorState doorState;				// state that the elevator door is (open/closed)
 	private boolean[] floorButtonLights;		// boolean array containing the state of the lights of all the floor buttons in the elevator. Array is indexed from zero so the light for floor 3 is stored at floorButtonLight[2]
-	private int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
-	private int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
+	public int MIN_FLOOR;						// Highest floor that this elevator can visit. Remains constant once set
+	public int MAX_FLOOR;						// Lowest floor that this elevator can visit. Remains constant once set
 	public int id;
+	private boolean idle;						// Boolean value indicating if elevator is idle
+	
+	public boolean isIdle() {
+		return idle;
+	}
+
+
+
+	public void setIdle(boolean idle) {
+		this.idle = idle;
+	}
+
+
+
+	public int getId() {
+		return id;
+	}
+
+
 
 	/**
 	 * Constructor for ElevatorStatus class
@@ -57,6 +79,9 @@ public class ElevatorStatus {
 		}
 
 		this.id = id;
+		
+		// set elevator to idle initially
+		this.idle = true;
 	}
 
 
@@ -76,13 +101,27 @@ public class ElevatorStatus {
 	 */
 	public void setPosition(int position) {
 		this.position = position;
+		/*
 		if (this.getFloorsToVisit().contains(Integer.valueOf(position))){
 			this.floorsToVisit.remove(Integer.valueOf(position));
 			System.out.println("Removed " + position + " from floorsToVisit");
 			this.setNextDestination(this.getNextFloor());
 		}
+		*/
 	}
-
+	
+	/**
+	 * Find the next destination for the elevator and set the next destination for the elevator
+	 * Remove the current floor from the list of floors to visit
+	 */
+	public void findNextDestination(){
+		if (this.getFloorsToVisit().contains(Integer.valueOf(position))){
+			this.floorsToVisit.remove(Integer.valueOf(position));
+			System.out.println("Removed " + position + " from floorsToVisit");
+			this.setNextDestination(this.getNextFloor());
+			System.out.println("New destination is " + this.getNextDestination());
+		}
+	}
 
 
 	/**
@@ -263,7 +302,10 @@ public class ElevatorStatus {
 
 		// Check if floorsToVisit is empty (no floors for this elevator to visit)
 		if (this.floorsToVisit.isEmpty()){	// If true
+			this.setIdle(true); 			// Set the elevator to be idle
 			return this.getPosition();		// Return the current position of the elevator
+		} else {
+			this.setIdle(false);
 		}
 
 		// check if the elevator is on an upwards trip
@@ -337,28 +379,54 @@ public class ElevatorStatus {
 		return nextFloor;	// if logic fails, return 1 to send elevator back to ground floor
 	}
 
-
+	
+	/**
+	 * Test if the elevator is in an idle state
+	 * Idle State is when elevator is stopped at a floor with the motor off and doors open and no pending requests for this elevator
+	 * @return True if elevator is idle, false if not
+	 */
+	public boolean testIfIdle(){
+		if (this.motorState != MotorState.OFF){
+			return false;
+		} else if (this.doorState != DoorState.OPEN) {
+			return false;
+		} else if (this.floorsToVisit.isEmpty() != true) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Print red message in console
+	 * @param msg message to print
+	 */
+	private static void printRedMessage (String msg){
+		System.err.println("\n" + msg + "\n");
+	}
+	
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState
 	 *
 	 * @param p	DataPacket from the elevator
 	 */
 	public void update(DataPacket p){
+		System.out.println("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n");
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
-				System.out.println("motor was updated to " + this.getMotorState());
+				printRedMessage("motor was updated to " + this.getMotorState());
 				break;
 			case DOOR:	// Door state is to be updated
 				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
-				System.out.println("door was updated to " + this.getDoorState());
+				printRedMessage("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
 				//TODO: handle updates from elevator about floor lights. Remove?
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				System.out.println("position was updated to " + this.getPosition());
+				printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
 				break;
 			default:
 				break;
@@ -371,63 +439,7 @@ public class ElevatorStatus {
 	public String toString() {
 		return "ElevatorStatus [position=" + position + ", tripDir=" + tripDir + ", floorsToVisit=" + floorsToVisit
 				+ ", nextDestination=" + nextDestination + ", motorState=" + motorState + ", doorState=" + doorState
-				+ ", floorButtonLights=" + Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR
+				+ ", idle = " + idle + ", floorButtonLights=" + Arrays.toString(floorButtonLights) + ", MIN_FLOOR=" + MIN_FLOOR
 				+ ", MAX_FLOOR=" + MAX_FLOOR + ", id=" + id + "]";
 	}
-
-
-
-	public static void main(String args[]) throws UnknownHostException{
-		
-		ElevatorStatus car = new ElevatorStatus(0, MotorState.OFF, DoorState.CLOSED, 7, 1);
-		
-		LinkedBlockingQueue<DataPacket> input = new LinkedBlockingQueue<DataPacket>();
-		LinkedBlockingQueue<DataPacket> output = new LinkedBlockingQueue<DataPacket>();
-		
-		Thread scheduler = new Thread(new NewNewScheduler(input, output, 1, 7));
-
-		System.out.println("car = " + car.toString() + "\n");
-		
-		/*
-		car.addFloor(4);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(5);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(3);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(7);
-		System.out.println("car = " + car.toString() + "\n");
-		
-		try {
-			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		
-		//car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 2}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 3}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 4}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.addFloor(3);
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 5}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 6}));
-		System.out.println("car = " + car.toString() + "\n");
-
-		car.update(new DataPacket(OriginType.ELEVATOR, (byte) 1, SubsystemType.LOCATION, new byte[] {(byte) 7}));
-		System.out.println("car = " + car.toString() + "\n");
-		*/
-	}
-
 }
