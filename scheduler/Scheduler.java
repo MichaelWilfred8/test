@@ -150,11 +150,8 @@ public class Scheduler implements Runnable {
 		} else {
 			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
 			// Find elevator that is on the same floor as the request
-			for(int i = 0; i < car.length; ++i){
-				if (car[i].getPosition() == (int) p.getId()){
-					car[i].addFloor((int) p.getStatus()[FLOOR_INDEX]);
-					break;
-				}
+			for (int i=2; i<p.getStatus()[1]+2; i++) {
+				car[p.getStatus()[0]].addFloor(p.getStatus()[i]);
 			}
 		}
 	}
