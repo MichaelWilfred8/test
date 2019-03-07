@@ -365,6 +365,7 @@ public class ElevatorStatus {
 	 * @param p	DataPacket from the elevator
 	 */
 	public void update(DataPacket p){
+		System.out.println("Updating elevatorState of car " + this.id + " with datapacket " + p.toString());
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
@@ -503,13 +504,6 @@ public class ElevatorStatus {
 			
 			// change location if necessary
 			if ((tempPacket.getSubSystem() == SubsystemType.MOTOR) && (tempPacket.getStatus()[0] != MotorState.OFF.getByte())){
-				if(tempPacket.getStatus()[0] == MotorState.UP.getByte()){
-					// if motor is going up then set locationPacket to be one higher then current
-					locationPacket.setStatus(new byte[] {(byte) (scheduler.car[0].getPosition() + 1)});
-				} else if (tempPacket.getStatus()[0] == MotorState.DOWN.getByte()) {
-					// if motor is going down then set locationPacket to be one lower then current
-					locationPacket.setStatus(new byte[] {(byte) (scheduler.car[0].getPosition() - 1)});
-				}
 				locationFlag = true;
 			}
 			
@@ -527,29 +521,34 @@ public class ElevatorStatus {
 			// If location needs to be sent...
 			if (locationFlag == true){
 				locationFlag = false;
+				boolean exitFlag = false;
 				
-				input.add(new DataPacket(locationPacket.getBytes()));
-				// print input
-				System.out.println("input = " + input.toString());
-				
-				Thread.sleep(500);
-				System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-				
-				System.out.println("output = " + output.toString() + "\n");
-				
-				// resend motorState
-				tempPacket.setSubSystem(SubsystemType.MOTOR);
-				tempPacket.setStatus(new byte[] {scheduler.getCar(0).getMotorState().getByte()});
-				
-				input.add(new DataPacket(tempPacket.getBytes()));
-				
-				// print input
-				System.out.println("input = " + input.toString());
-				
-				Thread.sleep(500);
-				System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-				
-				System.out.println("output = " + output.toString() + "\n");
+				while (exitFlag == false) {
+					// create location packet
+					if(tempPacket.getStatus()[0] == MotorState.UP.getByte()){
+						// if motor is going up then set locationPacket to be one higher then current
+						locationPacket.setStatus(new byte[] {(byte) (scheduler.car[0].getPosition() + 1)});
+					} else if (tempPacket.getStatus()[0] == MotorState.DOWN.getByte()) {
+						// if motor is going down then set locationPacket to be one lower then current
+						locationPacket.setStatus(new byte[] {(byte) (scheduler.car[0].getPosition() - 1)});
+					}
+					
+					// sending location packet
+					System.out.println("sending locationPacket = " + locationPacket.toString() + "\n");
+					input.add(new DataPacket(locationPacket.getBytes()));
+					
+					// print input
+					System.out.println("input = " + input.toString());
+					
+					Thread.sleep(500);
+					System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+					
+					System.out.println("output = " + output.toString() + "\n");
+					
+					if (output.isEmpty() != true){
+						exitFlag = true;
+					}
+				}
 			}
 		}
 		
