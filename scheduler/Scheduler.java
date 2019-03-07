@@ -165,11 +165,28 @@ public class Scheduler implements Runnable {
 	 */
 	private void sendNextStep(DataPacket p) {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Packet to return to the elevator.
-
+		
+		System.out.println("test if elevator idle...");
+		System.out.println("car = " + car[(int) p.getId()].toString());
+		
+		if(car[(int) p.getId()].testIfIdle()){
+			System.err.println("elevator idle!");
+		} else {
+			System.err.println("elevator not idle");
+		}
+		
 		// If the echo was from the motor system
 		if (p.getSubSystem() == SubsystemType.MOTOR) {
+			
 			// If the echo was the motor turning off and the elevator has arrived at its destination floor
 			if((p.getStatus()[0] == MotorState.OFF.getByte()) && (car[(int) p.getId()].getPosition() == car[(int) p.getId()].getNextDestination())){
+				// create a DataPacket to open the doors for the elevator
+				returnPacket.setSubSystem(SubsystemType.DOOR);
+				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
+			}
+			
+			// If elevator was told to stop, open the doors
+			if (p.getStatus()[0] == MotorState.OFF.getByte()) {
 				// create a DataPacket to open the doors for the elevator
 				returnPacket.setSubSystem(SubsystemType.DOOR);
 				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
