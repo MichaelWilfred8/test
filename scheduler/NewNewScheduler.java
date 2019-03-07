@@ -45,17 +45,14 @@ public class NewNewScheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		System.out.println("WAITING FOR AN INPUT\n");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-		System.out.println("FOO: " + inputBuffer.toString());
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-		System.out.println("INPUT RETRIEVED: " + input.toString());
-
-
+		
+		System.out.println("Handler recieved: " + input.toString());
 
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
@@ -119,9 +116,10 @@ public class NewNewScheduler implements Runnable {
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
 		
-		System.out.println("IN HERE");
+		System.out.println("HANDLING FLOOR REQUEST");
 		// check if request came from the floor (up/down)
 		if ((int) p.getStatus()[FLOOR_INDEX] == -1){
+			System.out.println("REQUESTING ELEVATOR FOR FLOOR " + p.getId());
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		} else {
 			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
