@@ -210,6 +210,8 @@ public class SchedulerHandler {
 			s.rawOutputBuffer.add(new DataPacket(OriginType.SCHEDULER, (byte) i, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()}));
 		}
 		
+		s.rawOutputBuffer.add(new DataPacket (OriginType.SCHEDULER, (byte) 1, SubsystemType.FLOORLAMP, new byte[] {2,1}));
+		
 		/*sender.setPriority(1);
 		listener.setPriority(2);
 		scheduler.setPriority(3);*/

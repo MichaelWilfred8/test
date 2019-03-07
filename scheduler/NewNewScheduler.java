@@ -61,17 +61,14 @@ public class NewNewScheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		System.out.println("WAITING FOR AN INPUT\n");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-		System.out.println("FOO: " + inputBuffer.toString());
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-		System.out.println("INPUT RETRIEVED: " + input.toString());
 
-
+		System.out.println("Handler recieved: " + input.toString());
 
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
@@ -134,19 +131,18 @@ public class NewNewScheduler implements Runnable {
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
-		
-		System.out.println("IN HERE");
+
+		System.out.println("HANDLING FLOOR REQUEST");
 		// check if request came from the floor (up/down)
 		if ((int) p.getStatus()[FLOOR_INDEX] == -1){
+			System.out.println("REQUESTING ELEVATOR FOR FLOOR " + p.getId());
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		} else {
 			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
 			// Find elevator that is on the same floor as the request
-			for(int i = 0; i < car.length; ++i){
-				if (car[i].getPosition() == (int) p.getId()){
-					car[i].addFloor((int) p.getStatus()[FLOOR_INDEX]);
-					break;
-				}
+
+			for (int i=2; i<p.getStatus()[1]+2; i++) {
+				car[p.getStatus()[0]].addFloor(p.getStatus()[i]);
 			}
 		}
 	}
@@ -168,7 +164,7 @@ public class NewNewScheduler implements Runnable {
 			}
 
 		} // If the echo was from the door system
-		  else if (p.getSubSystem() == SubsystemType.DOOR) {
+		else if (p.getSubSystem() == SubsystemType.DOOR) {
 			// If elevator has successfully closed its doors
 			if(p.getStatus()[0] == DoorState.CLOSED.getByte()) {
 				// TODO: make sure elevator is going in correct direction
@@ -183,7 +179,7 @@ public class NewNewScheduler implements Runnable {
 					returnPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
 				}
 			}
-		// If the packet is the current location of the elevator
+			// If the packet is the current location of the elevator
 		} else if (p.getSubSystem() == SubsystemType.LOCATION) {
 			// Update the car status with the location
 			car[(int) p.getId()].update(p);
