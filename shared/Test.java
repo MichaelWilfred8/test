@@ -60,13 +60,14 @@ public class Test{
 				
 				if(tokens[2].toString().equals("ERROR"))
 					{	
+					//Changes here
 						DatagramSocket sender = new DatagramSocket();
 						InetAddress elev = InetAddress.getLocalHost();
 						SocketAddress elevatorport = new InetSocketAddress(68);
 						SubsystemType type = SubsystemType.ERROR.toSubsystem(Integer.parseInt(tokens[3]));
 						int elevator = Integer.parseInt(tokens[1]);
 						byte id = (byte) elevator;
-						byte[] status=tokens[0].getBytes();
+						byte[] status=tokens[0].getBytes(); 
 						DataPacket request = new DataPacket(OriginType.ERROR,id,type,status);
 						byte[] errorbyte = request.getBytes();
 						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
