@@ -18,57 +18,7 @@ public class Scheduler implements Runnable {
 	private static final int FLOOR_INDEX = 17;
 	private static final int DIR_INDEX = 16;
 
-public class Scheduler {
-
-	DatagramPacket sendPacket;
-	DatagramPacket receivePacket;
-	DatagramSocket sendReceiveSocket, receiveSocket;
-
-	private ElevatorStatus carStatus;	// Information about the status of an elevator car
-
-	private static final int MAX_FLOOR = 10;
-	private static final int MIN_FLOOR = 1;
-	private static final int ARRAY_LEN = 100;
-	private static final int DELAY_MILLIS = 250;	// Delay 0.25 of a second
-
-	private Queue<ElevatorInputPacket> requestBuffer;	// Buffer Queue for all requests that have not been handled by the scheduler yet
-
-	private SocketAddress floorHandlerAddress;	// Holds addresses for each floor
-
-	//TODO: create floorStatus class?
-
-
-	public Scheduler() throws UnknownHostException{//TODO:make it a singleton?
-		try {
-			// Construct a datagram socket and bind it to any available port on the local host machine
-			// used to send and receive packets as echos
-			sendReceiveSocket = new DatagramSocket(2300);
-
-
-			// Construct a datagram socket and bind it to port 23 on the local host machine.
-			// used to receive packets
-			receiveSocket = new DatagramSocket(23);
-			receiveSocket.setSoTimeout(10000);	//set intermediate host receive socket to timeout after 10 seconds of no input
-		} catch (SocketException se) {
-			se.printStackTrace();
-			System.exit(1);
-		}
-
-		this.requestBuffer = new ConcurrentLinkedQueue<ElevatorInputPacket>();
-
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, 1);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
-
-		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 32);
-	}
-
-
-
-	/**
-	 * @return Top Level of building
-	 */
-	public int getTopFloor() {
-		return MAX_FLOOR;
-	}
+	//TODO: send messaage to open/close doors, send message to toggle motor
 
 	// TODO: send message to floors to update lamp
 
@@ -243,7 +193,7 @@ public class Scheduler {
 			}
 
 		} // If the echo was from the door system
-		  else if (p.getSubSystem() == SubsystemType.DOOR) {
+		else if (p.getSubSystem() == SubsystemType.DOOR) {
 			// If elevator has successfully closed its doors
 			if(p.getStatus()[0] == DoorState.CLOSED.getByte()) {
 				// TODO: make sure elevator is going in correct direction
