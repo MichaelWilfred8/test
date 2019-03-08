@@ -60,7 +60,7 @@ public class Scheduler {
 
 		this.requestBuffer = new ConcurrentLinkedQueue<ElevatorInputPacket>();
 
-		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, new InetSocketAddress(InetAddress.getLocalHost(), 69), 1);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
+		this.carStatus = new ElevatorStatus(MIN_FLOOR, MotorState.OFF, DoorState.CLOSED, MAX_FLOOR, 1);	// Have an elevator starting on the bottom floor of the building with the door closed and the motor off
 
 		this.floorHandlerAddress = new InetSocketAddress(InetAddress.getLocalHost(), 32);
 	}

@@ -74,13 +74,22 @@ public class GenericThreadedSender implements Runnable {
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
 		System.out.println("Data (String): " + p); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
-		System.out.println();
+		System.out.println(); 
 	}
 	
 	/**
 	 * Constantly try to send the head element in the outputBuffer
 	 * @throws InterruptedException
 	 */
+	public void addError(DataPacket error) {
+		System.out.println(error);
+		try {
+			outputBuffer.put(error);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	private void send() {
 		byte[] buf = new byte[BYTE_ARRAY_LENGTH];
 		this.sendPacket = new DatagramPacket(buf, buf.length);	// create new packet to send information in
@@ -100,8 +109,8 @@ public class GenericThreadedSender implements Runnable {
 			this.sendPacket.setData(tempPacket.getBytes());
 			
 			// Find the destination address of the DataPacket
-			if ((tempPacket.getSubSystem() == SubsystemType.DOOR) || (tempPacket.getSubSystem() == SubsystemType.MOTOR) || (tempPacket.getSubSystem() == SubsystemType.LOCATION)){
-				if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for an elevator and originated from the scheduler
+			if ((tempPacket.getSubSystem() == SubsystemType.DOOR) || (tempPacket.getSubSystem() == SubsystemType.MOTOR) || (tempPacket.getSubSystem() == SubsystemType.LOCATION || tempPacket.getSubSystem()==SubsystemType.ERROR)){
+				if (tempPacket.getOrigin() == OriginType.SCHEDULER || tempPacket.getOrigin() == OriginType.ERROR){		// If the data is for an elevator and originated from the scheduler or an error
 					this.sendPacket.setSocketAddress(elevatorAddress);		// Send to the elevatorHandler
 					try {
 						this.sendPacket.setAddress(InetAddress.getLocalHost());
@@ -129,6 +138,14 @@ public class GenericThreadedSender implements Runnable {
 					}
 				} else if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for a floor and originated from an elevator
 					this.sendPacket.setSocketAddress(floorAddress);				// Send to the floor handler
+					try {
+						this.sendPacket.setAddress(InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else if (tempPacket.getOrigin() == OriginType.ELEVATOR){	// If the data if for an elevator and originated from an elevator
+					this.sendPacket.setSocketAddress(schedulerAddress);		// Send to the scheduler handler
 					try {
 						this.sendPacket.setAddress(InetAddress.getLocalHost());
 					} catch (UnknownHostException e) {

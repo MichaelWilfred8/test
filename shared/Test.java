@@ -12,14 +12,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import Enums.OriginType;
+import Enums.SubsystemType;
 import floor.*;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
 public class Test{
 	FloorHandler handler;//Scheduler of
-
+	GenericThreadedSender error;
 	Test(){
-
+		
 		handler = FloorHandler.getHandler();
 
 	}
@@ -39,7 +41,7 @@ public class Test{
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
-
+		//Test should send the error packet to the elevator by reading the 3rd column and seeing if it's an error
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
 		BufferedReader fileReader = null;//instantiate file reader
@@ -52,6 +54,17 @@ public class Test{
 			while ((line = fileReader.readLine()) != null){//Read the file line by line
 				//Get all tokens available in line
 				String[] tokens = line.split(DELIMITER);//create an array of strings, represents the line of file
+				
+				if(tokens[2].equals("ERROR"))
+					{
+						byte id = 0;
+						byte[] status=tokens[0].getBytes();
+						DataPacket request = new DataPacket(OriginType.ERROR,id,SubsystemType.ERROR,status);
+						error.addError(request);
+						System.out.println("Error found"+request);
+						//Send to elevator to process
+					}
+				
 				inputLines.add(tokens);//add to the list of lines
 			}
 
