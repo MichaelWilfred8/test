@@ -89,6 +89,7 @@ public class GenericThreadedSender implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		send();
 	}
 	private void send() {
 		byte[] buf = new byte[BYTE_ARRAY_LENGTH];

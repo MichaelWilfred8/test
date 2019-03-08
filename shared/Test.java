@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import Enums.OriginType;
@@ -18,8 +21,8 @@ import floor.*;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
 public class Test{
+	
 	FloorHandler handler;//Scheduler of
-	GenericThreadedSender error;
 	Test(){
 		
 		handler = FloorHandler.getHandler();
@@ -55,13 +58,21 @@ public class Test{
 				//Get all tokens available in line
 				String[] tokens = line.split(DELIMITER);//create an array of strings, represents the line of file
 				
-				if(tokens[2].equals("ERROR"))
-					{
-						byte id = 0;
+				if(tokens[2].toString().equals("ERROR"))
+					{	
+						DatagramSocket sender = new DatagramSocket();
+						InetAddress elev = InetAddress.getLocalHost();
+						SocketAddress elevatorport = new InetSocketAddress(68);
+						SubsystemType type = SubsystemType.ERROR.toSubsystem(Integer.parseInt(tokens[3]));
+						int elevator = Integer.parseInt(tokens[1]);
+						byte id = (byte) elevator;
 						byte[] status=tokens[0].getBytes();
-						DataPacket request = new DataPacket(OriginType.ERROR,id,SubsystemType.ERROR,status);
-						error.addError(request);
-						System.out.println("Error found"+request);
+						DataPacket request = new DataPacket(OriginType.ERROR,id,type,status);
+						byte[] errorbyte = request.getBytes();
+						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
+						sender.send(packet);
+						//error.addError(request);
+						System.out.println("Error found "+type+ " Packet "+request);
 						//Send to elevator to process
 					}
 				else {
