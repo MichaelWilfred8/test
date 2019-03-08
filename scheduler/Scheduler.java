@@ -63,7 +63,7 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		System.out.println("WAITING FOR AN INPUT");
+		System.out.println("\n\nWAITING FOR AN INPUT");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
 
 		try {
