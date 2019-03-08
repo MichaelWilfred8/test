@@ -106,7 +106,26 @@ public class Elevator implements Runnable {
 		// at this stage, elevator will decode the packet
 
 		// The elevator will decode the packet
-		if(p.getSubSystem() == SubsystemType.MOTOR) {
+		if(p.getOrigin() == OriginType.ERROR)
+		{
+			switch(p.getSubSystem()) {
+			case MOTOR:
+				System.out.println("Motor Error");
+				break;
+			case DOOR:
+				System.out.println("Door Error");
+				break;
+			case CARLAMP:
+				System.out.println("Carlamp Error");
+				break;
+			case FLOORLAMP:
+				System.out.println("Floorlamp Error");
+				break;
+			
+			}
+			
+		}
+		else if(p.getSubSystem() == SubsystemType.MOTOR) {
 			//case of motor
 			System.out.println("SUBSYSTEM IS MOTOR  " );
 
