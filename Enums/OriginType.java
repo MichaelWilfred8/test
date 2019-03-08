@@ -1,10 +1,13 @@
 package Enums;
 
 public enum OriginType {
+	ERROR(4),
 	ELEVATOR(3),
 	SCHEDULER(2),
 	FLOOR(1);
 	
+	private static final int ERROR_INT = 4;
+	private static final byte ERROR_BYTE = (byte) ERROR_INT;
 	private static final int ELEVATOR_INT = 3;
 	private static final byte ELEVATOR_BYTE = (byte) ELEVATOR_INT;
 	private static final int SCHEDULER_INT = 2;
@@ -27,6 +30,8 @@ public enum OriginType {
 			return "ELEVATOR";
 		} else  if (this.value == SCHEDULER_INT){
 			return "SCHEDULER";
+		}else  if (this.value == ERROR_INT){
+			return "ERROR";
 		} else {
 			return "FLOOR";
 		}
@@ -40,6 +45,8 @@ public enum OriginType {
 	 */
 	public byte getByte(){
 		switch(this.value) {
+			case ERROR_INT:
+				return ERROR_BYTE;
 			case ELEVATOR_INT:
 				return ELEVATOR_BYTE;
 			case SCHEDULER_INT:
@@ -60,6 +67,8 @@ public enum OriginType {
 	 */
 	public static OriginType convertFromByte(byte b){
 		switch(b){
+			case ERROR_BYTE:
+				return ERROR;
 			case ELEVATOR_BYTE:
 				return ELEVATOR;
 			case SCHEDULER_BYTE:
