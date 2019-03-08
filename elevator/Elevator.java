@@ -106,7 +106,7 @@ public class Elevator implements Runnable {
 		// at this stage, elevator will decode the packet
 
 		// The elevator will decode the packet
-		if(p.getOrigin() == OriginType.ERROR)
+		if(p.getOrigin() == OriginType.ERROR)//Error packets
 		{
 			switch(p.getSubSystem()) {
 			case MOTOR:
