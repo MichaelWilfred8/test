@@ -72,7 +72,7 @@ public class GenericThreadedSender implements Runnable {
 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
-		System.out.println("Data (String): " + p); // Print the data in the packet as a String
+		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println(); 
 	}

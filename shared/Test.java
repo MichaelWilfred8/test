@@ -131,7 +131,7 @@ public class Test{
 
 			handler.createRequest(x[i]);
 			//System.out.println("WAITING");
-			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
 			//System.out.println("DONE WAITING\n");
 
 		}

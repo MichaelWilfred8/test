@@ -103,10 +103,10 @@ public class FloorHandler{
 			DataPacket input = inputBuffer.poll();
 
 			if (input != null && input.getSubSystem() == SubsystemType.FLOORLAMP) {
-				System.out.println("DATAPACKET: " + input.toString() + "\n");
+				//System.out.println("DATAPACKET: " + input.toString() + "\n");
 
 				Floor targetFloor = floors[input.getId()-1];
-				targetFloor.elevatorArrived(input.getStatus()[DIRECTION_BYTE]);
+				targetFloor.elevatorArrived(input.getStatus());
 
 			} else {
 				try {
