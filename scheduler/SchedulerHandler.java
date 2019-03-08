@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import Enums.DoorState;
 import Enums.OriginType;
@@ -63,14 +64,16 @@ public class SchedulerHandler {
 		System.out.println("IN OUTGOING");
 		DataPacket tempPacket = null;
 		DataPacket echoPacket = null;
-
 		try {
-			tempPacket = new DataPacket(rawOutputBuffer.take());	// Take the first element in the raw output queue
+			System.out.println("STUCK 2");
+			DataPacket input = rawOutputBuffer.poll(150, TimeUnit.MILLISECONDS);
+			if (input==null)
+				return;
+			tempPacket = new DataPacket(input);	// Take the first element in the raw output queue
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("STUCK 1");
 		// Convert the packet into a replica of the packet it is meant to receive
 		switch(tempPacket.getSubSystem()){
 			case MOTOR:
@@ -89,7 +92,7 @@ public class SchedulerHandler {
 				echoPacket = new DataPacket(null, (Byte) null, null, null);
 				break;
 		}
-		System.out.println("STUCK 2");
+		
 		// Create a TimeStampedPacket from the DataPacket and add it to the echo buffer
 		this.echoBuffer.add(new TimestampedPacket(echoPacket));
 
@@ -101,7 +104,6 @@ public class SchedulerHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("STUCK 3");
 	}
 
 

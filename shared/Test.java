@@ -24,9 +24,7 @@ public class Test{
 	
 	FloorHandler handler;//Scheduler of
 	Test(){
-		
 		handler = FloorHandler.getHandler();
-
 	}
 	
 	public void runTest() {
