@@ -64,8 +64,9 @@ public class Test{
 						System.out.println("Error found"+request);
 						//Send to elevator to process
 					}
-				
-				inputLines.add(tokens);//add to the list of lines
+				else {
+				inputLines.add(tokens);
+				}//add to the list of lines
 			}
 
 		} catch (Exception e) {
