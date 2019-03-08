@@ -63,9 +63,8 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		System.out.println("WAITING FOR AN INPUT");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-
+		System.out.println("\n\nLISTENING");
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
@@ -78,6 +77,7 @@ public class Scheduler implements Runnable {
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
+				System.out.println("GOING TO FLOOR");
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
@@ -143,10 +143,11 @@ public class Scheduler implements Runnable {
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
 		
-		System.out.println("IN HERE: " + p.toString());
+		System.out.println(p.toString());
 		// TODO: this if statement broken, fix for new request format. What format is test sending?
 		// check if request came from the floor (up/down)
 		if (p.getSubSystem() == SubsystemType.REQUEST){
+			System.out.println("THIS IS A REQUEST FOR AN ELEVATOR");
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		} 
 		else if (p.getSubSystem() == SubsystemType.INPUT){

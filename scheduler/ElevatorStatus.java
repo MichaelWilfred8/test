@@ -234,9 +234,10 @@ public class ElevatorStatus {
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
-		System.out.println("Floor " + floor + " added to list");
+		System.out.println("Floor " + floor + " added to list for elevator " + this.id);
 		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
 		this.nextDestination = this.getNextFloor();			// set the next destination floor
+		System.out.println("DONEZO\n\n");
 	}
 
 
