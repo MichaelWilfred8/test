@@ -21,9 +21,9 @@ public class Scheduler implements Runnable {
 	//TODO: send messaage to open/close doors, send message to toggle motor
 
 	// TODO: send message to floors to update lamp
-	
+
 	/**
-	 * Constructor for Scheduler 
+	 * Constructor for Scheduler
 	 * @param inputBuffer	BlockingQueue used in SchedulerHandler for storing messages to be sent to the scheduler
 	 * @param outputBuffer	BlockingQueue used in SchedulerHandler for storing messages that were sent by the handler
 	 * @param numElevators	Number of elevators in the system
@@ -39,7 +39,7 @@ public class Scheduler implements Runnable {
 			this.car[i] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, numFloors, i);
 		}
 	}
-	
+
 
 	/*
 	 * To access info from the inputBuffer:
@@ -50,7 +50,7 @@ public class Scheduler implements Runnable {
 	public ElevatorStatus[] getCar() {
 		return car;
 	}
-	
+
 	public ElevatorStatus getCar(int index) {
 		return car[index];
 	}
@@ -63,9 +63,8 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		System.out.println("WAITING FOR AN INPUT");
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-
+		System.out.println("\n\nLISTENING");
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
@@ -74,10 +73,11 @@ public class Scheduler implements Runnable {
 		System.out.println("INPUT RETRIEVED");
 
 
-		
+
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
+				System.out.println("GOING TO FLOOR");
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
@@ -91,7 +91,7 @@ public class Scheduler implements Runnable {
 				e.printStackTrace();
 				System.out.println("Elevator with id " + input.getId() + " does not exist");
 			}
-			
+
 			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
 		}
 	}
@@ -142,13 +142,14 @@ public class Scheduler implements Runnable {
 	private void handleNewRequest(DataPacket p){
 		// If request came from inside elevator, then add request to set inside elevatorStatus
 		// TODO: Request for an elevator to visit floor has -1 in status[17], direction for trip is in status[16]
-		
-		System.out.println("IN HERE: " + p.toString());
+
+		System.out.println(p.toString());
 		// TODO: this if statement broken, fix for new request format. What format is test sending?
 		// check if request came from the floor (up/down)
 		if (p.getSubSystem() == SubsystemType.REQUEST){
+			System.out.println("THIS IS A REQUEST FOR AN ELEVATOR");
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
-		} 
+		}
 		else if (p.getSubSystem() == SubsystemType.INPUT){
 			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
 			// Find elevator that is on the same floor as the request
@@ -164,20 +165,20 @@ public class Scheduler implements Runnable {
 	 */
 	private void sendNextStep(DataPacket p) {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Packet to return to the elevator.
-		
+
 		System.out.println("test if elevator idle...");
 		System.out.println("car = " + car[(int) p.getId()].toString());
-		
+
 		if(car[(int) p.getId()].testIfIdle()){
 			System.err.println("elevator idle!");
 			// TODO: do something here when elevator idle
 		} else {
 			System.err.println("elevator not idle");
 		}
-		
+
 		// If the echo was from the motor system
 		if (p.getSubSystem() == SubsystemType.MOTOR) {
-			
+
 			// TODO: Find way to test if elevator is at correct floor?
 			// If elevator was told to stop, open the doors
 			if (p.getStatus()[0] == MotorState.OFF.getByte()) {
@@ -193,7 +194,7 @@ public class Scheduler implements Runnable {
 			}
 
 		} // If the echo was from the door system
-		  else if (p.getSubSystem() == SubsystemType.DOOR) {
+		else if (p.getSubSystem() == SubsystemType.DOOR) {
 			// If elevator has successfully closed its doors
 			if(p.getStatus()[0] == DoorState.CLOSED.getByte()) {
 				// TODO: make sure elevator is going in correct direction
@@ -213,7 +214,7 @@ public class Scheduler implements Runnable {
 				returnPacket.setSubSystem(SubsystemType.DOOR);
 				returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
 			}
-		
+
 		} // If the packet is the current location of the elevator
 		else if (p.getSubSystem() == SubsystemType.LOCATION) {
 			// if car has reached destination
@@ -222,15 +223,15 @@ public class Scheduler implements Runnable {
 			if ((int) p.getStatus()[0] == car[(int) p.getId()].getNextDestination()) {
 				returnPacket.setSubSystem(SubsystemType.MOTOR);
 				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
-				
+
 				// remove this destination from the list of destinations for the car to visit
 				car[(int) p.getId()].findNextDestination();
 			}
 		}
-		
+
 		System.out.println("Input packet = " + p.toString());
 		System.out.println("Return packet = " + returnPacket.toString());
-		
+
 		// If the returnPacket has been modified, then add it to the output buffer to be sent
 		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {
 			try {

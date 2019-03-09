@@ -6,22 +6,25 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import Enums.OriginType;
+import Enums.SubsystemType;
 import floor.*;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
 public class Test{
+	
 	FloorHandler handler;//Scheduler of
-
 	Test(){
-
 		handler = FloorHandler.getHandler();
-
 	}
 	
 	public void runTest() {
@@ -39,7 +42,7 @@ public class Test{
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
-
+		//Test should send the error packet to the elevator by reading the 3rd column and seeing if it's an error
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
 
 		BufferedReader fileReader = null;//instantiate file reader
@@ -52,7 +55,28 @@ public class Test{
 			while ((line = fileReader.readLine()) != null){//Read the file line by line
 				//Get all tokens available in line
 				String[] tokens = line.split(DELIMITER);//create an array of strings, represents the line of file
-				inputLines.add(tokens);//add to the list of lines
+				
+				if(tokens[2].toString().equals("ERROR"))
+					{	
+					//Changes here
+						DatagramSocket sender = new DatagramSocket();
+						InetAddress elev = InetAddress.getLocalHost();
+						SocketAddress elevatorport = new InetSocketAddress(68);
+						SubsystemType type = SubsystemType.ERROR.toSubsystem(Integer.parseInt(tokens[3]));
+						int elevator = Integer.parseInt(tokens[1]);
+						byte id = (byte) elevator;
+						byte[] status=tokens[0].getBytes(); 
+						DataPacket request = new DataPacket(OriginType.ERROR,id,type,status);
+						byte[] errorbyte = request.getBytes();
+						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
+						sender.send(packet);
+						//error.addError(request);
+						System.out.println("Error found "+type+ " Packet "+request);
+						//Send to elevator to process
+					}
+				else {
+				inputLines.add(tokens);
+				}//add to the list of lines
 			}
 
 		} catch (Exception e) {
@@ -118,7 +142,7 @@ public class Test{
 
 			handler.createRequest(x[i]);
 			//System.out.println("WAITING");
-			//TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
+			TimeUnit.MILLISECONDS.sleep(formattedDate); //sleeps for the time difference
 			//System.out.println("DONE WAITING\n");
 
 		}

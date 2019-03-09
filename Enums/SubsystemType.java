@@ -61,6 +61,26 @@ public enum SubsystemType {
 		}
 	}
 	
+	public SubsystemType toSubsystem(int error){
+		switch(error) {
+			case MOTOR_INT:
+				return MOTOR;
+			case DOOR_INT:
+				return DOOR;
+			case CARLAMP_INT:
+				return CARLAMP;
+			case FLOORLAMP_INT:
+				return FLOORLAMP;
+			case LOCATION_INT:
+				return LOCATION;
+			case INPUT_INT:
+				return INPUT;
+			case REQUEST_INT:
+				return REQUEST;
+			default:
+				return ERROR;
+		}
+	}
 	
 	/**	
 	 * Generates a byte value for the enum

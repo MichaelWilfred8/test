@@ -98,7 +98,7 @@ public class GenericThreadedListener implements Runnable {
 				e.printStackTrace();
 			}
 			
-			System.out.println("GenericThreadedListener successfully added info to the inputBuffer");
+			System.out.println("GenericThreadedListener successfully added info to the inputBuffer\n");
 		}
 	}
 	
