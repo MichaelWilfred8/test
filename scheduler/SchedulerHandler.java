@@ -8,12 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import Enums.DoorState;
-import Enums.OriginType;
-import Enums.SubsystemType;
+import Enums.*;
 import shared.*;
 
 /**
@@ -24,14 +21,12 @@ import shared.*;
  *
  */
 
-// TODO: check echos,
 public class SchedulerHandler {
 
 
 	public BlockingQueue<DataPacket> rawInputBuffer, rawOutputBuffer;					// Buffer for DataPackets that have not been processed by the handler
 	public BlockingQueue<DataPacket> processedInputBuffer, processedOutputBuffer;		// Buffer for DataPackets that have been processed by the handler and are ready to be sent
-	private List<TimestampedPacket> echoBuffer;								// Buffer for DataPackets that the scheduler has not received an echo for yet.
-	// TODO: Does echoBuffer need to be a blockingqueue?
+	private List<TimestampedPacket> echoBuffer;											// Buffer for DataPackets that the scheduler has not received an echo for yet.
 
 	GenericThreadedSender schedulerSender;		// Sender thread that sends all processed DataPackets to their destination
 	GenericThreadedListener schedulerListener;	// Listener thread that listens for DataPackets and places them in the rawInputBuffer
@@ -71,7 +66,6 @@ public class SchedulerHandler {
 				return;
 			tempPacket = new DataPacket(input);	// Take the first element in the raw output queue
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		// Convert the packet into a replica of the packet it is meant to receive
@@ -101,7 +95,6 @@ public class SchedulerHandler {
 		try {
 			this.processedOutputBuffer.put(tempPacket);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -113,7 +106,7 @@ public class SchedulerHandler {
 	 * @return	True if the packet is an echo from another subsystem.
 	 */
 	private boolean checkIfEcho(DataPacket p){
-		Collections.sort(echoBuffer); //Sort
+		Collections.sort(echoBuffer); // Sort the array by finding which echo came first
 		for(int i = 0; i < echoBuffer.size(); ++i){
 			if (echoBuffer.get(i).getPacket().equals(p)){
 				echoBuffer.remove(i);
@@ -164,7 +157,6 @@ public class SchedulerHandler {
 		try {
 			tempPacket = new DataPacket(rawInputBuffer.take());	// Take the first element in the raw input queue
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -174,7 +166,6 @@ public class SchedulerHandler {
 				this.processedInputBuffer.put(tempPacket);
 				System.out.println("HANDLER PUT REQUEST");
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -184,7 +175,6 @@ public class SchedulerHandler {
 				this.processedInputBuffer.put(tempPacket);
 				System.out.println("HANDLER PUT ECHO");
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -208,7 +198,7 @@ public class SchedulerHandler {
 		Thread schedulerThread = new Thread(scheduler);
 
 		Thread listener = new Thread(new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue()));
-		Thread sender = new Thread(new GenericThreadedSender(s.rawOutputBuffer, s.ELEVATOR_PORT_NUMBER, s.SCHEDULER_PORT_NUMBER, s.FLOOR_PORT_NUMBER));
+		Thread sender = new Thread(new GenericThreadedSender(s.rawOutputBuffer, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER));
 
 		listener.start();
 		sender.start();

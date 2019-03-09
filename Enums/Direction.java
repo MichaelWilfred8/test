@@ -36,7 +36,8 @@ public enum Direction {
 			case DOWN_INT:
 				return DOWN_BYTE;
 			default:
-				return (Byte) null; //TODO: edit this case to return a null different value?
+				System.err.println("Given value does not match any enum values");
+				return (byte) 0x00; 	// Return 0 when given value does not match any enum values
 		}
 	}
 	
