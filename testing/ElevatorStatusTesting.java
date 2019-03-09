@@ -135,9 +135,10 @@ public class ElevatorStatusTesting {
 		System.out.println("output = " + output.toString() + "\n");
 		 */
 		
-		// Tell elevator to stop at floor 4 for upwards trip
+		
+		// Tell elevator to stop at floor 2 for upwards trip
 		try {
-			input.add(createFloorRequest(4, Direction.UP));
+			input.add(createFloorRequest(2, Direction.UP));
 		} catch (IllegalArgumentException e){
 			e.printStackTrace();
 		}
@@ -147,9 +148,12 @@ public class ElevatorStatusTesting {
 		System.out.println("output = " + output.toString() + "\n");
 		
 		
-		// Add floor 7 to visit
+		// Add floor 7, 5, 3, 6 to visit
 		ArrayList<Integer> floors = new ArrayList<Integer>();
 		floors.add(7);
+		floors.add(5);
+		floors.add(3);
+		floors.add(6);
 		try {
 			input.add(createElevatorRequest(floors, scheduler.getCar(0).getPosition(), scheduler.getCar(0).getId()));
 		} catch (IllegalArgumentException e){
@@ -159,6 +163,9 @@ public class ElevatorStatusTesting {
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		System.out.println("output = " + output.toString() + "\n");
+		
+		
+		
 		
 		
 		DataPacket tempPacket, locationPacket;
