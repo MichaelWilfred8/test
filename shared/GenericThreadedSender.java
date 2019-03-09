@@ -26,6 +26,7 @@ public class GenericThreadedSender implements Runnable {
 	private SocketAddress elevatorAddress;
 	private SocketAddress schedulerAddress;
 	private SocketAddress floorAddress;
+	private boolean outputEnable;
 	
 	
 	/**
@@ -51,9 +52,36 @@ public class GenericThreadedSender implements Runnable {
 		this.floorAddress = floorAddress;
 		this.elevatorAddress = elevatorAddress;
 		this.schedulerAddress = schedulerAddress;
+		this.outputEnable = true;
 	}
 	
 	
+	/**
+	 * Constructor for GenericThreadedSender object. Used to send objects stored in outputBuffer to other handlers.
+	 * 
+	 * @param outputBuffer		The output buffer shared by the handler and the sender
+	 * @param elevatorAddress	The SocketAddress of the elevator handler
+	 * @param schedulerAddress	The SocketAddress of the scheduler handler
+	 * @param floorAddress		The SocketAddress of the floor handler
+	 * @param outputEnable		Boolean value to enable printing of information to the console
+	 */
+	public GenericThreadedSender(BlockingQueue<DataPacket> outputBuffer, SocketAddress elevatorAddress, SocketAddress schedulerAddress, SocketAddress floorAddress, boolean outputEnable){
+		try{
+			// Construct a datagram socket to send on
+			// used to receive packets
+			sendSocket = new DatagramSocket();
+		} catch (SocketException se) {
+			se.printStackTrace();
+			System.exit(1);
+		}
+		
+		this.outputBuffer = outputBuffer;
+		
+		this.floorAddress = floorAddress;
+		this.elevatorAddress = elevatorAddress;
+		this.schedulerAddress = schedulerAddress;
+		this.outputEnable = outputEnable;
+	}
 	
 	/**
 	 * Print what was received from a datagram packet to the console
@@ -98,7 +126,10 @@ public class GenericThreadedSender implements Runnable {
 		
 		while(true){
 			// Get the data to send from the output buffer
-			System.out.println("GenericThreadedSender Trying to take a packet from the output queue");
+			if (outputEnable){
+				System.out.println("GenericThreadedSender Trying to take a packet from the output queue");
+			}
+			
 			try {
 				tempPacket = new DataPacket(outputBuffer.take());	// Take the packet at the head of the output queue
 			} catch (InterruptedException ie){
@@ -157,12 +188,17 @@ public class GenericThreadedSender implements Runnable {
 			}
 			
 			// Print the packet to be sent
-			printDatagramPacket(this.sendPacket, "s");
+			if (outputEnable){
+				printDatagramPacket(this.sendPacket, "s");
+			}
+			
 			
 			
 			// Try to send the packet
 			try {
-				System.out.println("GenericThreadedSender: Sending on port " + this.sendSocket.getLocalPort() + ".\n");
+				if (outputEnable){
+					System.out.println("GenericThreadedSender: Sending on port " + this.sendSocket.getLocalPort() + ".\n");
+				}
 				this.sendSocket.send(this.sendPacket);
 			} catch (IOException e){
 				e.printStackTrace();
