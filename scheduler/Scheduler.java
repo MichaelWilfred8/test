@@ -64,20 +64,17 @@ public class Scheduler implements Runnable {
 	 */
 	private void handleInput(){
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-		System.out.println("\n\nLISTENING");
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-		System.out.println("INPUT RETRIEVED");
 
 
 
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
-				System.out.println("GOING TO FLOOR");
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
@@ -147,11 +144,9 @@ public class Scheduler implements Runnable {
 		// TODO: this if statement broken, fix for new request format. What format is test sending?
 		// check if request came from the floor (up/down)
 		if (p.getSubSystem() == SubsystemType.REQUEST){
-			System.out.println("THIS IS A REQUEST FOR AN ELEVATOR");
 			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
 		}
 		else if (p.getSubSystem() == SubsystemType.INPUT){
-			System.out.println("REQUEST CAME FROM FLOOR: " + p.getId());
 			// Find elevator that is on the same floor as the request
 			for (int i=2; i<p.getStatus()[1]+2; i++) {
 				car[p.getStatus()[0]].addFloor(p.getStatus()[i]);

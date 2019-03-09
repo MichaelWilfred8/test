@@ -72,11 +72,12 @@ public class Elevator implements Runnable {
 		//this.floorLights = new boolean[numFloors];
 		//for(int i = 0; i < numFloors; ++i){
 		//	floorLights[i] = false;
-	//	}
+		//	}
 
 		this.currentFloor = 1;
 
 		this.id = id;
+		System.out.println("Elevator " + this.id + " has been created.");
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class Elevator implements Runnable {
 		if (mode == "s"){
 			System.out.println("Elevator sent:");
 			System.out.println("To host: " + p.getAddress());					// Print address of host to which DatagramPacket was sent
- 			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
+			System.out.println("Host port: " + p.getPort());					// Print port of host to which DatagramPacket was sent
 		} else if (mode == "r") {
 			System.out.println("Elevator received:");
 			System.out.println("From host: " + p.getAddress());					// Print address of host to which DatagramPacket was received
@@ -104,7 +105,6 @@ public class Elevator implements Runnable {
 
 	public void receiveAndEcho(DataPacket p, DatagramPacket packet) throws IOException, ClassNotFoundException, InterruptedException {
 		// at this stage, elevator will decode the packet
-
 		// The elevator will decode the packet
 		if(p.getOrigin() == OriginType.ERROR)//Error packets
 		{
@@ -121,9 +121,9 @@ public class Elevator implements Runnable {
 			case FLOORLAMP:
 				System.out.println("Floorlamp Error");
 				break;
-			
+
 			}
-			
+
 		}
 		else if(p.getSubSystem() == SubsystemType.MOTOR) {
 			//case of motor
@@ -143,7 +143,7 @@ public class Elevator implements Runnable {
 				Motor(MotorState.UP, packet.getSocketAddress());		//motor up and send message
 				break;
 			default:
-				  
+
 				System.out.println("Invalid type");
 				break;
 			}
@@ -196,6 +196,7 @@ public class Elevator implements Runnable {
 
 	private void sendDataPacket(DataPacket p, SocketAddress address){
 		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, address);
+		sendPacket.setPort(SocketPort.SCHEDULER_LISTENER.getValue());
 
 
 		System.out.println("Elevator: Sending packet...");
@@ -216,7 +217,7 @@ public class Elevator implements Runnable {
 	public void sendLocation(DatagramPacket dp) throws IOException, InterruptedException {
 		DataPacket p = new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.LOCATION, new byte[] {(byte) this.currentFloor});
 
-		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, dp.getAddress(), dp.getPort());
+		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, dp.getAddress(), SocketPort.SCHEDULER_LISTENER.getValue());
 
 		System.out.println( "Elevator: Sending packet to scheduler ");
 
@@ -242,23 +243,23 @@ public class Elevator implements Runnable {
 
 		if(command == MotorState.DOWN) {
 			while(currentFloor > 0) {
-			this.motorState = MotorState.DOWN;
-			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
-			currentFloor--;
-			//sendLocation();
-			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
+				this.motorState = MotorState.DOWN;
+				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
+				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+				currentFloor--;
+				//sendLocation();
+				System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 			}
 		} else if (command == MotorState.UP){
 			while(currentFloor < 11) {
-			this.motorState = MotorState.UP;
-			
-			//changed the second byte from id to current floor, so that scheduler will get update of the current floor
-			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte)currentFloor, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
-			currentFloor++;
-			//sendLocation();
-			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
+				this.motorState = MotorState.UP;
+
+				//changed the second byte from id to current floor, so that scheduler will get update of the current floor
+				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {(byte) this.currentFloor, this.motorState.getByte()}), address);
+				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+				currentFloor++;
+				//sendLocation();
+				System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 			}
 		} else if (command == MotorState.OFF){
 			this.motorState = MotorState.OFF;
@@ -266,7 +267,7 @@ public class Elevator implements Runnable {
 			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 		}
-	
+
 	}
 
 	public String[] GetString(byte[] bytes) throws ClassNotFoundException, IOException
@@ -280,8 +281,8 @@ public class Elevator implements Runnable {
 		objectInputStream.close();
 		return stringArray2;
 	}
-	
-	
+
+
 	// TODO: determine if this can be deleted
 	private static byte[] convertToBytes(String[] strings) throws IOException {
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -342,9 +343,9 @@ public class Elevator implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	// TODO: remove this from the function
 	/*
 	public static void main( String args[] ) throws IOException, ClassNotFoundException, InterruptedException {
@@ -353,7 +354,7 @@ public class Elevator implements Runnable {
 			//c.receiveAndEcho();
 		}
 	}
-	*/
-	
+	 */
+
 
 }

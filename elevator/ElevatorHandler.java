@@ -16,16 +16,16 @@ public class ElevatorHandler implements Runnable{
 	DatagramSocket receiveSocket;
 
 	private static List<Elevator> elevatorList = new ArrayList<Elevator>(3);
-    private boolean stopController;
+	private boolean stopController;
 
-	 private static final ElevatorHandler instance = new ElevatorHandler();
-	    private ElevatorHandler(){
-	        if(instance != null){
-	            throw new IllegalStateException("Already instantiated");
-	        }
-	        setStopController(false);
-	        initializeElevators();
-	    
+	private static final ElevatorHandler instance = new ElevatorHandler();
+	private ElevatorHandler(){
+		if(instance != null){
+			throw new IllegalStateException("Already instantiated");
+		}
+		setStopController(false);
+		initializeElevators();
+
 
 		// Construct a datagram socket and bind it to port 69 
 		// on the local host machine. This socket will be used to
@@ -50,8 +50,8 @@ public class ElevatorHandler implements Runnable{
 	 * listen for incoming requests, listens on port 69
 	 */
 	private void listen(){
-//v
-		
+		//v
+
 		boolean notDone = true;
 		while(notDone) {
 			// Construct a DatagramPacket for receiving packets up 
@@ -83,40 +83,40 @@ public class ElevatorHandler implements Runnable{
 			if(data[0]==-1) {
 				notDone = false;
 			} else {
-				 Elevator elevator = null;
+				Elevator elevator = null;
 				DataPacket dp = new DataPacket(data);
 				int id = dp.getId();
-				  elevator = findElevator(id);
-				  System.out.println("calling elevator " + id + "\n");
-				  try {
+				elevator = findElevator(id);
+				System.out.println("calling elevator " + id + "\n");
+				try {
 					elevator.receiveAndEcho(dp, receivePacket);
 				} catch (ClassNotFoundException | IOException | InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
 
 	}
-    public synchronized Elevator selectElevator(int id) {
-        Elevator elevator = null;
-        
-        elevator = findElevator(id);
-        // So that elevators can start moving again.
-        notifyAll();
-        return elevator;
-    }
-	
-    private static void initializeElevators(){
-        for(int i=0; i<3; i++){
-            Elevator elevator = new Elevator(i);
-            Thread t = new Thread(elevator);
-            t.start();
+	public synchronized Elevator selectElevator(int id) {
+		Elevator elevator = null;
 
-            elevatorList.add(elevator);
-        }
-    }
+		elevator = findElevator(id);
+		// So that elevators can start moving again.
+		notifyAll();
+		return elevator;
+	}
+
+	private static void initializeElevators(){
+		for(int i=0; i<3; i++){
+			Elevator elevator = new Elevator(i);
+			Thread t = new Thread(elevator);
+			t.start();
+
+			elevatorList.add(elevator);
+		}
+	}
 
 	/**
 	 * Thread run class
@@ -126,24 +126,24 @@ public class ElevatorHandler implements Runnable{
 		listen();
 
 	}
-	
-	  /**
-     * Right now, the findElevator is only based on id
-     * TODO in the future, findElevator will take (movingDirection, DestinationFloor, RequestFloor) as param
-     * 		so we can use hash map
-     * @param id
-     * @return selected elevator
-     */
-    private static Elevator findElevator(int id) {
-        Elevator elevator = null;
-       elevator =  elevatorList.get(id);
-        return elevator;
-    }
-	
-	   public void setStopController(boolean stop){
-	        this.stopController = stop;
 
-	    }
+	/**
+	 * Right now, the findElevator is only based on id
+	 * TODO in the future, findElevator will take (movingDirection, DestinationFloor, RequestFloor) as param
+	 * 		so we can use hash map
+	 * @param id
+	 * @return selected elevator
+	 */
+	private static Elevator findElevator(int id) {
+		Elevator elevator = null;
+		elevator =  elevatorList.get(id);
+		return elevator;
+	}
+
+	public void setStopController(boolean stop){
+		this.stopController = stop;
+
+	}
 
 	public static void main(String args[]){
 		instance.run();
