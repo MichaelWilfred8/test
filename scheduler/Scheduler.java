@@ -172,12 +172,19 @@ public class Scheduler implements Runnable {
 		if(car[(int) p.getId()].testIfIdle()){
 			System.err.println("elevator idle!");
 			// TODO: do something here when elevator idle
+			// Do not return package since elevator must wait
+			
+			
 		} else {
-			System.err.println("elevator not idle");
+			System.out.println("elevator not idle");
 		}
-
+		
+		if (car[(int) p.getId()].testIfIdle()) {
+			// do nothing since elevator is idle
+			System.out.println("Elevator idle, doing nothing");
+		}
 		// If the echo was from the motor system
-		if (p.getSubSystem() == SubsystemType.MOTOR) {
+		else if (p.getSubSystem() == SubsystemType.MOTOR) {
 
 			// TODO: Find way to test if elevator is at correct floor?
 			// If elevator was told to stop, open the doors
