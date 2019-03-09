@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import Enums.Direction;
+import Enums.DoorState;
 import Enums.MotorState;
 import Enums.OriginType;
 import Enums.SubsystemType;
@@ -29,7 +30,6 @@ public class ElevatorStatusTesting {
 		}
 		
 		requestPacket.setStatus(req);
-		System.out.println("createElevator");
 		return requestPacket;
 		
 	}
@@ -46,7 +46,6 @@ public class ElevatorStatusTesting {
 		tempReq[floorIndex] = (byte) -1;
 		
 		requestPacket.setStatus(tempReq);
-		System.out.println("createFloor");
 		return requestPacket;
 	}
 	
@@ -77,7 +76,7 @@ public class ElevatorStatusTesting {
 		for(int i = 0; i < NUM_ELEVATORS; ++i){
 			// Tell all elevators that motor is stopped
 			try {
-				input.add(new DataPacket(OriginType.ELEVATOR, (byte) i, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()}));
+				input.add(new DataPacket(OriginType.ELEVATOR, (byte) i, SubsystemType.DOOR, new byte[] {DoorState.OPEN.getByte()}));
 			} catch (IllegalArgumentException e){
 				e.printStackTrace();
 			}

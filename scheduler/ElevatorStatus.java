@@ -235,6 +235,12 @@ public class ElevatorStatus {
 		this.inoperable = state;
 	}
 
+	/**
+	 * Toggle if the elevator is inoperable
+	 */
+	public void toggleInoperable() {
+		this.inoperable = !this.inoperable;
+	}
 
 
 	/**
@@ -252,7 +258,9 @@ public class ElevatorStatus {
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
-		System.out.println("Floor " + floor + " added to list for elevator " + this.id);
+		//System.out.println("Floor " + floor + " added to list for elevator " + this.id);
+		ColouredOutput.printColouredText("Floor " + floor + " added to list for elevator " + this.id, ColouredOutput.ANSI_GREEN);
+		this.setIdle(false); 								// Set elevator to not be idle
 		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
 		this.nextDestination = this.getNextFloor();			// set the next destination floor
 	}
@@ -434,12 +442,12 @@ public class ElevatorStatus {
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
-				ColouredOutput.printColouredText("motor was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
+				ColouredOutput.printColouredText("motor of car " + this.getId() + " was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("motor was updated to " + this.getMotorState());
 				break;
 			case DOOR:	// Door state is to be updated
 				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
-				ColouredOutput.printColouredText("door was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
+				ColouredOutput.printColouredText("door of car " + this.getId() + " was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
@@ -447,13 +455,14 @@ public class ElevatorStatus {
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
+				ColouredOutput.printColouredText("position of car " + this.getId() + " in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("position in elevatorStatus was updated to " + this.getPosition());
-				printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
+				//printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
 				break;
 			case ERROR:
 				// TODO: configure this !
-				
+				this.toggleInoperable();
+				ColouredOutput.printColouredText("car " + this.getId() + " had its error toggled to " + this.isInoperable(), ColouredOutput.ANSI_RED_BACKGROUND);
 				//this.setError(p.getStatus());
 				break;
 			default:

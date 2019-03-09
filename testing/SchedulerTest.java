@@ -63,7 +63,7 @@ public class SchedulerTest {
 						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
 						sender.send(packet);
 						//error.addError(request);
-						System.out.println("Error found "+type+ " Packet "+request);
+						System.out.println("Error found in: " + type + ", Error Packet: " + request);
 						//Send to elevator to process
 					}
 				else {
@@ -147,7 +147,7 @@ public class SchedulerTest {
 	}*/
 	
 	
-	public void organizer(String x [][], FloorHandler handler) throws InterruptedException {
+	public void organizer(String x [][]) throws InterruptedException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 		System.out.println(x[0][0]);
 
@@ -167,7 +167,6 @@ public class SchedulerTest {
 
 			long formattedDate = date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
-			//handler.createRequest(x[i]);
 			this.createRequest(x[i]);
 			
 			//System.out.println("WAITING");
@@ -184,13 +183,13 @@ public class SchedulerTest {
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		
 		try {
-			organizer(testLines, handler);
+			organizer(testLines);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		handler.listen();
+		//handler.listen();
 	}
 	
 
