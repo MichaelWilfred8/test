@@ -1,18 +1,15 @@
 package scheduler;
 
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import Enums.*;
 import shared.*;
 
 // Class for the scheduler to hold information about the elevator and its current position
 
-// TODO: Add idle state for elevator
-// TODO: fix elevator buttons
+// TODO: fix elevator buttons or remove from elevatorStatus
 
 /**
  * Class for the scheduler to hold information about a single elevator car
@@ -34,7 +31,8 @@ public class ElevatorStatus {
 	public int id;
 	private boolean idle;						// Boolean value indicating if elevator is idle
 	
-	public boolean isIdle() {
+	
+	public boolean getIdle() {
 		return idle;
 	}
 
@@ -301,12 +299,13 @@ public class ElevatorStatus {
 		Integer nextFloor = 1;
 
 		// Check if floorsToVisit is empty (no floors for this elevator to visit)
+		/*
 		if (this.floorsToVisit.isEmpty()){	// If true
 			this.setIdle(true); 			// Set the elevator to be idle
 			return this.getPosition();		// Return the current position of the elevator
 		} else {
 			this.setIdle(false);
-		}
+		}*/
 
 		// check if the elevator is on an upwards trip
 		if (this.getTripDir() == Direction.UP){

@@ -13,7 +13,7 @@ import shared.DataPacket;
 public class ElevatorStatusTesting {
 	
 	
-	private static final int NUM_ELEVATORS = 2;
+	private static final int NUM_ELEVATORS = 1;
 
 	public static DataPacket createElevatorRequest(ArrayList<Integer> floors, int floorNo, int targetElevator){
 		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) floorNo, SubsystemType.INPUT, new byte[] {(byte) 0});
