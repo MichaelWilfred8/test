@@ -12,11 +12,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import Enums.OriginType;
-import Enums.SubsystemType;
+import Enums.*;
 import floor.*;
 
 // TODO: Get test to send requests when time is specified, assuming first one is moment test is started
@@ -70,8 +68,9 @@ public class Test{
 						byte[] errorbyte = request.getBytes();
 						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
 						sender.send(packet);
+						sender.close();
 						//error.addError(request);
-						System.out.println("Error found "+type+ " Packet "+request);
+						System.out.println("Error found " + type + " Packet " + request);
 						//Send to elevator to process
 					}
 				else {

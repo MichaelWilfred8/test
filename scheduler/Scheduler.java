@@ -71,7 +71,7 @@ public class Scheduler implements Runnable {
 		//System.out.println("INPUT RETRIEVED");
 
 
-
+		
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
@@ -108,7 +108,9 @@ public class Scheduler implements Runnable {
 		
 		// Cycle through all elevators
 		for(int i = 0; i < car.length; ++i){
-			if (dir == Direction.UP){
+			if (car[i].isInoperable()){
+				// Do not use elevator i since it is out of operation
+			} else if (dir == Direction.UP){
 				// If car is below the given floor and is traveling up
 				if ((car[i].getPosition() < floor) && (car[i].getTripDir() == Direction.UP)){
 					// If car is above the current best candidate
@@ -131,7 +133,8 @@ public class Scheduler implements Runnable {
 
 		return carNum;
 	}
-
+	
+	
 	/**
 	 * Handle a new request for an elevator to visit a floor
 	 * @param p	The DataPacket that contains the request
@@ -153,15 +156,17 @@ public class Scheduler implements Runnable {
 		}
 	}
 
+	
 	/**
 	 * Send the next step in the process back to the elevator
 	 * @param 	p	The DataPacket retrieved from the inputBuffer
 	 */
 	private void sendNextStep(DataPacket p) {
-		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Packet to return to the elevator.
+		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Create a DataPacket to return to the elevator.
 		
 		System.out.println("car = " + car[(int) p.getId()].toString());
-
+		
+		
 		if(car[(int) p.getId()].testIfIdle()){
 			System.err.println("elevator idle!");
 			// TODO: Update something here for when elevator is idle for long period of time?
@@ -176,6 +181,10 @@ public class Scheduler implements Runnable {
 		if (car[(int) p.getId()].getIdle()) {
 			// do nothing since elevator is idle
 			System.out.println("Elevator idle, doing nothing");
+		}
+		else if (car[(int) p.getId()].isInoperable() == true){
+			// Do nothing since the elevator is inoperable
+			System.out.println("Elevator " + (int) p.getId() + " is inoperable");
 		}
 		// If the echo was from the motor system
 		else if (p.getSubSystem() == SubsystemType.MOTOR) {

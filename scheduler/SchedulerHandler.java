@@ -196,12 +196,15 @@ public class SchedulerHandler {
 
 		Scheduler scheduler = new Scheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
 		Thread schedulerThread = new Thread(scheduler);
+		
+		GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue(), false);
+		Thread listenerThread = new Thread(listener);
+		
+		GenericThreadedSender sender = new GenericThreadedSender(s.rawOutputBuffer, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, false);
+		Thread senderThread = new Thread(sender);
 
-		Thread listener = new Thread(new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue()));
-		Thread sender = new Thread(new GenericThreadedSender(s.rawOutputBuffer, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER));
-
-		listener.start();
-		sender.start();
+		listenerThread.start();
+		senderThread.start();
 		schedulerThread.start();
 
 		for (int i = 0; i < scheduler.car.length; ++i){

@@ -69,20 +69,13 @@ public class ElevatorStatusTesting {
 		Scheduler scheduler = new Scheduler(input, output, NUM_ELEVATORS, 7);
 		Thread schThread = new Thread(scheduler);
 		
-		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
-		// byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, enum reqType = floor, (dir)2};
-		// byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, enum reqType = elev, floor 3, floor 4, floor 5, };
-		
-		final int dirIndex = 16;
-		final int floorIndex = 17;
-		
 		schThread.start();
 		
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		
 		for(int i = 0; i < NUM_ELEVATORS; ++i){
-			// Tell elevator that motor is stopped
+			// Tell all elevators that motor is stopped
 			try {
 				input.add(new DataPacket(OriginType.ELEVATOR, (byte) i, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()}));
 			} catch (IllegalArgumentException e){
