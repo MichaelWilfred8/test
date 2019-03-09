@@ -2,7 +2,6 @@ package scheduler;
 
 import shared.*;
 
-import java.net.DatagramPacket;
 import java.time.Instant;
 
 /**
@@ -10,7 +9,7 @@ import java.time.Instant;
  * @author Craig Worthington
  *
  */
-public class TimestampedPacket implements Comparable {
+public class TimestampedPacket implements Comparable<TimestampedPacket> {
 	private Instant timeStamp;
 	private DataPacket packet;
 	
@@ -95,12 +94,5 @@ public class TimestampedPacket implements Comparable {
 
 	public int compareTo(TimestampedPacket p) {
 		return this.getTimeStamp().compareTo(p.getTimeStamp());
-	}
-
-	@Override
-	public int compareTo(Object o) {
-		return this.getTimeStamp().compareTo(((TimestampedPacket) o).getTimeStamp());
-	}
-	
-	
+	}	
 }

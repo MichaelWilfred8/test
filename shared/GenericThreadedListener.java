@@ -6,7 +6,6 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
-import shared.*;
 
 /**
  * Threaded class used to constantly listen for inputs to the scheduler from other subsystems.
@@ -128,7 +127,6 @@ public class GenericThreadedListener implements Runnable {
 				inputBuffer.put(p);
 				//System.out.println("GOT THIS MESSAGE " + p);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			

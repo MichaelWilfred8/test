@@ -13,6 +13,8 @@ import shared.DataPacket;
 public class ElevatorStatusTesting {
 	
 	
+	private static final int NUM_ELEVATORS = 1;
+
 	public static DataPacket createElevatorRequest(ArrayList<Integer> floors, int floorNo, int targetElevator){
 		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) floorNo, SubsystemType.INPUT, new byte[] {(byte) 0});
 		
@@ -48,6 +50,15 @@ public class ElevatorStatusTesting {
 		return requestPacket;
 	}
 	
+	
+	public static void printElevators(Scheduler scheduler){
+		System.out.print("\n");
+		for (int i = 0; i < NUM_ELEVATORS; ++i){
+			System.out.println("car " + i + " = " + scheduler.getCar(i).toString());
+		}
+		System.out.print("\n");
+	}
+	
 	// TODO: test -1 for sending to floors
 	public static void main(String[] args) throws InterruptedException {
 		//ElevatorStatus car = new ElevatorStatus(0, MotorState.OFF, DoorState.CLOSED, 7, 1);
@@ -55,7 +66,7 @@ public class ElevatorStatusTesting {
 		LinkedBlockingQueue<DataPacket> input = new LinkedBlockingQueue<DataPacket>();
 		LinkedBlockingQueue<DataPacket> output = new LinkedBlockingQueue<DataPacket>();
 		
-		Scheduler scheduler = new Scheduler(input, output, 1, 7);
+		Scheduler scheduler = new Scheduler(input, output, NUM_ELEVATORS, 7);
 		Thread schThread = new Thread(scheduler);
 		
 		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
@@ -70,70 +81,18 @@ public class ElevatorStatusTesting {
 		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
 		
 		
-		// Tell elevator that motor is stopped
-		try {
-			input.add(new DataPacket(OriginType.ELEVATOR, (byte) 0, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()}));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
+		for(int i = 0; i < NUM_ELEVATORS; ++i){
+			// Tell elevator that motor is stopped
+			try {
+				input.add(new DataPacket(OriginType.ELEVATOR, (byte) i, SubsystemType.MOTOR, new byte[] {MotorState.OFF.getByte()}));
+			} catch (IllegalArgumentException e){
+				e.printStackTrace();
+			}
+			Thread.sleep(100);
+			printElevators(scheduler);
+			
+			System.out.println("output = " + output.toString() + "\n");
 		}
-		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-		
-		System.out.println("output = " + output.toString() + "\n");
-		
-		
-		/*
-		// Add floor 4 to visit
-		tempReq[floorIndex] = 4;
-		try {
-			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-		
-		System.out.println("output = " + output.toString() + "\n");
-		
-		
-		// Add floor 5 to visit
-		tempReq[floorIndex] = 5;
-		try {
-			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-		
-		System.out.println("output = " + output.toString() + "\n");
-		
-		
-		// Add floor 3 to visit
-		tempReq[floorIndex] = 3;
-		try {
-			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-		
-		System.out.println("output = " + output.toString() + "\n");
-		
-		
-		// Add floor 7 to visit
-		tempReq[floorIndex] = 7;
-		try {
-			input.add(new DataPacket(OriginType.FLOOR, (byte) 1, SubsystemType.REQUEST, tempReq));
-		} catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
-		
-		System.out.println("output = " + output.toString() + "\n");
-		 */
 		
 		
 		// Tell elevator to stop at floor 2 for upwards trip
@@ -143,7 +102,7 @@ public class ElevatorStatusTesting {
 			e.printStackTrace();
 		}
 		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		printElevators(scheduler);
 		
 		System.out.println("output = " + output.toString() + "\n");
 		
@@ -160,7 +119,7 @@ public class ElevatorStatusTesting {
 			e.printStackTrace();
 		}
 		Thread.sleep(100);
-		System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+		printElevators(scheduler);
 		
 		System.out.println("output = " + output.toString() + "\n");
 		
@@ -180,9 +139,11 @@ public class ElevatorStatusTesting {
 			
 			System.out.println("\n\n\ninside 1st loop");
 			
+			System.out.println("output = " + output.toString());
+			
 			tempPacket = new DataPacket(output.take().getBytes());
 			
-			System.out.println("removed packet = " + tempPacket.toString());
+			//System.out.println("removed packet = " + tempPacket.toString());
 			
 			// change tempPacket to elevator
 			if (tempPacket.getSubSystem() == SubsystemType.FLOORLAMP){
@@ -207,7 +168,7 @@ public class ElevatorStatusTesting {
 			System.out.println("input = " + input.toString());
 			
 			Thread.sleep(250);
-			System.out.println("car = " + scheduler.getCar(0).toString() + "\n");
+			printElevators(scheduler);
 			
 			System.out.println("output = " + output.toString() + "\n");
 			
