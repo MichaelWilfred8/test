@@ -59,7 +59,7 @@ public class Test{
 					//Changes here
 						DatagramSocket sender = new DatagramSocket();
 						InetAddress elev = InetAddress.getLocalHost();
-						SocketAddress elevatorport = new InetSocketAddress(68);
+						System.out.println("CHICKA");
 						SubsystemType type = SubsystemType.ERROR.toSubsystem(Integer.parseInt(tokens[3]));
 						int elevator = Integer.parseInt(tokens[1]);
 						byte id = (byte) elevator;

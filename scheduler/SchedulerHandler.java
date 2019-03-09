@@ -56,11 +56,9 @@ public class SchedulerHandler {
 	 * Process one outgoing request from the rawOutputBuffer
 	 */
 	private void processOutgoingRequest(){
-		System.out.println("IN OUTGOING");
 		DataPacket tempPacket = null;
 		DataPacket echoPacket = null;
 		try {
-			System.out.println("STUCK 2");
 			DataPacket input = rawOutputBuffer.poll(150, TimeUnit.MILLISECONDS);
 			if (input==null)
 				return;
@@ -126,7 +124,6 @@ public class SchedulerHandler {
 	 * Find the next timed out message in the echoBuffer and resend it
 	 */
 	private void getTimedOutMessage(){
-		System.out.println("IN TIMEOUT");
 		// Exit out of the function if there are no packets in the echo Buffer
 		if (echoBuffer.size() == 0){
 			return;
@@ -153,7 +150,6 @@ public class SchedulerHandler {
 	 */
 	private void processIncomingRequest(){
 		DataPacket tempPacket = null;
-		System.out.println("IN INCOMING");
 		try {
 			tempPacket = new DataPacket(rawInputBuffer.take());	// Take the first element in the raw input queue
 		} catch (InterruptedException e) {
@@ -164,7 +160,6 @@ public class SchedulerHandler {
 		if (tempPacket.getSubSystem() == SubsystemType.REQUEST){
 			try {
 				this.processedInputBuffer.put(tempPacket);
-				System.out.println("HANDLER PUT REQUEST");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -173,7 +168,6 @@ public class SchedulerHandler {
 		} else if (!this.checkIfEcho(tempPacket)){
 			try {	// If not an echo, add tempPacket to the processedOutputBuffer to be sent
 				this.processedInputBuffer.put(tempPacket);
-				System.out.println("HANDLER PUT ECHO");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -184,7 +178,6 @@ public class SchedulerHandler {
 
 		System.out.println("Running schedulerHandler");
 		while(true){
-			System.out.println("LOOP");
 			this.processIncomingRequest();
 			this.getTimedOutMessage();
 			this.processOutgoingRequest();
@@ -194,7 +187,7 @@ public class SchedulerHandler {
 	public static void main(String args[]){
 		SchedulerHandler s = new SchedulerHandler();
 
-		Scheduler scheduler = new Scheduler(s.processedInputBuffer, s.rawOutputBuffer, 2, 10);
+		Scheduler scheduler = new Scheduler(s.processedInputBuffer, s.rawOutputBuffer, 3, 10);
 		Thread schedulerThread = new Thread(scheduler);
 		
 		GenericThreadedListener listener = new GenericThreadedListener(s.rawInputBuffer, SocketPort.SCHEDULER_LISTENER.getValue(), false);
@@ -207,7 +200,7 @@ public class SchedulerHandler {
 		senderThread.start();
 		schedulerThread.start();
 
-		for (int i = 0; i < scheduler.car.length; ++i){
+		for (int i = 0; i < scheduler.car.length; i++){
 			s.rawOutputBuffer.add(new DataPacket(OriginType.SCHEDULER, (byte) i, SubsystemType.DOOR, new byte[] {DoorState.CLOSED.getByte()}));
 		}
 
