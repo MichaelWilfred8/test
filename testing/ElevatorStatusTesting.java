@@ -52,9 +52,11 @@ public class ElevatorStatusTesting {
 	
 	
 	public static void printElevators(Scheduler scheduler){
+		System.out.print("\n");
 		for (int i = 0; i < NUM_ELEVATORS; ++i){
-			System.out.println("car " + i + " = " + scheduler.getCar(i).toString() + "\n");
+			System.out.println("car " + i + " = " + scheduler.getCar(i).toString());
 		}
+		System.out.print("\n");
 	}
 	
 	// TODO: test -1 for sending to floors
@@ -137,9 +139,11 @@ public class ElevatorStatusTesting {
 			
 			System.out.println("\n\n\ninside 1st loop");
 			
+			System.out.println("output = " + output.toString());
+			
 			tempPacket = new DataPacket(output.take().getBytes());
 			
-			System.out.println("removed packet = " + tempPacket.toString());
+			//System.out.println("removed packet = " + tempPacket.toString());
 			
 			// change tempPacket to elevator
 			if (tempPacket.getSubSystem() == SubsystemType.FLOORLAMP){

@@ -62,20 +62,20 @@ public class Scheduler implements Runnable {
 	 */
 	private void handleInput(){
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
-		System.out.println("\n\nLISTENING");
+		//System.out.println("\n\nLISTENING");
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-		System.out.println("INPUT RETRIEVED");
+		//System.out.println("INPUT RETRIEVED");
 
 
 
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
-				System.out.println("GOING TO FLOOR");
+				//System.out.println("GOING TO FLOOR");
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
@@ -172,6 +172,7 @@ public class Scheduler implements Runnable {
 			car[(int) p.getId()].setIdle(false);	// Set the elevator as not being idle	
 		}
 		
+		// Test if the elevator is idle
 		if (car[(int) p.getId()].getIdle()) {
 			// do nothing since elevator is idle
 			System.out.println("Elevator idle, doing nothing");
