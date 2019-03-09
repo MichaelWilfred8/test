@@ -7,7 +7,7 @@ public enum SubsystemType {
 	CARLAMP(5),
 	FLOORLAMP(4),
 	LOCATION(3),
-	INPUT(2),	// TODO: remove input since it is no longer used
+	INPUT(2),
 	REQUEST(1);
 	
 	private static final int ERROR_INT = 8;
@@ -63,6 +63,8 @@ public enum SubsystemType {
 	
 	public SubsystemType toSubsystem(int error){
 		switch(error) {
+			case ERROR_INT:
+				return ERROR;
 			case MOTOR_INT:
 				return MOTOR;
 			case DOOR_INT:
@@ -78,6 +80,7 @@ public enum SubsystemType {
 			case REQUEST_INT:
 				return REQUEST;
 			default:
+				System.err.println("Given integer does not match any subsystem enum values. Returning ERROR");
 				return ERROR;
 		}
 	}
@@ -106,7 +109,8 @@ public enum SubsystemType {
 			case REQUEST_INT:
 				return REQUEST_BYTE;
 			default:
-				return (Byte) null;
+				System.err.println("Given value does not match any enum values");
+				return (byte) 0x00; 	// Return 0 when given value does not match any enum values
 		}
 	}
 

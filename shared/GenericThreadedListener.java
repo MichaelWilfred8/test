@@ -6,7 +6,6 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
-import shared.*;
 
 /**
  * Threaded class used to constantly listen for inputs to the scheduler from other subsystems.
@@ -22,11 +21,18 @@ public class GenericThreadedListener implements Runnable {
 	
 	DataPacket packet;
 	
+	private boolean outputEnable;
+	
 	//BlockingQueue<DatagramPacket> inputBuffer;
 	BlockingQueue<DataPacket> inputBuffer;
 	
 	private static final int BYTE_ARRAY_LENGTH = 100;
 	
+	/**
+	 * Constructor for GenericThreadedListener class
+	 * @param inputBuffer	BlockingQueue to place received DataPackets inside
+	 * @param port			Port number to use for the DatagramSocket
+	 */
 	public GenericThreadedListener(BlockingQueue<DataPacket> inputBuffer, int port){
 		try{
 			// Construct a datagram socket to receive on and bind it to port on the local host machine.
@@ -38,6 +44,28 @@ public class GenericThreadedListener implements Runnable {
 		}
 		
 		this.inputBuffer = inputBuffer;
+		this.outputEnable = true;
+	}
+	
+	
+	/**
+	 * Constructor for GenericThreadedListener class
+	 * @param inputBuffer	BlockingQueue to place received DataPackets inside
+	 * @param port			Port number to use for the DatagramSocket
+	 * @param outputEnable	Boolean to enable printing to the console for the GenericThreadedListener
+	 */
+	public GenericThreadedListener(BlockingQueue<DataPacket> inputBuffer, int port, boolean outputEnable){
+		try{
+			// Construct a datagram socket to receive on and bind it to port on the local host machine.
+			// used to receive packets
+			receiveSocket = new DatagramSocket(port);
+		} catch (SocketException se) {
+			se.printStackTrace();
+			System.exit(1);
+		}
+		
+		this.inputBuffer = inputBuffer;
+		this.outputEnable = outputEnable;
 	}
 	
 	
@@ -74,7 +102,9 @@ public class GenericThreadedListener implements Runnable {
 		while(true){
 			try {
 				// Block until a datagram is received via sendReceiveSocket.
-				System.out.println("GenericThreadedListener: Waiting for Packet on port " + this.receiveSocket.getLocalPort() + ".\n");
+				if (outputEnable) {
+					System.out.println("GenericThreadedListener: Waiting for Packet on port " + this.receiveSocket.getLocalPort() + ".\n");
+				}
 				receiveSocket.receive(receivePacket);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -82,7 +112,10 @@ public class GenericThreadedListener implements Runnable {
 			}
 			
 			// Print the Received DatagramPacket to the console
-			printDatagramPacket(receivePacket, "r");
+			if (outputEnable) {
+				printDatagramPacket(receivePacket, "r");
+			}
+			
 			
 			
 			
@@ -94,11 +127,12 @@ public class GenericThreadedListener implements Runnable {
 				inputBuffer.put(p);
 				//System.out.println("GOT THIS MESSAGE " + p);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			System.out.println("GenericThreadedListener successfully added info to the inputBuffer\n");
+			if (outputEnable) {
+				System.out.println("GenericThreadedListener successfully added info to the inputBuffer\n");
+			}
 		}
 	}
 	

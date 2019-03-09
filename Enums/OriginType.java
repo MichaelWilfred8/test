@@ -54,7 +54,8 @@ public enum OriginType {
 			case FLOOR_INT:
 				return FLOOR_BYTE;
 			default:
-				return 0x00;
+				System.err.println("Given value does not match any enum values");
+				return (byte) 0x00; 	// Return 0 when given value does not match any enum values
 		}
 	}
 	

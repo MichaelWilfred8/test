@@ -246,13 +246,4 @@ public class DataPacket implements Cloneable {
 		return "DataPacket [origin=" + origin + ", id=" + id + ", subSystem=" + subSystem + ", status="
 				+ Arrays.toString(status) + "]";
 	}
-	
-	// TODO: remove this
-	public static void main(String args[]){
-		DataPacket p1 = new DataPacket(OriginType.FLOOR, (byte) 0, SubsystemType.FLOORLAMP, new byte[]{0x00, 0x01});
-		DataPacket p2 = new DataPacket(p1);
-		
-		System.out.println("p1 = " + p1.toString() + System.identityHashCode(p1));
-		System.out.println("p2 = " + p2.toString() + System.identityHashCode(p2));
-	}
 }	
