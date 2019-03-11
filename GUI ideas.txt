@@ -1,0 +1,6 @@
+Floor	CAR 1	CAR 2	CAR 3	CAR 4 	Requests
+22		[ ]	 	[ ] 	 [ ] 	 [X]	
+22		[ ]	 	[O] 	 [ ] 	 [ ]	
+...
+01		[X]	 	[ ] 	 [X] 	 [ ]	
+ 
