@@ -61,6 +61,7 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
+		System.out.println("Car = " + car[0].toString());
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
 		try {
 			input = new DataPacket(inputBuffer.take());		// Take the next input from the databuffer
@@ -89,6 +90,9 @@ public class Scheduler implements Runnable {
 
 			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
 		}
+		
+		System.out.println("Output = " + this.outputBuffer.toString());
+		System.out.println("Car = " + car[0].toString());
 	}
 
 
@@ -160,6 +164,22 @@ public class Scheduler implements Runnable {
 		if (car[selectedCar].getDoorState() == DoorState.OPEN) {
 			returnPacket.setSubSystem(SubsystemType.DOOR);
 			returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
+			
+			// Add packet to output queue and exit
+			try {
+				this.outputBuffer.put(returnPacket);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return;
+		} // If the doors are closed and the elevator has a destination to visit, start the motor in the direction of the destination
+		else if ((car[selectedCar].getDoorState() == DoorState.CLOSED) && (car[selectedCar].getFloorsToVisit().isEmpty() != true)){
+			returnPacket.setSubSystem(SubsystemType.MOTOR);
+			if (car[selectedCar].getTripDir() == Direction.UP) {
+				returnPacket.setStatus(new byte[] {MotorState.UP.getByte()});
+			} else if (car[selectedCar].getTripDir() == Direction.DOWN) {
+				returnPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
+			}
 			
 			// Add packet to output queue and exit
 			try {

@@ -50,12 +50,13 @@ public class Elevator implements Runnable {
 	private int count;				// number of floors in the elevator
 	private boolean[] floorLights;	// Array containing the status of the floor lights in each elevator
 	private int id;
+	private int MAX_FLOOR;
 
 
 	MotorState motorState;
 
 
-	public Elevator(int id){
+	public Elevator(int id, int maxFloor){
 		try {
 
 			sendSocket = new DatagramSocket(SocketPort.ELEVATOR_SENDER.getValue() + id);
@@ -77,6 +78,7 @@ public class Elevator implements Runnable {
 		this.currentFloor = 1;
 
 		this.id = id;
+		this.MAX_FLOOR = maxFloor;
 	}
 
 	/**
@@ -241,16 +243,23 @@ public class Elevator implements Runnable {
 		System.out.println("Elevator " + id + " : I am at floor "+ currentFloor);
 
 		if(command == MotorState.DOWN) {
-			while(currentFloor > 0) {
+			if (currentFloor > 0){
+				// Send echo back saying motor is going down
 				this.motorState = MotorState.DOWN;
 				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
+			}
+			
+			// Loop until scheduler sends message saying elevator is at correct floor
+			while(currentFloor > 0) {
 				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
 				currentFloor--;
+				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.LOCATION, new byte[] {(byte) this.currentFloor}), address);
 				//sendLocation();
 				System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 			}
 		} else if (command == MotorState.UP){
-			while(currentFloor <= 10) {
+			// While the elevator is below the maximum floor
+			while(currentFloor <= MAX_FLOOR) {
 				this.motorState = MotorState.UP;
 
 				//changed the second byte from id to current floor, so that scheduler will get update of the current floor

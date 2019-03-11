@@ -3,7 +3,11 @@ package testing;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import scheduler.Scheduler;
+import scheduler.SchedulerHandler;
 import shared.DataPacket;
+import shared.GenericThreadedListener;
+import shared.GenericThreadedSender;
+import shared.SocketPort;
 
 public class NewSchedulerTest {
 	
@@ -19,8 +23,11 @@ public class NewSchedulerTest {
 		Scheduler scheduler = new Scheduler(inBuf, outBuf, NUM_ELEVATORS, 9);
 		Thread schThread = new Thread(scheduler);
 		
-		ElevatorTestThread car = new ElevatorTestThread(inBuf, outBuf, 0, scheduler);
-		Thread carThread = new Thread(car);
+		GenericThreadedListener listener = new GenericThreadedListener(inBuf, SocketPort.SCHEDULER_LISTENER.getValue(), true);
+		Thread listenerThread = new Thread(listener);
+		
+		GenericThreadedSender sender = new GenericThreadedSender(outBuf, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, true);
+		Thread senderThread = new Thread(sender);
 		
 		schThread.start();
 		try {
@@ -30,7 +37,8 @@ public class NewSchedulerTest {
 			e.printStackTrace();
 		}
 		
-		carThread.start();
+		listenerThread.start();
+		senderThread.start();
 		testThread.start();
 	}
 }

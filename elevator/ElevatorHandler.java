@@ -20,6 +20,8 @@ public class ElevatorHandler implements Runnable{
 
 	private static final ElevatorHandler instance = new ElevatorHandler();
 	
+	private static final int NUM_ELEVATORS = 1;
+	
 	private ElevatorHandler(){
 		if(instance != null){
 			throw new IllegalStateException("Already instantiated");
@@ -110,7 +112,7 @@ public class ElevatorHandler implements Runnable{
 	}
 
 	private static void initializeElevators(){
-		for(int i=0; i<3; i++){
+		for(int i=0; i<NUM_ELEVATORS; i++){
 			Elevator elevator = new Elevator(i);
 			Thread t = new Thread(elevator);
 			t.start();
