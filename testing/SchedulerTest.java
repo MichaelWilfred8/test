@@ -18,19 +18,71 @@ import java.util.concurrent.TimeUnit;
 
 import Enums.*;
 import floor.*;
+import scheduler.Scheduler;
 import shared.DataPacket;
 
-public class SchedulerTest {
+public class SchedulerTest implements Runnable {
 	FloorHandler handler;//Scheduler of
 	
-	LinkedBlockingQueue<DataPacket> input, output;
+	LinkedBlockingQueue<DataPacket> inputBuffer, outputBuffer;
 	
 
-	SchedulerTest(){
-		this.input = new LinkedBlockingQueue<DataPacket>();
-		this.output = new LinkedBlockingQueue<DataPacket>();
+	SchedulerTest(LinkedBlockingQueue<DataPacket> in, LinkedBlockingQueue<DataPacket> out){
+		this.inputBuffer = in;
+		this.outputBuffer = out;
 	}
-
+	
+	
+	public static DataPacket createElevatorRequest(ArrayList<Integer> destFloor, int originFloor, int targetElevator){
+		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) originFloor, SubsystemType.INPUT, new byte[] {(byte) 0});
+		
+		// req[0] targetElevator, req[1] = # of requests, req[2..n] floors to be requested
+		byte[] req = new byte[2 + destFloor.size()];
+		
+		req[0] = (byte) targetElevator;
+		req[1] = (byte) destFloor.size();
+		
+		for(int i = 2; i < destFloor.size() + 2; ++i){
+			req[i] = destFloor.get(i-2).byteValue();
+		}
+		
+		requestPacket.setStatus(req);
+		return requestPacket;
+		
+	}
+	
+	
+	public static DataPacket createElevatorRequest(int destFloor, int originFloor, int targetElevator){
+		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) originFloor, SubsystemType.INPUT, new byte[] {(byte) 0});
+		
+		// req[0] targetElevator, req[1] = # of requests, req[2..n] floors to be requested
+		byte[] req = new byte[2 + 1];
+		
+		req[0] = (byte) targetElevator;
+		req[1] = (byte) 1;
+		req[2] = (byte) destFloor;
+		
+		requestPacket.setStatus(req);
+		return requestPacket;
+		
+	}
+	
+	public static DataPacket createFloorRequest(int floor, Direction dir){
+		DataPacket requestPacket = new DataPacket(OriginType.FLOOR, (byte) floor, SubsystemType.REQUEST, new byte[] {(byte) 0});
+		
+		final int dirIndex = 16;
+		final int floorIndex = 17;
+		
+		byte[] tempReq = {0,0,0,12, 0,0,0,15, 0,0,0,13, 0,0,0,111, 2, -1};
+		
+		tempReq[dirIndex] = dir.getByte();
+		tempReq[floorIndex] = (byte) -1;
+		
+		requestPacket.setStatus(tempReq);
+		return requestPacket;
+	}
+	
+	
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv
 		//Test should send the error packet to the elevator by reading the 3rd column and seeing if it's an error
 		ArrayList<String[]> inputLines = new ArrayList<>(11);//arrayList of String arrays, each string array is a line from the input file
@@ -63,7 +115,7 @@ public class SchedulerTest {
 						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
 						sender.send(packet);
 						//error.addError(request);
-						System.out.println("Error found "+type+ " Packet "+request);
+						System.out.println("Error found in: " + type + ", Error Packet: " + request);
 						//Send to elevator to process
 					}
 				else {
@@ -97,14 +149,27 @@ public class SchedulerTest {
 	
 	
 	private void createRequest(String[] input) {
+		/* Input format:
+		 * Input[0] = time string
+		 * Input[1] = origin floor
+		 * Input[2] = direction
+		 * Input[3] = destination floor
+		 */
 		System.out.println("Input = " + Arrays.toString(input));
 		if (input[2].equalsIgnoreCase("ERROR")) {	// if an error is sent from the .csv file
 			byte[] errorPacketContents = {(byte) Integer.parseInt(input[3]), 1}; // adds the byte of the integer representation of the Enum of the system that has failed
 			DataPacket errorPacket = new DataPacket(OriginType.ELEVATOR, (byte) Integer.parseInt(input[1]),SubsystemType.ERROR, errorPacketContents); //forms error packet to be sent
 			
-			this.input.add(errorPacket); // places error message in queue to be sent to scheduler	
+			this.inputBuffer.add(errorPacket); // places error message in queue to be sent to scheduler	
 			
-		} else {
+		} else if (input[2].equalsIgnoreCase("UP")) {
+			this.inputBuffer.add(createFloorRequest(Integer.parseInt(input[1]), Direction.UP));
+			// TODO: add thing where floor can change (currently zero)
+			this.inputBuffer.add(createElevatorRequest(Integer.parseInt(input[3]), Integer.parseInt(input[1]), 0));
+		} else if (input[2].equalsIgnoreCase("DOWN")) {
+			this.inputBuffer.add(createFloorRequest(Integer.parseInt(input[1]), Direction.DOWN));
+			// TODO: add thing where floor can change (currently zero)
+			this.inputBuffer.add(createElevatorRequest(Integer.parseInt(input[3]), Integer.parseInt(input[1]), 0));
 			/*
 			for (int i = 0; i < floors.length; i++) {
 				if (floors[i].getFloorNumber() == Integer.parseInt(input[1])) {
@@ -113,6 +178,7 @@ public class SchedulerTest {
 				}
 			}*/
 		}
+		System.out.println("Input Queue = " + this.inputBuffer.toString());
 	}
 	
 	
@@ -147,7 +213,7 @@ public class SchedulerTest {
 	}*/
 	
 	
-	public void organizer(String x [][], FloorHandler handler) throws InterruptedException {
+	public void organizer(String x [][]) throws InterruptedException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 		System.out.println(x[0][0]);
 
@@ -167,7 +233,6 @@ public class SchedulerTest {
 
 			long formattedDate = date1.getTime()-date.getTime(); //calculates the time difference between the current and the next
 
-			//handler.createRequest(x[i]);
 			this.createRequest(x[i]);
 			
 			//System.out.println("WAITING");
@@ -180,23 +245,54 @@ public class SchedulerTest {
 	
 	public void runTest() {
 
-		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
+		String fileToParse = "schedulerTest.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
 		
 		try {
-			organizer(testLines, handler);
+			organizer(testLines);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		handler.listen();
+		//handler.listen();
 	}
 	
+	@Override
+	public void run() {
+		System.out.println("Starting testThread");
+		this.runTest();
+		
+	}
 
 	public static void main(String[] args) {
-		SchedulerTest t = new SchedulerTest();
-		t.runTest();
+		LinkedBlockingQueue<DataPacket> inBuf = new LinkedBlockingQueue<DataPacket>();
+		LinkedBlockingQueue<DataPacket> outBuf = new LinkedBlockingQueue<DataPacket>();
+		
+		final int NUM_ELEVATORS = 1;
+		
+		SchedulerTest t = new SchedulerTest(inBuf, outBuf);
+		Thread tThread = new Thread(t);
+		
+		Scheduler scheduler = new Scheduler(inBuf, outBuf, NUM_ELEVATORS, 9);
+		Thread schThread = new Thread(scheduler);
+		
+		ElevatorTestThread car = new ElevatorTestThread(inBuf, outBuf, 0, scheduler);
+		Thread carThread = new Thread(car);
+		
+		schThread.start();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		carThread.start();
+		tThread.start();
 	}
+
+
+	
 
 }

@@ -31,8 +31,8 @@ public class ElevatorStatus {
 	public int id;
 	private boolean idle;						// Boolean value indicating if elevator is idle
 	private boolean inoperable;					// Boolean value indicating if elevator is not operational
-	
-	
+
+
 	public boolean getIdle() {
 		return idle;
 	}
@@ -78,7 +78,7 @@ public class ElevatorStatus {
 		}
 
 		this.id = id;
-		
+
 		// set elevator to idle initially
 		this.idle = true;
 	}
@@ -108,7 +108,7 @@ public class ElevatorStatus {
 		}
 		*/
 	}
-	
+
 	/**
 	 * Find the next destination for the elevator and set the next destination for the elevator
 	 * Remove the current floor from the list of floors to visit
@@ -234,6 +234,12 @@ public class ElevatorStatus {
 		this.inoperable = state;
 	}
 
+	/**
+	 * Toggle if the elevator is inoperable
+	 */
+	public void toggleInoperable() {
+		this.inoperable = !this.inoperable;
+	}
 
 
 	/**
@@ -251,7 +257,9 @@ public class ElevatorStatus {
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
-		System.out.println("Floor " + floor + " added to list for elevator " + this.id);
+		//System.out.println("Floor " + floor + " added to list for elevator " + this.id);
+		ColouredOutput.printColouredText("Floor " + floor + " added to list for elevator " + this.id, ColouredOutput.ANSI_GREEN);
+		this.setIdle(false); 								// Set elevator to not be idle
 		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
 		this.nextDestination = this.getNextFloor();			// set the next destination floor
 	}
@@ -397,7 +405,7 @@ public class ElevatorStatus {
 		return nextFloor;	// if logic fails, return 1 to send elevator back to ground floor
 	}
 
-	
+
 	/**
 	 * Test if the elevator is in an idle state
 	 * Idle State is when elevator is stopped at a floor with the motor off and doors open and no pending requests for this elevator
@@ -414,7 +422,7 @@ public class ElevatorStatus {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Print red message in console
 	 * @param msg message to print
@@ -422,7 +430,7 @@ public class ElevatorStatus {
 	private static void printRedMessage (String msg){
 		System.err.println("\n" + msg + "\n");
 	}
-	
+
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState
 	 *
@@ -448,11 +456,12 @@ public class ElevatorStatus {
 				this.setPosition((int) p.getStatus()[0]);
 				//ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("position in elevatorStatus was updated to " + this.getPosition());
-				printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
+				//printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
 				break;
 			case ERROR:
 				// TODO: configure this !
-				
+				this.toggleInoperable();
+				ColouredOutput.printColouredText("car " + this.getId() + " had its error toggled to " + this.isInoperable(), ColouredOutput.ANSI_RED_BACKGROUND);
 				//this.setError(p.getStatus());
 				break;
 			default:
