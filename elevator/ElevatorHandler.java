@@ -32,8 +32,8 @@ public class ElevatorHandler implements Runnable {
 
 	//private static final ElevatorHandler instance = new ElevatorHandler();
 	
-	private static final int NUM_ELEVATORS = 1;		// Numner of elevator cars in the building
-	private static final int MAX_FLOOR = 22;		// Number of floors in the building
+	private int NUM_ELEVATORS = 1;		// Number of elevator cars in the building
+	private int MAX_FLOOR = 22;			// Number of floors in the building
 	
 	public ElevatorHandler(){
 		
@@ -42,7 +42,6 @@ public class ElevatorHandler implements Runnable {
 //		}
 		
 		setStopController(false);
-		//initializeElevators();
 
 
 		// Construct a datagram socket and bind it to port 69 
@@ -79,6 +78,50 @@ public class ElevatorHandler implements Runnable {
 	}
 
 	
+	public ElevatorHandler(int numFloors, int numCars){
+		
+//		if(instance != null){
+//			throw new IllegalStateException("Already instantiated");
+//		}
+		
+		setStopController(false);
+		
+		this.MAX_FLOOR = numFloors;
+		this.NUM_ELEVATORS = numCars;
+
+		// Construct a datagram socket and bind it to port 69 
+		// on the local host machine. This socket will be used to
+		// receive UDP Datagram packets. 
+		try {
+			receiveSocket = new DatagramSocket(SocketPort.ELEVATOR_LISTENER.getValue());
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// to test socket timeout (2 seconds)
+		//receiveSocket.setSoTimeout(2000);
+		
+		// Initialize each elevator
+		this.elevatorList = new ArrayList<Elevator>(NUM_ELEVATORS);
+		this.elevatorThreadList = new ArrayList<Thread>(NUM_ELEVATORS);
+		
+		for(int i = 0; i < NUM_ELEVATORS; i++){
+			Elevator elevator = new Elevator(i, MAX_FLOOR);
+			Thread t = new Thread(elevator);
+			//t.start();
+
+			elevatorList.add(elevator);
+			elevatorThreadList.add(t);
+			
+			try {
+				elevatorList.get(i).setSchedulerAddress(new InetSocketAddress(InetAddress.getLocalHost(), SocketPort.SCHEDULER_LISTENER.getValue()));
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 //	// static method to create instance of class 
 //	public static ElevatorHandler getHandler(){ 
 //		return instance; 
@@ -111,7 +154,7 @@ public class ElevatorHandler implements Runnable {
 		
 		// Start all elevator threads
 		for(int i = 0; i < NUM_ELEVATORS; ++i) {
-			this.elevatorThreadList.get(0).start();
+			this.elevatorThreadList.get(i).start();
 		}
 
 		
@@ -219,139 +262,146 @@ public class ElevatorHandler implements Runnable {
 //		instance.run();
 //	}
 	
-	public static void main(String args[]) throws InterruptedException{
+	public static void main(String args[]) throws InterruptedException {
 		
-		LinkedBlockingQueue<DataPacket> inQueue = new LinkedBlockingQueue<DataPacket>();
-		LinkedBlockingQueue<DataPacket> outQueue = new LinkedBlockingQueue<DataPacket>();
-		DataPacket sendPacket = new DataPacket(OriginType.SCHEDULER, (byte) 0, null, null);
-		DataPacket getPacket = new DataPacket(OriginType.SCHEDULER, (byte) 0, null, null);
+		final int NUM_FLOORS = 22;
+		final int NUM_ELEVATORS = 1;
+		ElevatorHandler eh = new ElevatorHandler(NUM_FLOORS, NUM_ELEVATORS);
 		
-		ElevatorHandler eh = new ElevatorHandler();
-		Thread ehThread = new Thread(eh);
-		
-		GenericThreadedSender sender = new GenericThreadedSender(inQueue, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, false);
-		Thread senderThread = new Thread(sender);
-		
-		GenericThreadedListener listener = new GenericThreadedListener(outQueue, SocketPort.SCHEDULER_LISTENER.getValue(), false);
-		Thread listenerThread = new Thread(listener);
-		
-		ehThread.start();
-		senderThread.start();
-		listenerThread.start();
+		eh.listen();
 		
 		
-		
-		// Tell elevator to open doors
-		sendPacket.setSubSystem(SubsystemType.DOOR);
-		sendPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
-		
-		inQueue.add(sendPacket);
-		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println("output from elevator = " + outQueue.toString());
-		try {
-			getPacket = outQueue.take();
-		} catch (InterruptedException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		
-		
-		// Tell elevator to close doors
-		sendPacket.setSubSystem(SubsystemType.DOOR);
-		sendPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
-		
-		inQueue.add(sendPacket);
-		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println("output from elevator = " + outQueue.toString());
-		try {
-			getPacket = outQueue.take();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
-		// Tell elevator to move upwards
-		sendPacket.setSubSystem(SubsystemType.MOTOR);
-		sendPacket.setStatus(new byte[] {MotorState.UP.getByte()});
-		
-		inQueue.add(sendPacket);
-		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println("output from elevator = " + outQueue.toString());
-		getPacket = outQueue.take();
-		
-		while(true){
-			try {
-				getPacket = outQueue.take();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if ((getPacket.getSubSystem() == SubsystemType.LOCATION) && (getPacket.getStatus()[0] == (byte) 4)){
-				// Tell elevator to stop
-				sendPacket.setSubSystem(SubsystemType.MOTOR);
-				sendPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
-				
-				inQueue.add(sendPacket);
-				break;
-			}
-		}
-		
-		Thread.sleep(3000);
-		
-		// Tell elevator to move upwards
-		sendPacket.setSubSystem(SubsystemType.MOTOR);
-		sendPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
-		
-		inQueue.add(sendPacket);
-		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println("output from elevator = " + outQueue.toString());
-		getPacket = outQueue.take();
-		
-		while(true){
-			try {
-				getPacket = outQueue.take();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if ((getPacket.getSubSystem() == SubsystemType.LOCATION) && (getPacket.getStatus()[0] == (byte) 2)){
-				// Tell elevator to stop
-				sendPacket.setSubSystem(SubsystemType.MOTOR);
-				sendPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
-				
-				inQueue.add(sendPacket);
-				break;
-			}
-		}
+//		LinkedBlockingQueue<DataPacket> inQueue = new LinkedBlockingQueue<DataPacket>();
+//		LinkedBlockingQueue<DataPacket> outQueue = new LinkedBlockingQueue<DataPacket>();
+//		DataPacket sendPacket = new DataPacket(OriginType.SCHEDULER, (byte) 0, null, null);
+//		DataPacket getPacket = new DataPacket(OriginType.SCHEDULER, (byte) 0, null, null);
+//		
+//		ElevatorHandler eh = new ElevatorHandler();
+//		Thread ehThread = new Thread(eh);
+//		
+//		GenericThreadedSender sender = new GenericThreadedSender(inQueue, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, false);
+//		Thread senderThread = new Thread(sender);
+//		
+//		GenericThreadedListener listener = new GenericThreadedListener(outQueue, SocketPort.SCHEDULER_LISTENER.getValue(), false);
+//		Thread listenerThread = new Thread(listener);
+//		
+//		ehThread.start();
+//		senderThread.start();
+//		listenerThread.start();
+//		
+//		
+//		
+//		// Tell elevator to open doors
+//		sendPacket.setSubSystem(SubsystemType.DOOR);
+//		sendPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
+//		
+//		inQueue.add(sendPacket);
+//		
+//		try {
+//			Thread.sleep(500);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		System.out.println("output from elevator = " + outQueue.toString());
+//		try {
+//			getPacket = outQueue.take();
+//		} catch (InterruptedException e2) {
+//			// TODO Auto-generated catch block
+//			e2.printStackTrace();
+//		}
+//		
+//		
+//		// Tell elevator to close doors
+//		sendPacket.setSubSystem(SubsystemType.DOOR);
+//		sendPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
+//		
+//		inQueue.add(sendPacket);
+//		
+//		try {
+//			Thread.sleep(500);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		System.out.println("output from elevator = " + outQueue.toString());
+//		try {
+//			getPacket = outQueue.take();
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		
+//		
+//		// Tell elevator to move upwards
+//		sendPacket.setSubSystem(SubsystemType.MOTOR);
+//		sendPacket.setStatus(new byte[] {MotorState.UP.getByte()});
+//		
+//		inQueue.add(sendPacket);
+//		
+//		try {
+//			Thread.sleep(500);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		System.out.println("output from elevator = " + outQueue.toString());
+//		getPacket = outQueue.take();
+//		
+//		while(true){
+//			try {
+//				getPacket = outQueue.take();
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			if ((getPacket.getSubSystem() == SubsystemType.LOCATION) && (getPacket.getStatus()[0] == (byte) 4)){
+//				// Tell elevator to stop
+//				sendPacket.setSubSystem(SubsystemType.MOTOR);
+//				sendPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+//				
+//				inQueue.add(sendPacket);
+//				break;
+//			}
+//		}
+//		
+//		Thread.sleep(3000);
+//		
+//		// Tell elevator to move upwards
+//		sendPacket.setSubSystem(SubsystemType.MOTOR);
+//		sendPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
+//		
+//		inQueue.add(sendPacket);
+//		
+//		try {
+//			Thread.sleep(500);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		System.out.println("output from elevator = " + outQueue.toString());
+//		getPacket = outQueue.take();
+//		
+//		while(true){
+//			try {
+//				getPacket = outQueue.take();
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			if ((getPacket.getSubSystem() == SubsystemType.LOCATION) && (getPacket.getStatus()[0] == (byte) 2)){
+//				// Tell elevator to stop
+//				sendPacket.setSubSystem(SubsystemType.MOTOR);
+//				sendPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+//				
+//				inQueue.add(sendPacket);
+//				break;
+//			}
+//		}
 		
 	}
 

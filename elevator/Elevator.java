@@ -61,7 +61,7 @@ public class Elevator implements Runnable {
 	// Thread variables
 	static volatile boolean exitMovementFlag = false;
 	public FloorChangerThread floorChanger;
-	public Thread floorChangerThread;
+	//public Thread floorChangerThread;
 	private static final int TIME_BETWEEN_FLOORS = 3000;
 	
 	private SocketAddress schedulerAddress;
@@ -93,7 +93,7 @@ public class Elevator implements Runnable {
 		//this.inputBuffer = new LinkedBlockingQueue<DataPacket>();
 		this.inputBuffer = new LinkedBlockingQueue<DatagramPacket>();
 		this.floorChanger = new FloorChangerThread(this);
-		this.floorChangerThread = new Thread(this.floorChanger);
+		//this.floorChangerThread = new Thread(this.floorChanger);
 	}
 	
 	
@@ -364,100 +364,6 @@ public class Elevator implements Runnable {
 	}
 	
 	
-	
-	
-	
-	/**
-	 * Deprecated Receive and Echo
-	 * @param p
-	 * @param packet
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws InterruptedException
-	 */
-	/*public void receiveAndEcho(DataPacket p, DatagramPacket packet) throws IOException, ClassNotFoundException, InterruptedException {
-		// at this stage, elevator will decode the packet
-		// The elevator will decode the packet
-		
-		
-		if(p.getOrigin() == OriginType.ERROR)//Error packets
-		{
-			switch(p.getSubSystem()) {
-			case MOTOR:
-				System.out.println("Motor Error");
-				break;
-			case DOOR:
-				System.out.println("Door Error");
-				break;
-			case CARLAMP:
-				System.out.println("Carlamp Error");
-				break;
-			case FLOORLAMP:
-				System.out.println("Floorlamp Error");
-				break;
-
-			}
-
-		}
-		else if(p.getSubSystem() == SubsystemType.MOTOR) {
-			//case of motor
-			System.out.println("SUBSYSTEM IS MOTOR  " );
-
-			switch(MotorState.convertFromByte(p.getStatus()[0])){
-			case DOWN:
-				System.out.println("going down" );
-				Motor(MotorState.DOWN, packet.getSocketAddress());		//motor down and send message
-				break;
-			case OFF:
-				System.out.println("motor off" );
-				Motor(MotorState.OFF, packet.getSocketAddress());		//motor off
-				break;
-			case UP:
-				System.out.println("going up" );
-				Motor(MotorState.UP, packet.getSocketAddress());		//motor up and send message
-				break;
-			default:
-
-				System.out.println("Invalid type");
-				break;
-			}
-		} else if (p.getSubSystem() == SubsystemType.DOOR) {
-			System.out.println("SUBSYSTEM IS DOOR  " );
-
-			switch(DoorState.convertFromByte(p.getStatus()[0])){
-			case OPEN:
-				door = true;		//door open and send message
-				System.out.println("door opened  " );
-				break;
-			case CLOSED:
-				door = false;		//door closed and send message
-				System.out.println("door closed " );
-				break;
-			default:
-				System.out.println("Invalid State");
-				break;
-			}
-		} else if (p.getSubSystem() == SubsystemType.LOCATION){
-			System.out.println("SUBSYSTEM IS LOCATION  " );
-			sendLocation(packet);
-		} else if (p.getSubSystem() == SubsystemType.INPUT){
-			System.out.println("SUBSYSTEM IS INPUT");
-			setFloorLight(p);
-		}
-
-		System.out.println("\n\n");
-
-
-
-		// Echo back the packet if not from the motor or the location
-		if ((p.getSubSystem() != SubsystemType.MOTOR) && (p.getSubSystem() != SubsystemType.LOCATION)){
-			sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), packet.getSocketAddress());
-		}
-
-		//receiveSocket.close();
-	}*/
-
-
 	// toggle the floor light inside the elevator to on or off
 	private void setFloorLight(DataPacket p){
 		this.floorLights[(int) p.getStatus()[0]] = !this.floorLights[(int) p.getStatus()[0]];
@@ -528,29 +434,10 @@ public class Elevator implements Runnable {
 				this.motorState = MotorState.DOWN;
 				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
 				
-				this.floorChangerThread = new Thread(new FloorChangerThread(this));
-				//this.floorChanger.resetThread();
-				//this.floorChangerThread.start();
-				
-				/*
-				// Create thread inside main elevator function to increment the floor while allowing elevator to still run
-				new Thread() {
-					public void run() {
-						// Exit the thread when the MotorState is no longer down
-						while ((currentFloor <= MAX_FLOOR) && (motorState == MotorState.DOWN) && (exitMovementFlag)){
-							
-							try {
-								Thread.sleep(TIME_BETWEEN_FLOORS);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-							currentFloor++;															// Increment floor of the elevator
-							System.out.println("Elevator " + id + " : I am at  "+ currentFloor);	// Print location
-							sendLocation();														// Send a packet back to Scheduler with location
-						}
-					}
-				}.start();
-				*/
+				// If the floorChanger is already running, then do not start it
+				if (!this.floorChanger.isRunning()){
+					this.floorChanger.start();
+				}
 			}
 		
 		} else if (command == MotorState.UP) {
@@ -559,24 +446,24 @@ public class Elevator implements Runnable {
 				// Send echo back to scheduler saying motor is going up
 				this.motorState = MotorState.UP;
 				//changed the second byte from id to current floor, so that scheduler will get update of the current floor
-				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {(byte) this.currentFloor, this.motorState.getByte()}), address);
+				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
 				System.out.println("Starting upwards...");
-				this.floorChangerThread = new Thread(this.floorChanger);
-				//this.floorChanger.resetThread();
-				//this.floorChangerThread.start();
+				
+				// If the floorChanger is already running, then do not start it
+				if (!this.floorChanger.isRunning()){
+					this.floorChanger.start();
+				}
+				
 			}
 			
 			
 		} else if (command == MotorState.OFF) {
 			
-			//Elevator.exitMovementFlag = true;	// Stop the movement of the elevator
-			
 			this.motorState = MotorState.OFF;
-			this.floorChanger.exitFlag = true;
 			
-			// If the thread for changing floors is running, then interrupt it
-			if (this.floorChangerThread.isAlive()){
-				this.floorChangerThread.interrupt();
+			// If the thread for changing floors is running, then stop it
+			if (this.floorChanger.isRunning()){
+				this.floorChanger.interrupt();
 			}
 			
 			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);

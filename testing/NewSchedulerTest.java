@@ -17,11 +17,12 @@ public class NewSchedulerTest {
 		LinkedBlockingQueue<DataPacket> outBuf = new LinkedBlockingQueue<DataPacket>();
 		
 		final int NUM_ELEVATORS = 1;
+		final int NUM_FLOORS = 22;
 		
 		SchedulerTest test = new SchedulerTest(inBuf, outBuf);
 		Thread testThread = new Thread(test);
 		
-		Scheduler scheduler = new Scheduler(inBuf, outBuf, NUM_ELEVATORS, 9);
+		Scheduler scheduler = new Scheduler(inBuf, outBuf, NUM_ELEVATORS, NUM_FLOORS);
 		Thread schThread = new Thread(scheduler);
 		
 		GenericThreadedListener listener = new GenericThreadedListener(inBuf, SocketPort.SCHEDULER_LISTENER.getValue(), true);
@@ -30,10 +31,12 @@ public class NewSchedulerTest {
 		GenericThreadedSender sender = new GenericThreadedSender(outBuf, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, true);
 		Thread senderThread = new Thread(sender);
 		
-		ElevatorHandler elevatorHandler = new ElevatorHandler();
-		Thread elevatorHandlerThread = new Thread(elevatorHandler);
+		//ElevatorHandler elevatorHandler = new ElevatorHandler();
+		//Thread elevatorHandlerThread = new Thread(elevatorHandler);
 		
 		schThread.start();
+		listenerThread.start();
+		senderThread.start();
 		
 		try {
 			Thread.sleep(1000);
@@ -42,8 +45,7 @@ public class NewSchedulerTest {
 			e.printStackTrace();
 		}
 		
-		listenerThread.start();
-		senderThread.start();
+		
 		testThread.start();
 	}
 }
