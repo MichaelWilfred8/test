@@ -46,7 +46,7 @@ public class Elevator implements Runnable {
 
 	private int currentFloor = 1;
 	private int DesFloor;
-	private boolean door = false;
+	private boolean door = true;	//true = open, false = closed
 	private int count;				// number of floors in the elevator
 	private boolean[] floorLights;	// Array containing the status of the floor lights in each elevator
 	private int id;

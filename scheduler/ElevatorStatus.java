@@ -258,7 +258,7 @@ public class ElevatorStatus {
 	 */
 	public void addFloor(int floor){
 		//System.out.println("Floor " + floor + " added to list for elevator " + this.id);
-		ColouredOutput.printColouredText("Floor " + floor + " added to list for elevator " + this.id, ColouredOutput.ANSI_GREEN);
+		//ColouredOutput.printColouredText("Floor " + floor + " added to list for elevator " + this.id, ColouredOutput.ANSI_GREEN);
 		this.setIdle(false); 								// Set elevator to not be idle
 		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
 		this.nextDestination = this.getNextFloor();			// set the next destination floor
@@ -461,7 +461,7 @@ public class ElevatorStatus {
 			case ERROR:
 				// TODO: configure this !
 				this.toggleInoperable();
-				ColouredOutput.printColouredText("car " + this.getId() + " had its error toggled to " + this.isInoperable(), ColouredOutput.ANSI_RED_BACKGROUND);
+				//ColouredOutput.printColouredText("car " + this.getId() + " had its error toggled to " + this.isInoperable(), ColouredOutput.ANSI_RED_BACKGROUND);
 				//this.setError(p.getStatus());
 				break;
 			default:

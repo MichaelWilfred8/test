@@ -34,7 +34,7 @@ public class Scheduler implements Runnable {
 
 		// Initialize each ElevatorStatus to being on the first floor with the motors off and the doors closed
 		for(int i = 0; i < numElevators; ++i){
-			this.car[i] = new ElevatorStatus(1, MotorState.OFF, DoorState.CLOSED, numFloors, i);
+			this.car[i] = new ElevatorStatus(1, MotorState.OFF, DoorState.OPEN, numFloors, i);
 		}
 	}
 
@@ -139,7 +139,6 @@ public class Scheduler implements Runnable {
 	private void handleNewRequest(DataPacket p){
 		int selectedCar = 0;
 		
-		System.out.println("handleNewRequest: " + p.toString()); 
 		// check if request came from the floor (up/down)
 		if (p.getSubSystem() == SubsystemType.REQUEST){
 			selectedCar = findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]));
@@ -157,6 +156,7 @@ public class Scheduler implements Runnable {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, (byte) selectedCar, null, null); // Create a DataPacket to return to the elevator.
 		
 		// If the doors are open, close the doors
+		System.out.println("DOOR STATE: " + (car[selectedCar].getDoorState() == DoorState.OPEN));
 		if (car[selectedCar].getDoorState() == DoorState.OPEN) {
 			returnPacket.setSubSystem(SubsystemType.DOOR);
 			returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
@@ -167,6 +167,7 @@ public class Scheduler implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			System.out.println("ADDED REQUEST TO OUTPUT BUFFER: " + returnPacket.toString());
 			return;
 		}
 	}
