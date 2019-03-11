@@ -60,33 +60,6 @@ public class Test{
 				//Get all tokens available in line
 				String[] tokens = line.split(DELIMITER);//create an array of strings, represents the line of file
 				
-				/*if(tokens[2].toString().equals("ERROR"))
-					{	
-					//Creates a new socket directly to the elevator
-						DatagramSocket sender = new DatagramSocket();
-						InetAddress elev = InetAddress.getLocalHost();
-						SocketAddress elevatorport = new InetSocketAddress(68);
-						
-						//Gets what subsytem has the error from the 4th index of the array
-						SubsystemType type = SubsystemType.ERROR.toSubsystem(Integer.parseInt(tokens[3]));
-						
-						//Sets which elevator has the error from the 2nd index of the array
-						int elevator = Integer.parseInt(tokens[1]);
-						byte id = (byte) elevator;
-						
-						//Sets the status to the timestamp of the error from the 1st index of the array
-						byte[] status=tokens[0].getBytes(); 
-						
-						//Creates the packet and sends it to the elevator handler
-						DataPacket request = new DataPacket(OriginType.ERROR,id,type,status);
-						byte[] errorbyte = request.getBytes();
-						DatagramPacket packet = new DatagramPacket(errorbyte,errorbyte.length,elev,68);
-						sender.send(packet);
-						//error.addError(request);
-						System.out.println("Error found "+type+ " Packet "+request);
-						//Send to elevator to process
-					}*/
-				
 				inputLines.add(tokens);
 				//add to the list of lines
 			}
