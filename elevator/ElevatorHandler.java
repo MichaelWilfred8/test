@@ -19,6 +19,7 @@ public class ElevatorHandler implements Runnable{
 	private boolean stopController;
 
 	private static final ElevatorHandler instance = new ElevatorHandler();
+	
 	private ElevatorHandler(){
 		if(instance != null){
 			throw new IllegalStateException("Already instantiated");
