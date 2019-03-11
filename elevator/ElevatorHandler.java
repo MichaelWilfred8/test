@@ -20,7 +20,8 @@ public class ElevatorHandler implements Runnable{
 
 	private static final ElevatorHandler instance = new ElevatorHandler();
 	
-	private static final int NUM_ELEVATORS = 1;
+	private static final int NUM_ELEVATORS = 1;		// Numner of elevator cars in the building
+	private static final int MAX_FLOOR = 22;		// Number of floors in the building
 	
 	private ElevatorHandler(){
 		if(instance != null){
@@ -44,11 +45,28 @@ public class ElevatorHandler implements Runnable{
 		//receiveSocket.setSoTimeout(2000);
 	}
 
+	
 	// static method to create instance of class 
 	public static ElevatorHandler getHandler(){ 
 		return instance; 
 	}
+	
+	
+	/**
+	 * Print a received datapacket to the console
+	 * @param receivePacket
+	 */
+	private static void printDatagramPacket(DatagramPacket receivePacket) {
+		System.out.println("ElevatorHandler: Packet received:");
+		System.out.println("From host: " + receivePacket.getAddress());
+		System.out.println("Host port: " + receivePacket.getPort());
+		System.out.println("Length: " + receivePacket.getLength());
+		System.out.println("Containing: ");
+		// Form a String from the byte array.
+		System.out.println("(Bytes) " + Arrays.toString(receivePacket.getData()));
+	}
 
+	
 	/**
 	 * listen for incoming requests, listens on port 69
 	 */
@@ -74,15 +92,9 @@ public class ElevatorHandler implements Runnable{
 			}
 
 			// Process the received datagram.
-			System.out.println("ElevatorHandler: Packet received:");
-			System.out.println("From host: " + receivePacket.getAddress());
-			System.out.println("Host port: " + receivePacket.getPort());
-			int len = receivePacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.println("Containing: ");
-			// Form a String from the byte array.
-			System.out.println("(Bytes) " + Arrays.toString(data));
-
+			printDatagramPacket(receivePacket);
+			
+			
 			if(data[0]==-1) {
 				notDone = false;
 			} else {
@@ -91,12 +103,19 @@ public class ElevatorHandler implements Runnable{
 				int id = dp.getId();
 				elevator = findElevator(id);
 				System.out.println("calling elevator " + id + "\n");
+				
+				// Add message to the queue
+				//elevator.inputBuffer.add(dp);
+				elevator.inputBuffer.add(receivePacket);
+				
+				/*
 				try {
 					elevator.receiveAndEcho(dp, receivePacket);
 				} catch (ClassNotFoundException | IOException | InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				*/
 			}
 
 		}
@@ -113,7 +132,7 @@ public class ElevatorHandler implements Runnable{
 
 	private static void initializeElevators(){
 		for(int i=0; i<NUM_ELEVATORS; i++){
-			Elevator elevator = new Elevator(i);
+			Elevator elevator = new Elevator(i, MAX_FLOOR);
 			Thread t = new Thread(elevator);
 			t.start();
 
