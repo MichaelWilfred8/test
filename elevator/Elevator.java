@@ -77,7 +77,6 @@ public class Elevator implements Runnable {
 		this.currentFloor = 1;
 
 		this.id = id;
-		System.out.println("Elevator " + this.id + " has been created.");
 	}
 
 	/**
@@ -251,7 +250,7 @@ public class Elevator implements Runnable {
 				System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 			}
 		} else if (command == MotorState.UP){
-			while(currentFloor < 11) {
+			while(currentFloor <= 10) {
 				this.motorState = MotorState.UP;
 
 				//changed the second byte from id to current floor, so that scheduler will get update of the current floor

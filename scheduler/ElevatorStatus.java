@@ -6,7 +6,6 @@ import java.util.TreeSet;
 
 import Enums.*;
 import shared.*;
-import testing.ColouredOutput;
 
 // Class for the scheduler to hold information about the elevator and its current position
 
@@ -434,12 +433,12 @@ public class ElevatorStatus {
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
-				ColouredOutput.printColouredText("motor was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
+				//ColouredOutput.printColouredText("motor was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("motor was updated to " + this.getMotorState());
 				break;
 			case DOOR:	// Door state is to be updated
 				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
-				ColouredOutput.printColouredText("door was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
+				//ColouredOutput.printColouredText("door was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
@@ -447,7 +446,7 @@ public class ElevatorStatus {
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
+				//ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("position in elevatorStatus was updated to " + this.getPosition());
 				printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
 				break;
