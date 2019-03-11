@@ -6,7 +6,6 @@ import java.util.TreeSet;
 
 import Enums.*;
 import shared.*;
-import testing.ColouredOutput;
 
 // Class for the scheduler to hold information about the elevator and its current position
 
@@ -32,8 +31,8 @@ public class ElevatorStatus {
 	public int id;
 	private boolean idle;						// Boolean value indicating if elevator is idle
 	private boolean inoperable;					// Boolean value indicating if elevator is not operational
-	
-	
+
+
 	public boolean getIdle() {
 		return idle;
 	}
@@ -79,7 +78,7 @@ public class ElevatorStatus {
 		}
 
 		this.id = id;
-		
+
 		// set elevator to idle initially
 		this.idle = true;
 	}
@@ -109,7 +108,7 @@ public class ElevatorStatus {
 		}
 		*/
 	}
-	
+
 	/**
 	 * Find the next destination for the elevator and set the next destination for the elevator
 	 * Remove the current floor from the list of floors to visit
@@ -406,7 +405,7 @@ public class ElevatorStatus {
 		return nextFloor;	// if logic fails, return 1 to send elevator back to ground floor
 	}
 
-	
+
 	/**
 	 * Test if the elevator is in an idle state
 	 * Idle State is when elevator is stopped at a floor with the motor off and doors open and no pending requests for this elevator
@@ -423,7 +422,7 @@ public class ElevatorStatus {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Print red message in console
 	 * @param msg message to print
@@ -431,7 +430,7 @@ public class ElevatorStatus {
 	private static void printRedMessage (String msg){
 		System.err.println("\n" + msg + "\n");
 	}
-	
+
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState
 	 *
@@ -442,12 +441,12 @@ public class ElevatorStatus {
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
-				ColouredOutput.printColouredText("motor of car " + this.getId() + " was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
+				//ColouredOutput.printColouredText("motor was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("motor was updated to " + this.getMotorState());
 				break;
 			case DOOR:	// Door state is to be updated
 				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
-				ColouredOutput.printColouredText("door of car " + this.getId() + " was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
+				//ColouredOutput.printColouredText("door was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
@@ -455,7 +454,7 @@ public class ElevatorStatus {
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				ColouredOutput.printColouredText("position of car " + this.getId() + " in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
+				//ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("position in elevatorStatus was updated to " + this.getPosition());
 				//printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
 				break;
