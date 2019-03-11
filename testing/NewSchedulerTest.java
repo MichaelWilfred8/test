@@ -2,6 +2,7 @@ package testing;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import elevator.ElevatorHandler;
 import scheduler.Scheduler;
 import scheduler.SchedulerHandler;
 import shared.DataPacket;
@@ -29,7 +30,11 @@ public class NewSchedulerTest {
 		GenericThreadedSender sender = new GenericThreadedSender(outBuf, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, true);
 		Thread senderThread = new Thread(sender);
 		
+		ElevatorHandler elevatorHandler = new ElevatorHandler();
+		Thread elevatorHandlerThread = new Thread(elevatorHandler);
+		
 		schThread.start();
+		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

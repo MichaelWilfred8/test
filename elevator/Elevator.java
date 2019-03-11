@@ -60,7 +60,8 @@ public class Elevator implements Runnable {
 	
 	// Thread variables
 	static volatile boolean exitMovementFlag = false;
-	public Thread floorChanger;
+	public FloorChangerThread floorChanger;
+	public Thread floorChangerThread;
 	private static final int TIME_BETWEEN_FLOORS = 3000;
 	
 	private SocketAddress schedulerAddress;
@@ -91,6 +92,8 @@ public class Elevator implements Runnable {
 		this.MAX_FLOOR = maxFloor;
 		//this.inputBuffer = new LinkedBlockingQueue<DataPacket>();
 		this.inputBuffer = new LinkedBlockingQueue<DatagramPacket>();
+		this.floorChanger = new FloorChangerThread(this);
+		this.floorChangerThread = new Thread(this.floorChanger);
 	}
 	
 	
@@ -267,11 +270,13 @@ public class Elevator implements Runnable {
 		
 		byte[] data = new byte[100];
 		DatagramPacket packet = new DatagramPacket(data, data.length);
-		DataPacket p = new DataPacket(null, (Byte) null, null, new byte[] {(Byte) null});
+		
+		DataPacket p = new DataPacket(OriginType.ELEVATOR, (byte) this.getId(), null, null);
 		
 		
 		// Get DatagramPacket from inputQueue
 		try {
+			System.out.println("Elevator " + this.getId() + " waiting for input packet");
 			packet = this.inputBuffer.take();
 		} catch (InterruptedException e){
 			e.printStackTrace();
@@ -523,8 +528,9 @@ public class Elevator implements Runnable {
 				this.motorState = MotorState.DOWN;
 				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
 				
-				this.floorChanger = new Thread(new FloorChangerThread(this));
-				this.floorChanger.start();
+				this.floorChangerThread = new Thread(new FloorChangerThread(this));
+				//this.floorChanger.resetThread();
+				//this.floorChangerThread.start();
 				
 				/*
 				// Create thread inside main elevator function to increment the floor while allowing elevator to still run
@@ -554,9 +560,10 @@ public class Elevator implements Runnable {
 				this.motorState = MotorState.UP;
 				//changed the second byte from id to current floor, so that scheduler will get update of the current floor
 				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {(byte) this.currentFloor, this.motorState.getByte()}), address);
-				
-				this.floorChanger = new Thread(new FloorChangerThread(this));
-				this.floorChanger.start();
+				System.out.println("Starting upwards...");
+				this.floorChangerThread = new Thread(this.floorChanger);
+				//this.floorChanger.resetThread();
+				//this.floorChangerThread.start();
 			}
 			
 			
@@ -565,10 +572,11 @@ public class Elevator implements Runnable {
 			//Elevator.exitMovementFlag = true;	// Stop the movement of the elevator
 			
 			this.motorState = MotorState.OFF;
+			this.floorChanger.exitFlag = true;
 			
 			// If the thread for changing floors is running, then interrupt it
-			if (this.floorChanger.isAlive()){
-				this.floorChanger.interrupt();
+			if (this.floorChangerThread.isAlive()){
+				this.floorChangerThread.interrupt();
 			}
 			
 			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);

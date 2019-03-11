@@ -3,32 +3,46 @@ package elevator;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import Enums.DoorState;
+import Enums.MotorState;
+import Enums.OriginType;
+import Enums.SubsystemType;
+import scheduler.SchedulerHandler;
 import shared.*;
 
-public class ElevatorHandler implements Runnable{
+public class ElevatorHandler implements Runnable {
 
 
 	DatagramPacket receivePacket;
 	DatagramSocket receiveSocket;
 
-	private static List<Elevator> elevatorList = new ArrayList<Elevator>(3);
+	//private static List<Elevator> elevatorList = new ArrayList<Elevator>(3);
+	private List<Elevator> elevatorList;
+	private List<Thread> elevatorThreadList;
 	private boolean stopController;
 
-	private static final ElevatorHandler instance = new ElevatorHandler();
+	//private static final ElevatorHandler instance = new ElevatorHandler();
 	
 	private static final int NUM_ELEVATORS = 1;		// Numner of elevator cars in the building
 	private static final int MAX_FLOOR = 22;		// Number of floors in the building
 	
-	private ElevatorHandler(){
-		if(instance != null){
-			throw new IllegalStateException("Already instantiated");
-		}
+	public ElevatorHandler(){
+		
+//		if(instance != null){
+//			throw new IllegalStateException("Already instantiated");
+//		}
+		
 		setStopController(false);
-		initializeElevators();
+		//initializeElevators();
 
 
 		// Construct a datagram socket and bind it to port 69 
@@ -43,13 +57,32 @@ public class ElevatorHandler implements Runnable{
 
 		// to test socket timeout (2 seconds)
 		//receiveSocket.setSoTimeout(2000);
+		
+		// Initialize each elevator
+		this.elevatorList = new ArrayList<Elevator>(NUM_ELEVATORS);
+		this.elevatorThreadList = new ArrayList<Thread>(NUM_ELEVATORS);
+		
+		for(int i = 0; i < NUM_ELEVATORS; i++){
+			Elevator elevator = new Elevator(i, MAX_FLOOR);
+			Thread t = new Thread(elevator);
+			//t.start();
+
+			elevatorList.add(elevator);
+			elevatorThreadList.add(t);
+			
+			try {
+				elevatorList.get(i).setSchedulerAddress(new InetSocketAddress(InetAddress.getLocalHost(), SocketPort.SCHEDULER_LISTENER.getValue()));
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	
-	// static method to create instance of class 
-	public static ElevatorHandler getHandler(){ 
-		return instance; 
-	}
+//	// static method to create instance of class 
+//	public static ElevatorHandler getHandler(){ 
+//		return instance; 
+//	}
 	
 	
 	/**
@@ -57,12 +90,15 @@ public class ElevatorHandler implements Runnable{
 	 * @param receivePacket
 	 */
 	private static void printDatagramPacket(DatagramPacket receivePacket) {
+		DataPacket tempPacket = new DataPacket(receivePacket.getData());
+		
 		System.out.println("ElevatorHandler: Packet received:");
 		System.out.println("From host: " + receivePacket.getAddress());
 		System.out.println("Host port: " + receivePacket.getPort());
 		System.out.println("Length: " + receivePacket.getLength());
 		System.out.println("Containing: ");
 		// Form a String from the byte array.
+		System.out.println("(String) " + tempPacket.toString());
 		System.out.println("(Bytes) " + Arrays.toString(receivePacket.getData()));
 	}
 
@@ -71,9 +107,14 @@ public class ElevatorHandler implements Runnable{
 	 * listen for incoming requests, listens on port 69
 	 */
 	private void listen(){
-		//v
-
 		boolean notDone = true;
+		
+		// Start all elevator threads
+		for(int i = 0; i < NUM_ELEVATORS; ++i) {
+			this.elevatorThreadList.get(0).start();
+		}
+
+		
 		while(notDone) {
 			// Construct a DatagramPacket for receiving packets up 
 			// to 100 bytes long (the length of the byte array).
@@ -130,24 +171,20 @@ public class ElevatorHandler implements Runnable{
 		return elevator;
 	}
 
-	private static void initializeElevators(){
-		for(int i=0; i<NUM_ELEVATORS; i++){
-			Elevator elevator = new Elevator(i, MAX_FLOOR);
-			Thread t = new Thread(elevator);
-			t.start();
-
-			elevatorList.add(elevator);
-		}
-	}
-
-	/**
-	 * Thread run class
-	 */
-	@Override
-	public void run() {
-		listen();
-
-	}
+//	private static void initializeElevators(){
+//		for(int i = 0; i < NUM_ELEVATORS; i++){
+//			Elevator elevator = new Elevator(i, MAX_FLOOR);
+//			Thread t = new Thread(elevator);
+//			t.start();
+//
+//			elevatorList.add(elevator);
+//			try {
+//				elevatorList.get(i).setSchedulerAddress(new InetSocketAddress(InetAddress.getLocalHost(), SocketPort.SCHEDULER_LISTENER.getValue()));
+//			} catch (UnknownHostException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 	/**
 	 * Right now, the findElevator is only based on id
@@ -156,19 +193,166 @@ public class ElevatorHandler implements Runnable{
 	 * @param id
 	 * @return selected elevator
 	 */
-	private static Elevator findElevator(int id) {
-		Elevator elevator = null;
-		elevator =  elevatorList.get(id);
-		return elevator;
+//	private static Elevator findElevator(int id) {
+//		Elevator elevator = null;
+//		elevator =  elevatorList.get(id);
+//		return elevator;
+//	}
+	
+	private Elevator findElevator(int id) {
+		return elevatorList.get(id);
 	}
 
 	public void setStopController(boolean stop){
 		this.stopController = stop;
 
 	}
-
-	public static void main(String args[]){
-		instance.run();
+	
+	
+	@Override
+	public void run() {
+		listen();
+		
+	}
+	
+//	public static void main(String args[]){
+//		instance.run();
+//	}
+	
+	public static void main(String args[]) throws InterruptedException{
+		
+		LinkedBlockingQueue<DataPacket> inQueue = new LinkedBlockingQueue<DataPacket>();
+		LinkedBlockingQueue<DataPacket> outQueue = new LinkedBlockingQueue<DataPacket>();
+		DataPacket sendPacket = new DataPacket(OriginType.SCHEDULER, (byte) 0, null, null);
+		DataPacket getPacket = new DataPacket(OriginType.SCHEDULER, (byte) 0, null, null);
+		
+		ElevatorHandler eh = new ElevatorHandler();
+		Thread ehThread = new Thread(eh);
+		
+		GenericThreadedSender sender = new GenericThreadedSender(inQueue, SchedulerHandler.ELEVATOR_PORT_NUMBER, SchedulerHandler.SCHEDULER_PORT_NUMBER, SchedulerHandler.FLOOR_PORT_NUMBER, false);
+		Thread senderThread = new Thread(sender);
+		
+		GenericThreadedListener listener = new GenericThreadedListener(outQueue, SocketPort.SCHEDULER_LISTENER.getValue(), false);
+		Thread listenerThread = new Thread(listener);
+		
+		ehThread.start();
+		senderThread.start();
+		listenerThread.start();
+		
+		
+		
+		// Tell elevator to open doors
+		sendPacket.setSubSystem(SubsystemType.DOOR);
+		sendPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
+		
+		inQueue.add(sendPacket);
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("output from elevator = " + outQueue.toString());
+		try {
+			getPacket = outQueue.take();
+		} catch (InterruptedException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		
+		// Tell elevator to close doors
+		sendPacket.setSubSystem(SubsystemType.DOOR);
+		sendPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
+		
+		inQueue.add(sendPacket);
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("output from elevator = " + outQueue.toString());
+		try {
+			getPacket = outQueue.take();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		// Tell elevator to move upwards
+		sendPacket.setSubSystem(SubsystemType.MOTOR);
+		sendPacket.setStatus(new byte[] {MotorState.UP.getByte()});
+		
+		inQueue.add(sendPacket);
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("output from elevator = " + outQueue.toString());
+		getPacket = outQueue.take();
+		
+		while(true){
+			try {
+				getPacket = outQueue.take();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if ((getPacket.getSubSystem() == SubsystemType.LOCATION) && (getPacket.getStatus()[0] == (byte) 4)){
+				// Tell elevator to stop
+				sendPacket.setSubSystem(SubsystemType.MOTOR);
+				sendPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+				
+				inQueue.add(sendPacket);
+				break;
+			}
+		}
+		
+		Thread.sleep(3000);
+		
+		// Tell elevator to move upwards
+		sendPacket.setSubSystem(SubsystemType.MOTOR);
+		sendPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
+		
+		inQueue.add(sendPacket);
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("output from elevator = " + outQueue.toString());
+		getPacket = outQueue.take();
+		
+		while(true){
+			try {
+				getPacket = outQueue.take();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if ((getPacket.getSubSystem() == SubsystemType.LOCATION) && (getPacket.getStatus()[0] == (byte) 2)){
+				// Tell elevator to stop
+				sendPacket.setSubSystem(SubsystemType.MOTOR);
+				sendPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+				
+				inQueue.add(sendPacket);
+				break;
+			}
+		}
+		
 	}
 
 }
