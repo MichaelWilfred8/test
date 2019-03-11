@@ -23,7 +23,9 @@ public class ColouredOutput {
 	
 	
 	public static void printColouredText(String text, String colour){
-		System.out.println(colour + text);
+		System.out.print(colour + text);
+		System.out.print(ANSI_RESET);
+		System.out.print("\n");
 	}
 	
 	public static void main(String[] args){

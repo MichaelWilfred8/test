@@ -137,17 +137,37 @@ public class Scheduler implements Runnable {
 	 * @param p	The DataPacket that contains the request
 	 */
 	private void handleNewRequest(DataPacket p){
-		System.out.println("handleNewRequest: " + p.toString());
-
+		int selectedCar = 0;
+		
+		System.out.println("handleNewRequest: " + p.toString()); 
 		// check if request came from the floor (up/down)
 		if (p.getSubSystem() == SubsystemType.REQUEST){
-			car[findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]))].addFloor((int) p.getId());
+			selectedCar = findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]));
+			car[selectedCar].addFloor((int) p.getId());
 		}
 		else if (p.getSubSystem() == SubsystemType.INPUT){
-			// Find elevator that is on the same floor as the request
+			selectedCar = (int)p.getStatus()[0];	// set selectedCar as the elevator which was specified in request
 			for (int i=2; i<p.getStatus()[1]+2; i++) {
 				car[p.getStatus()[0]].addFloor(p.getStatus()[i]);
 			}
+		}
+		
+		
+		// Return a package to the elevator
+		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, (byte) selectedCar, null, null); // Create a DataPacket to return to the elevator.
+		
+		// If the doors are open, close the doors
+		if (car[selectedCar].getDoorState() == DoorState.OPEN) {
+			returnPacket.setSubSystem(SubsystemType.DOOR);
+			returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
+			
+			// Add packet to output queue and exit
+			try {
+				this.outputBuffer.put(returnPacket);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return;
 		}
 	}
 
@@ -163,7 +183,7 @@ public class Scheduler implements Runnable {
 
 
 		if(car[(int) p.getId()].testIfIdle()){
-			System.err.println("elevator idle!");
+			System.out.println("elevator idle!");
 			// TODO: Update something here for when elevator is idle for long period of time?
 			car[(int) p.getId()].setIdle(true);		// Set the elevator as being idle
 
