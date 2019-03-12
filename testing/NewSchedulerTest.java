@@ -2,7 +2,6 @@ package testing;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import elevator.ElevatorHandler;
 import scheduler.Scheduler;
 import scheduler.SchedulerHandler;
 import shared.DataPacket;

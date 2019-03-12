@@ -46,42 +46,40 @@ public class Elevator implements Runnable {
 	private DatagramSocket sendSocket;
 	
 	//public LinkedBlockingQueue<DataPacket> inputBuffer;
-	public LinkedBlockingQueue<DatagramPacket> inputBuffer;
+	public LinkedBlockingQueue<DatagramPacket> inputBuffer;		// Queue of input messages for this elevator
 
-	private volatile int currentFloor = 1;
-	private int DesFloor;
-	private boolean door = true;	//true = open, false = closed
-	private int count;				// number of floors in the elevator
-	private boolean[] floorLights;	// Array containing the status of the floor lights in each elevator
-	private int id;
-	private int MAX_FLOOR;			// Maximum floor that this elevator can travel to
+	private volatile int currentFloor = 1;						// Current floor of the elevator
+	private boolean door = true;								// State of the door: true = open, false = closed
+	private MotorState motorState;								// State of the motor for this elevator
+	private boolean[] floorLights;								// Array containing the status of the floor lights in each elevator
+	private int id;												// ID of this elevator
+	private int MAX_FLOOR;										// Maximum floor that this elevator can travel to
+	private SocketAddress schedulerAddress;						// SocketAddress of the scheduler to which it will return messages
 	
-	MotorState motorState;
+	private boolean printDebug = true;							// PrintDebug enables printing debugging information to the console
 	
 	// Thread variables
-	static volatile boolean exitMovementFlag = false;
-	public FloorChangerThread floorChanger;
-	//public Thread floorChangerThread;
-	private static final int TIME_BETWEEN_FLOORS = 3000;
+	public FloorChangerThread floorChanger;						// The thread used to change the current floor of the elevator when running
 	
-	private SocketAddress schedulerAddress;
 	
-	private boolean printDebug = true;
 	
-
+	/**
+	 * Constructor for the elevator class
+	 * @param id			The ID of this elevator
+	 * @param maxFloor		The maximum number of floors this elevator can travel to
+	 * @param printDebug	Debugging variable, when enabled print additional information to the console
+	 */
 	public Elevator(int id, int maxFloor, boolean printDebug){
+		
+		// Create a DatagramSocket for the elevator to send return messages 
 		try {
-
 			sendSocket = new DatagramSocket(SocketPort.ELEVATOR_SENDER.getValue() + id);
-
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
 		}
-
-		//count = numFloors;
-		//id = idCounter++;
-
+		
+		// TODO: determine if floor lights will be used
 		// initialize all floor lights to off
 		//this.floorLights = new boolean[numFloors];
 		//for(int i = 0; i < numFloors; ++i){
@@ -102,22 +100,14 @@ public class Elevator implements Runnable {
 	 * Getter for elevator input buffer
 	 * @return inputBuffer for this elevator
 	 */
-	/*public LinkedBlockingQueue<DataPacket> getInputBuffer(){
-		return this.inputBuffer;
-	}*/
-	
-	
-	/**
-	 * Getter for elevator input buffer
-	 * @return inputBuffer for this elevator
-	 */
 	public LinkedBlockingQueue<DatagramPacket> getInputBuffer(){
 		return this.inputBuffer;
 	}
 	
 	
 	/**
-	 * @return the currentFloor
+	 * Getter for the current floor of the elevator
+	 * @return the currentFloor of the elevator
 	 */
 	public int getCurrentFloor() {
 		return currentFloor;
@@ -125,15 +115,17 @@ public class Elevator implements Runnable {
 
 
 	/**
-	 * @param currentFloor the currentFloor to set
+	 * Setter for the current floor
+	 * @param floor the floor to set this elevator to
 	 */
-	public void setCurrentFloor(int currentFloor) {
-		this.currentFloor = currentFloor;
+	public void setCurrentFloor(int floor) {
+		this.currentFloor = floor;
 	}
 
 
 	/**
-	 * @return the door
+	 * Getter for the state of the elevator doors
+	 * @return True when open
 	 */
 	public boolean isDoor() {
 		return door;
@@ -141,7 +133,8 @@ public class Elevator implements Runnable {
 
 
 	/**
-	 * @param door the door to set
+	 * Setter for the state of the elevator doors
+	 * @param The state of the doors to set (true when open, false when closed)
 	 */
 	public void setDoor(boolean door) {
 		this.door = door;
@@ -149,6 +142,7 @@ public class Elevator implements Runnable {
 
 
 	/**
+	 * Getter for the boolean array representing the status of the floor lights inside the elevator
 	 * @return the floorLights
 	 */
 	public boolean[] getFloorLights() {
@@ -157,6 +151,7 @@ public class Elevator implements Runnable {
 
 
 	/**
+	 * Setter for the boolean array representing the status of the floor lights inside the elevator
 	 * @param floorLights the floorLights to set
 	 */
 	public void setFloorLights(boolean[] floorLights) {
@@ -165,6 +160,7 @@ public class Elevator implements Runnable {
 
 
 	/**
+	 * Getter for the ID of the elevator
 	 * @return the id
 	 */
 	public int getId() {
@@ -173,14 +169,7 @@ public class Elevator implements Runnable {
 
 
 	/**
-	 * @param id the id to set
-	 */
-	public void setId(int id) {
-		this.id = id;
-	}
-
-
-	/**
+	 * Getter for the maximum floor this elevator can visit
 	 * @return the mAX_FLOOR
 	 */
 	public int getMAX_FLOOR() {
@@ -189,14 +178,7 @@ public class Elevator implements Runnable {
 
 
 	/**
-	 * @param mAX_FLOOR the mAX_FLOOR to set
-	 */
-	public void setMAX_FLOOR(int mAX_FLOOR) {
-		MAX_FLOOR = mAX_FLOOR;
-	}
-
-
-	/**
+	 * Getter for the state of the motor on this elevator
 	 * @return the motorState
 	 */
 	public MotorState getMotorState() {
@@ -205,6 +187,7 @@ public class Elevator implements Runnable {
 
 
 	/**
+	 * Setter for the state of the motor on this elevator
 	 * @param motorState the motorState to set
 	 */
 	public void setMotorState(MotorState motorState) {
@@ -213,6 +196,7 @@ public class Elevator implements Runnable {
 
 
 	/**
+	 * Getter for the SocketAddress of the scheduler for this elevator
 	 * @return the schedulerAddress
 	 */
 	public SocketAddress getSchedulerAddress() {
@@ -221,20 +205,23 @@ public class Elevator implements Runnable {
 
 
 	/**
+	 * Setter for the SocketAddress of the scheduler for this elevator
 	 * @param schedulerAddress the schedulerAddress to set
 	 */
 	public void setSchedulerAddress(SocketAddress schedulerAddress) {
 		this.schedulerAddress = schedulerAddress;
 	}
-
-
-	/**
-	 * @param inputBuffer the inputBuffer to set
-	 */
-	public void setInputBuffer(LinkedBlockingQueue<DatagramPacket> inputBuffer) {
-		this.inputBuffer = inputBuffer;
-	}
 	
+	
+	// TODO: Determine if this needs to be removed
+	/**
+	 * Toggle the Floor light inside the elevator on or off
+	 * @param p	A DataPacket containing the floor number to toggle inside
+	 */
+	private void setFloorLight(DataPacket p){
+		this.floorLights[(int) p.getStatus()[0]] = !this.floorLights[(int) p.getStatus()[0]];
+	}
+
 	
 	/**
 	 * Print what was received from a datagram packet to the console
@@ -256,123 +243,19 @@ public class Elevator implements Runnable {
 		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
 		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
 		System.out.println();
-	}
-	
-
-	/**
-	 * New Receive and Echo
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws InterruptedException
-	 */
-	public void receiveAndEcho() throws IOException, ClassNotFoundException, InterruptedException {
-		// at this stage, elevator will decode the packet
-		// The elevator will decode the packet
-		
-		byte[] data = new byte[100];
-		DatagramPacket packet = new DatagramPacket(data, data.length);
-		
-		DataPacket p = new DataPacket(OriginType.ELEVATOR, (byte) this.getId(), null, null);
-		
-		
-		// Get DatagramPacket from inputQueue
-		try {
-			//System.out.println("Elevator " + this.getId() + " waiting for input packet");
-			packet = this.inputBuffer.take();
-		} catch (InterruptedException e){
-			e.printStackTrace();
-		}
-		
-		p = new DataPacket(packet.getData());
-		
-		
-		if(p.getOrigin() == OriginType.ERROR)//Error packets
-		{
-			switch(p.getSubSystem()) {
-			case MOTOR:
-				System.out.println("Motor Error");
-				break;
-			case DOOR:
-				System.out.println("Door Error");
-				break;
-			case CARLAMP:
-				System.out.println("Carlamp Error");
-				break;
-			case FLOORLAMP:
-				System.out.println("Floorlamp Error");
-				break;
-			default:
-				break;
-
-			}
-
-		}
-		else if(p.getSubSystem() == SubsystemType.MOTOR) {
-			//case of motor
-			System.out.println("SUBSYSTEM IS MOTOR  " );
-
-			switch(MotorState.convertFromByte(p.getStatus()[0])){
-			case DOWN:
-				System.out.println("GOING DOWN" );
-				Motor(MotorState.DOWN, packet.getSocketAddress());		//motor down and send message
-				break;
-			case OFF:
-				System.out.println("MOTOR OFF" );
-				Motor(MotorState.OFF, packet.getSocketAddress());		//motor off
-				break;
-			case UP:
-				System.out.println("GOING UP" );
-				Motor(MotorState.UP, packet.getSocketAddress());		//motor up and send message
-				break;
-			default:
-				System.err.println("Invalid type");
-				break;
-			}
-		} else if (p.getSubSystem() == SubsystemType.DOOR) {
-			System.out.println("SUBSYSTEM IS DOOR  " );
-
-			switch(DoorState.convertFromByte(p.getStatus()[0])){
-			case OPEN:
-				door = true;		//door open and send message
-				System.out.println("DOOR OPENED  " );
-				break;
-			case CLOSED:
-				door = false;		//door closed and send message
-				System.out.println("DOOR CLOSED " );
-				break;
-			default:
-				System.err.println("Invalid State");
-				break;
-			}
-		} else if (p.getSubSystem() == SubsystemType.LOCATION){
-			System.out.println("SUBSYSTEM IS LOCATION  " );
-			sendLocation(packet);
-		} else if (p.getSubSystem() == SubsystemType.INPUT){
-			System.out.println("SUBSYSTEM IS INPUT");
-			setFloorLight(p);
-		}
-
-
-
-		// Echo back the packet if not from the motor or the location
-		if ((p.getSubSystem() != SubsystemType.MOTOR) && (p.getSubSystem() != SubsystemType.LOCATION)){
-			sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), packet.getSocketAddress());
-		}
-
-		//receiveSocket.close();
-	}
+	}	
 	
 	
-	// toggle the floor light inside the elevator to on or off
-	private void setFloorLight(DataPacket p){
-		this.floorLights[(int) p.getStatus()[0]] = !this.floorLights[(int) p.getStatus()[0]];
-	}
-
-
 	private DataPacket createEchoPacket(SubsystemType subSystem, byte[] status){
 		return new DataPacket(OriginType.ELEVATOR, (byte) this.id, subSystem, status);
 	}
-
+	
+	
+	/**
+	 * Send a DataPacket to a specified SocketAddress
+	 * @param p			The DataPacket to be sent
+	 * @param address	The SocketAddress of the location to send the DataPacket
+	 */
 	private void sendDataPacket(DataPacket p, SocketAddress address){
 		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, address);
 		sendPacket.setPort(SocketPort.SCHEDULER_LISTENER.getValue());
@@ -394,9 +277,14 @@ public class Elevator implements Runnable {
 
 		//System.out.println("Elevator: packet sent \n");
 	}
-
-
-	public void sendLocation(DatagramPacket dp) throws IOException, InterruptedException {
+	
+	
+	// TODO: refactor this function to not use dp
+	/**
+	 * Send the location of the elevator back to the Scheduler
+	 * @param dp The DatagramPacket received from the Scheduler
+	 */
+	public void sendLocation(DatagramPacket dp) {
 		DataPacket p = new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.LOCATION, new byte[] {(byte) this.currentFloor});
 
 		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, dp.getAddress(), SocketPort.SCHEDULER_LISTENER.getValue());
@@ -407,7 +295,13 @@ public class Elevator implements Runnable {
 			printDatagramPacket(this.sendPacket, "s");
 		}
 		
-		TimeUnit.SECONDS.sleep(1);
+		// TODO: determine if we need this anymore
+		try {
+			TimeUnit.SECONDS.sleep(1);
+		} catch (InterruptedException ie) {
+			System.err.println(ie);
+		}
+		
 
 		try {
 			sendSocket.send(sendPacket);
@@ -417,9 +311,6 @@ public class Elevator implements Runnable {
 		}
 
 		//System.out.println("Elevator: packet sent \n");
-
-		// We're finished, so close the sockets.
-		//sendSocket.close();
 	}
 	
 	/**
@@ -429,7 +320,13 @@ public class Elevator implements Runnable {
 		this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.LOCATION, new byte[] {(byte) this.currentFloor}), this.getSchedulerAddress());
 	}
 	
-	public void Motor(MotorState command, SocketAddress address) throws IOException, InterruptedException{
+	
+	/**
+	 * Main function that handles changes to the motor state
+	 * @param command	The new command for the elevator's motor
+	 * @param address	The SocketAddress of the Scheduler (for returning the message)
+	 */
+	public void motorController(MotorState command, SocketAddress address) {
 		System.out.println("Elevator " + id + ": I am at floor "+ currentFloor);
 
 		if(command == MotorState.DOWN) {
@@ -470,12 +367,21 @@ public class Elevator implements Runnable {
 			}
 			
 			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-			TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			
+			// TODO: do we need this sleep anymore?
+			try {
+				TimeUnit.SECONDS.sleep(3); 		 // sleep for three seconds
+			} catch (InterruptedException ie) {
+				System.err.println(ie);
+			}
+			
 			System.out.println("Elevator " + id + " : I am at  "+ currentFloor);
 		}
 
 	}
-
+	
+	
+	// TODO: determine if we need this function anymore?
 	public String[] GetString(byte[] bytes) throws ClassNotFoundException, IOException
 	{
 		// Form a String from the byte array.
@@ -487,20 +393,102 @@ public class Elevator implements Runnable {
 		objectInputStream.close();
 		return stringArray2;
 	}
+	
+	
+	/**
+	 * Main control function for the elevator. Receive a single request and echo it back to the scheduler
+	 */
+	public void receiveAndEcho() {
+		// at this stage, elevator will decode the packet
+		// The elevator will decode the packet
+		
+		byte[] data = new byte[100];
+		DatagramPacket packet = new DatagramPacket(data, data.length);							// The DatagramPacket pulled from the inputBuffer is stored in this variable
+		DataPacket p = new DataPacket(OriginType.ELEVATOR, (byte) this.getId(), null, null);	// The DataPacket converted from the DatagramPacket is stored in this variable
+		
+		
+		// Get DatagramPacket from inputQueue
+		try {
+			//System.out.println("Elevator " + this.getId() + " waiting for input packet");
+			packet = this.inputBuffer.take();
+		} catch (InterruptedException e){
+			e.printStackTrace();
+		}
+		
+		p = new DataPacket(packet.getData());
+		
+		
+		// If the DataPacket has an Error as the OriginType
+		if(p.getOrigin() == OriginType.ERROR)//Error packets
+		{
+			switch(p.getSubSystem()) {
+			case MOTOR:
+				System.out.println("Motor Error");
+				break;
+			case DOOR:
+				System.out.println("Door Error");
+				break;
+			case CARLAMP:
+				System.out.println("Carlamp Error");
+				break;
+			case FLOORLAMP:
+				System.out.println("Floorlamp Error");
+				break;
+			default:
+				break;
 
+			}
 
-	// TODO: determine if this can be deleted
-	private static byte[] convertToBytes(String[] strings) throws IOException {
-		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		final ObjectOutputStream objectOutputStream =
-				new ObjectOutputStream(byteArrayOutputStream);
-		objectOutputStream.writeObject(strings);
-		objectOutputStream.flush();
-		objectOutputStream.close();
+		}
+		else if(p.getSubSystem() == SubsystemType.MOTOR) {
+			//case of motor
+			System.out.println("SUBSYSTEM IS MOTOR  " );
 
-		final byte[] data = byteArrayOutputStream.toByteArray();
+			switch(MotorState.convertFromByte(p.getStatus()[0])){
+			case DOWN:
+				System.out.println("GOING DOWN" );
+				motorController(MotorState.DOWN, packet.getSocketAddress());		//motor down and send message
+				break;
+			case OFF:
+				System.out.println("MOTOR OFF" );
+				motorController(MotorState.OFF, packet.getSocketAddress());		//motor off
+				break;
+			case UP:
+				System.out.println("GOING UP" );
+				motorController(MotorState.UP, packet.getSocketAddress());		//motor up and send message
+				break;
+			default:
+				System.err.println("Invalid type");
+				break;
+			}
+		} else if (p.getSubSystem() == SubsystemType.DOOR) {
+			System.out.println("SUBSYSTEM IS DOOR  " );
 
-		return data;
+			switch(DoorState.convertFromByte(p.getStatus()[0])){
+			case OPEN:
+				door = true;		//door open and send message
+				System.out.println("DOOR OPENED  " );
+				break;
+			case CLOSED:
+				door = false;		//door closed and send message
+				System.out.println("DOOR CLOSED " );
+				break;
+			default:
+				System.err.println("Invalid State");
+				break;
+			}
+		} else if (p.getSubSystem() == SubsystemType.LOCATION){
+			System.out.println("SUBSYSTEM IS LOCATION  " );
+			sendLocation(packet);
+		} else if (p.getSubSystem() == SubsystemType.INPUT){
+			System.out.println("SUBSYSTEM IS INPUT");
+			setFloorLight(p);
+		}
+		
+		// Echo back the packet if not from the motor or the location
+		if ((p.getSubSystem() != SubsystemType.MOTOR) && (p.getSubSystem() != SubsystemType.LOCATION)){
+			sendDataPacket(createEchoPacket(p.getSubSystem(), p.getStatus()), packet.getSocketAddress());
+		}
 	}
 	
 
@@ -508,31 +496,8 @@ public class Elevator implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		while(true){
-			try {
-				receiveAndEcho();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			receiveAndEcho();
 		}
 
 	}
-
-	// TODO: remove this from the function
-	/*
-	public static void main( String args[] ) throws IOException, ClassNotFoundException, InterruptedException {
-		while(true) {
-			Elevator c = new Elevator(10, 1);
-			//c.receiveAndEcho();
-		}
-	}
-	 */
-
-
 }

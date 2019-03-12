@@ -429,14 +429,7 @@ public class ElevatorStatus {
 			return true;
 		}
 	}
-
-	/**
-	 * Print red message in console
-	 * @param msg message to print
-	 */
-	private static void printRedMessage (String msg){
-		System.err.println("\n" + msg + "\n");
-	}
+	
 
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState

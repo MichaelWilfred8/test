@@ -14,7 +14,7 @@ public class FloorChangerThread implements Runnable {
 	private Thread worker;
 	private final AtomicBoolean running = new AtomicBoolean(false);
 	private final AtomicBoolean stopped = new AtomicBoolean(true);
-	private static final int timeBetweenFloors = 3000;
+	private static final int TIME_BETWEEN_FLOORS = 3000;
 	
 	/**
 	 * Constructor for FloorChangerThread
@@ -76,7 +76,7 @@ public class FloorChangerThread implements Runnable {
 		
 		while(running.get()) {
 			try {
-				Thread.sleep(timeBetweenFloors);
+				Thread.sleep(TIME_BETWEEN_FLOORS);
 			} catch (InterruptedException ie) {
 				Thread.currentThread().interrupt();
 				System.out.println("Thread was interrupted, no longer moving floors");
