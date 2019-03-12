@@ -352,8 +352,6 @@ public class Elevator implements Runnable {
 			setFloorLight(p);
 		}
 
-		System.out.println("\n\n");
-
 
 
 		// Echo back the packet if not from the motor or the location
@@ -453,7 +451,6 @@ public class Elevator implements Runnable {
 				this.motorState = MotorState.UP;
 				//changed the second byte from id to current floor, so that scheduler will get update of the current floor
 				this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.MOTOR, new byte[] {this.motorState.getByte()}), address);
-				System.out.println("Starting upwards...");
 				
 				// If the floorChanger is already running, then do not start it
 				if (!this.floorChanger.isRunning()){

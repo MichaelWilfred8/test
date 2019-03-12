@@ -64,7 +64,6 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		ColouredOutput.printColouredText("Before Car[0] = " + car[0].toString(), ColouredOutput.ANSI_YELLOW);
 		ColouredOutput.printColouredText("inputBuffer = " + this.inputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
 		//System.out.println("Car[0] = " + car[0].toString());
 		
@@ -75,7 +74,7 @@ public class Scheduler implements Runnable {
 			System.err.println(ie);
 		}
 
-
+		
 
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
@@ -88,6 +87,7 @@ public class Scheduler implements Runnable {
 
 		// If the input came from an elevator
 		if (input.getOrigin() == OriginType.ELEVATOR){
+			this.printAllCarStatus("Before");
 			try {
 				ColouredOutput.printColouredText("Updating elevatorStatus of car " + (int) input.getId(), ColouredOutput.ANSI_YELLOW);
 				this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
@@ -97,12 +97,19 @@ public class Scheduler implements Runnable {
 			}
 
 			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
+			this.printAllCarStatus("After");
 		}
 		
 		ColouredOutput.printColouredText("Output = " + this.outputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
-		ColouredOutput.printColouredText("After Car[0] = " + car[0].toString() + "\n", ColouredOutput.ANSI_YELLOW);
+		
 	}
-
+	
+	
+	private void printAllCarStatus(String prefix) {
+		for(int i = 0; i < car.length; ++i) {
+			ColouredOutput.printColouredText(prefix + " Car[" + i + "] = " + car[i].toString() + "\n", ColouredOutput.ANSI_YELLOW);
+		}
+	}
 
 	/**
 	 * Find the nearest elevator to the given floor that is travelling in the correct direction
@@ -152,35 +159,36 @@ public class Scheduler implements Runnable {
 		int selectedCar = 0;
 		boolean wasIdle = false;
 		
-		ColouredOutput.printColouredText("In handleNewRequest", ColouredOutput.ANSI_BLACK);
+		//ColouredOutput.printColouredText("In handleNewRequest", ColouredOutput.ANSI_BLACK);
 		
 		// check if request came from the floor (up/down)
 		if (p.getSubSystem() == SubsystemType.REQUEST){
 			selectedCar = findNearestElevator((int) p.getId(), Direction.convertFromByte(p.getStatus()[DIR_INDEX]));
-			ColouredOutput.printColouredText("Request from floor", ColouredOutput.ANSI_BLACK);
+			//ColouredOutput.printColouredText("Request from floor", ColouredOutput.ANSI_BLACK);
 			
 			if (car[selectedCar].getIdle() == true){
-				ColouredOutput.printColouredText("setting wasIdle true", ColouredOutput.ANSI_BLACK);
+				//ColouredOutput.printColouredText("setting wasIdle true", ColouredOutput.ANSI_BLACK);
 				wasIdle = true;
 			}
 			car[selectedCar].addFloor((int) p.getId());
 		}
 		else if (p.getSubSystem() == SubsystemType.INPUT){
 			selectedCar = (int)p.getStatus()[0];	// set selectedCar as the elevator which was specified in request
-			ColouredOutput.printColouredText("Request from elevator", ColouredOutput.ANSI_BLACK);
+			//ColouredOutput.printColouredText("Request from elevator", ColouredOutput.ANSI_BLACK);
 			
 			if (car[selectedCar].getIdle() == true){
-				ColouredOutput.printColouredText("setting wasIdle true", ColouredOutput.ANSI_BLACK);
+				//ColouredOutput.printColouredText("setting wasIdle true", ColouredOutput.ANSI_BLACK);
 				wasIdle = true;
 			}
 			for (int i=2; i<p.getStatus()[1]+2; i++) {
 				car[p.getStatus()[0]].addFloor(p.getStatus()[i]);
+				car[p.getStatus()[0]].setFloorButtonLight(p.getStatus()[i], true);
 			}
 		}
 		
 		// Test if car was idle and is now no longer idle
 		if ((wasIdle == true) && (car[selectedCar].testIfIdle() == false)) {
-			ColouredOutput.printColouredText("wasIdle is true, returning packet", ColouredOutput.ANSI_BLACK);
+			//ColouredOutput.printColouredText("wasIdle is true, returning packet", ColouredOutput.ANSI_BLACK);
 			DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, (byte) selectedCar, null, null); // Create a DataPacket to return to the elevator.
 			
 			returnPacket.setSubSystem(SubsystemType.DOOR);
@@ -193,73 +201,12 @@ public class Scheduler implements Runnable {
 				e.printStackTrace();
 			}
 						
-			ColouredOutput.printColouredText("ADDED REQUEST TO OUTPUT BUFFER: " + returnPacket.toString(), ColouredOutput.ANSI_BLACK);
+			//ColouredOutput.printColouredText("ADDED REQUEST TO OUTPUT BUFFER: " + returnPacket.toString(), ColouredOutput.ANSI_BLACK);
 		} else {
-			ColouredOutput.printColouredText("wasIdle not true, not sending packet", ColouredOutput.ANSI_BLACK);
+			//ColouredOutput.printColouredText("wasIdle not true, not sending packet", ColouredOutput.ANSI_BLACK);
 		}
 		
 		return;
-//		// Return a package to the elevator
-//		
-//		// If selectedCar is idle, send close door message and change idle state
-//		ColouredOutput.printColouredText("Testing car " + car[selectedCar].getId() + " is idle", ColouredOutput.ANSI_BLACK);
-//		if (car[selectedCar].getIdle()){
-//			ColouredOutput.printColouredText("Car " + car[selectedCar].getId() + " is idle", ColouredOutput.ANSI_BLACK);
-//			ColouredOutput.printColouredText("Car " + car[selectedCar].getId() + " will have message sent", ColouredOutput.ANSI_BLACK);
-//			
-//			returnPacket.setSubSystem(SubsystemType.DOOR);
-//			returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
-//			
-//			//car[selectedCar].setIdle(false); // set car as no longer idle
-//			ColouredOutput.printColouredText("Car " + car[selectedCar].getId() + " testIfIdle = " + car[selectedCar].testIfIdle(), ColouredOutput.ANSI_BLACK);
-//			
-//			// Add packet to output queue and exit
-//			try {
-//				this.outputBuffer.put(returnPacket);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//			//System.out.println("ADDED REQUEST TO OUTPUT BUFFER: " + returnPacket.toString());
-//			ColouredOutput.printColouredText("ADDED REQUEST TO OUTPUT BUFFER: " + returnPacket.toString(), ColouredOutput.ANSI_BLACK);
-//		} else {
-//			ColouredOutput.printColouredText("Car " + car[selectedCar].getId() + " idle = " + car[selectedCar].testIfIdle(), ColouredOutput.ANSI_BLACK);
-//		}
-//		
-//		// If the doors are open, close the doors
-//		ColouredOutput.printColouredText("DOOR STATE: " + (car[selectedCar].getDoorState() == DoorState.OPEN), ColouredOutput.ANSI_BLACK);
-//		//System.out.println("DOOR STATE: " + (car[selectedCar].getDoorState() == DoorState.OPEN));
-//		
-		
-		
-//		if (car[selectedCar].getDoorState() == DoorState.OPEN) {
-//			returnPacket.setSubSystem(SubsystemType.DOOR);
-//			returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
-//			
-//			// Add packet to output queue and exit
-//			try {
-//				this.outputBuffer.put(returnPacket);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//			System.out.println("ADDED REQUEST TO OUTPUT BUFFER: " + returnPacket.toString());
-//			return;
-//		} // If the doors are closed and the elevator has a destination to visit, start the motor in the direction of the destination
-//		else if ((car[selectedCar].getDoorState() == DoorState.CLOSED) && (car[selectedCar].getFloorsToVisit().isEmpty() != true)){
-//			returnPacket.setSubSystem(SubsystemType.MOTOR);
-//			if (car[selectedCar].getTripDir() == Direction.UP) {
-//				returnPacket.setStatus(new byte[] {MotorState.UP.getByte()});
-//			} else if (car[selectedCar].getTripDir() == Direction.DOWN) {
-//				returnPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
-//			}
-//			
-//			// Add packet to output queue and exit
-//			try {
-//				this.outputBuffer.put(returnPacket);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//			return;
-//		}
 	}
 
 
@@ -269,19 +216,19 @@ public class Scheduler implements Runnable {
 	 */
 	private void sendNextStep(DataPacket p) {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Create a DataPacket to return to the elevator.
-		ColouredOutput.printColouredText("In sendNextStep", ColouredOutput.ANSI_GREEN);
-		ColouredOutput.printColouredText("car = " + car[(int) p.getId()].toString(), ColouredOutput.ANSI_GREEN);
+		//ColouredOutput.printColouredText("In sendNextStep", ColouredOutput.ANSI_GREEN);
+		ColouredOutput.printColouredText("sendNextStep car = " + car[(int) p.getId()].toString(), ColouredOutput.ANSI_GREEN);
 		//System.out.println("car = " + car[(int) p.getId()].toString());
 
 
 		if(car[(int) p.getId()].testIfIdle()){
-			ColouredOutput.printColouredText("elevator idle!", ColouredOutput.ANSI_GREEN);
+			//ColouredOutput.printColouredText("elevator idle!", ColouredOutput.ANSI_GREEN);
 			//System.out.println("elevator idle!");
 			// TODO: Update something here for when elevator is idle for long period of time?
 			car[(int) p.getId()].setIdle(true);		// Set the elevator as being idle
 
 		} else {
-			ColouredOutput.printColouredText("elevator not idle", ColouredOutput.ANSI_GREEN);
+			//ColouredOutput.printColouredText("elevator not idle", ColouredOutput.ANSI_GREEN);
 			//System.out.println("elevator not idle");
 			car[(int) p.getId()].setIdle(false);	// Set the elevator as not being idle
 		}
@@ -289,12 +236,12 @@ public class Scheduler implements Runnable {
 		// Test if the elevator is idle
 		if (car[(int) p.getId()].getIdle()) {
 			// do nothing since elevator is idle
-			ColouredOutput.printColouredText("Elevator idle, doing nothing", ColouredOutput.ANSI_GREEN);
+			//ColouredOutput.printColouredText("Elevator idle, doing nothing", ColouredOutput.ANSI_GREEN);
 			//System.out.println("Elevator idle, doing nothing");
 		}
 		else if (car[(int) p.getId()].isInoperable() == true){
 			// Do nothing since the elevator is inoperable
-			ColouredOutput.printColouredText("Elevator " + (int) p.getId() + " is inoperable", ColouredOutput.ANSI_GREEN);
+			//ColouredOutput.printColouredText("Elevator " + (int) p.getId() + " is inoperable", ColouredOutput.ANSI_GREEN);
 			//System.out.println("Elevator " + (int) p.getId() + " is inoperable");
 		}
 		// If the echo was from the motor system
@@ -336,34 +283,40 @@ public class Scheduler implements Runnable {
 
 		} // If the packet is the current location of the elevator
 		else if (p.getSubSystem() == SubsystemType.LOCATION) {
+			//ColouredOutput.printColouredText("testing if car is at destination", ColouredOutput.ANSI_GREEN);
+			//ColouredOutput.printColouredText("p.getStatus[0] = " + p.getStatus()[0] + " car[(int) p.getId()].getNextDestination() = " + car[(int) p.getId()].getNextDestination(), ColouredOutput.ANSI_GREEN);
+			//System.out.println("testing if car is at destination");
+			//System.out.println("p.getStatus[0] = " + p.getStatus()[0] + " car[(int) p.getId()].getNextDestination() = " + car[(int) p.getId()].getNextDestination());
 			// if car has reached destination
-			System.out.println("testing if car is at destination");
-			System.out.println("p.getStatus[0] = " + p.getStatus()[0] + " car[(int) p.getId()].getNextDestination() = " + car[(int) p.getId()].getNextDestination());
 			if ((int) p.getStatus()[0] == car[(int) p.getId()].getNextDestination()) {
+				// set the return packet to turn off the motor
 				returnPacket.setSubSystem(SubsystemType.MOTOR);
 				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
 
 				// remove this destination from the list of destinations for the car to visit
 				car[(int) p.getId()].findNextDestination();
+				// remove the floorButtonLight for this floor
+				car[(int) p.getId()].setFloorButtonLight(p.getStatus()[0], false);
 			}
 		}
 		
-		ColouredOutput.printColouredText("Input packet = " + p.toString(), ColouredOutput.ANSI_GREEN);
-		ColouredOutput.printColouredText("Return packet = " + returnPacket.toString(), ColouredOutput.ANSI_GREEN);
+		//ColouredOutput.printColouredText("Input packet = " + p.toString(), ColouredOutput.ANSI_GREEN);
+		//ColouredOutput.printColouredText("Return packet = " + returnPacket.toString(), ColouredOutput.ANSI_GREEN);
 		//System.out.println("Input packet = " + p.toString());
 		//System.out.println("Return packet = " + returnPacket.toString());
 
 		// If the returnPacket has been modified, then add it to the output buffer to be sent
 		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {
 			try {
-				ColouredOutput.printColouredText("Sending next step " + returnPacket.toString(), ColouredOutput.ANSI_GREEN_BACKGROUND);
+				//ColouredOutput.printColouredText("Sending next step " + returnPacket.toString(), ColouredOutput.ANSI_GREEN_BACKGROUND);
 				outputBuffer.add(returnPacket);
 			} catch (IllegalStateException ise) {
 				ise.printStackTrace();
 				System.exit(0);
 			}
 		} else {
-			System.out.println("returnPacket is null, not creating return message");
+			//ColouredOutput.printColouredText("returnPacket is null, not creating return message", ColouredOutput.ANSI_GREEN_BACKGROUND);
+			//System.out.println("returnPacket is null, not creating return message");
 		}
 	}
 

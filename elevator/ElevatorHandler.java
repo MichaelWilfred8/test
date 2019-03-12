@@ -183,7 +183,7 @@ public class ElevatorHandler implements Runnable {
 				DataPacket dp = new DataPacket(data);
 				int id = dp.getId();
 				elevator = findElevator(id);
-				System.out.println("Calling elevator " + id + "\n");
+				System.out.println("\nCalling elevator " + id);
 				
 				// Add message to the queue
 				//elevator.inputBuffer.add(dp);
