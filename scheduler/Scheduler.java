@@ -11,6 +11,8 @@ import shared.DataPacket;
 import testing.ColouredOutput;
 
 // TODO: Add state where elevator is at first floor waiting with doors open for elevator to visit
+
+// BUG: Elevator is getting messages twice, and this messes everything up
 public class Scheduler implements Runnable {
 
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
@@ -63,6 +65,7 @@ public class Scheduler implements Runnable {
 	 */
 	private void handleInput(){
 		ColouredOutput.printColouredText("Before Car[0] = " + car[0].toString(), ColouredOutput.ANSI_YELLOW);
+		ColouredOutput.printColouredText("inputBuffer = " + this.inputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
 		//System.out.println("Car[0] = " + car[0].toString());
 		
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
@@ -97,7 +100,7 @@ public class Scheduler implements Runnable {
 		}
 		
 		ColouredOutput.printColouredText("Output = " + this.outputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
-		ColouredOutput.printColouredText("After Car[0] = " + car[0].toString(), ColouredOutput.ANSI_YELLOW);
+		ColouredOutput.printColouredText("After Car[0] = " + car[0].toString() + "\n", ColouredOutput.ANSI_YELLOW);
 	}
 
 
@@ -175,7 +178,8 @@ public class Scheduler implements Runnable {
 			}
 		}
 		
-		if (wasIdle == true){
+		// Test if car was idle and is now no longer idle
+		if ((wasIdle == true) && (car[selectedCar].testIfIdle() == false)) {
 			ColouredOutput.printColouredText("wasIdle is true, returning packet", ColouredOutput.ANSI_BLACK);
 			DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, (byte) selectedCar, null, null); // Create a DataPacket to return to the elevator.
 			
@@ -265,28 +269,33 @@ public class Scheduler implements Runnable {
 	 */
 	private void sendNextStep(DataPacket p) {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Create a DataPacket to return to the elevator.
-
-		System.out.println("car = " + car[(int) p.getId()].toString());
+		ColouredOutput.printColouredText("In sendNextStep", ColouredOutput.ANSI_GREEN);
+		ColouredOutput.printColouredText("car = " + car[(int) p.getId()].toString(), ColouredOutput.ANSI_GREEN);
+		//System.out.println("car = " + car[(int) p.getId()].toString());
 
 
 		if(car[(int) p.getId()].testIfIdle()){
-			System.out.println("elevator idle!");
+			ColouredOutput.printColouredText("elevator idle!", ColouredOutput.ANSI_GREEN);
+			//System.out.println("elevator idle!");
 			// TODO: Update something here for when elevator is idle for long period of time?
 			car[(int) p.getId()].setIdle(true);		// Set the elevator as being idle
 
 		} else {
-			System.out.println("elevator not idle");
+			ColouredOutput.printColouredText("elevator not idle", ColouredOutput.ANSI_GREEN);
+			//System.out.println("elevator not idle");
 			car[(int) p.getId()].setIdle(false);	// Set the elevator as not being idle
 		}
 
 		// Test if the elevator is idle
 		if (car[(int) p.getId()].getIdle()) {
 			// do nothing since elevator is idle
-			System.out.println("Elevator idle, doing nothing");
+			ColouredOutput.printColouredText("Elevator idle, doing nothing", ColouredOutput.ANSI_GREEN);
+			//System.out.println("Elevator idle, doing nothing");
 		}
 		else if (car[(int) p.getId()].isInoperable() == true){
 			// Do nothing since the elevator is inoperable
-			System.out.println("Elevator " + (int) p.getId() + " is inoperable");
+			ColouredOutput.printColouredText("Elevator " + (int) p.getId() + " is inoperable", ColouredOutput.ANSI_GREEN);
+			//System.out.println("Elevator " + (int) p.getId() + " is inoperable");
 		}
 		// If the echo was from the motor system
 		else if (p.getSubSystem() == SubsystemType.MOTOR) {
@@ -338,9 +347,11 @@ public class Scheduler implements Runnable {
 				car[(int) p.getId()].findNextDestination();
 			}
 		}
-
-		System.out.println("Input packet = " + p.toString());
-		System.out.println("Return packet = " + returnPacket.toString());
+		
+		ColouredOutput.printColouredText("Input packet = " + p.toString(), ColouredOutput.ANSI_GREEN);
+		ColouredOutput.printColouredText("Return packet = " + returnPacket.toString(), ColouredOutput.ANSI_GREEN);
+		//System.out.println("Input packet = " + p.toString());
+		//System.out.println("Return packet = " + returnPacket.toString());
 
 		// If the returnPacket has been modified, then add it to the output buffer to be sent
 		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {

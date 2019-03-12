@@ -66,8 +66,10 @@ public class Elevator implements Runnable {
 	
 	private SocketAddress schedulerAddress;
 	
+	private boolean printDebug = true;
+	
 
-	public Elevator(int id, int maxFloor){
+	public Elevator(int id, int maxFloor, boolean printDebug){
 		try {
 
 			sendSocket = new DatagramSocket(SocketPort.ELEVATOR_SENDER.getValue() + id);
@@ -90,10 +92,9 @@ public class Elevator implements Runnable {
 
 		this.id = id;
 		this.MAX_FLOOR = maxFloor;
-		//this.inputBuffer = new LinkedBlockingQueue<DataPacket>();
 		this.inputBuffer = new LinkedBlockingQueue<DatagramPacket>();
 		this.floorChanger = new FloorChangerThread(this);
-		//this.floorChangerThread = new Thread(this.floorChanger);
+		this.printDebug = printDebug;
 	}
 	
 	
@@ -276,7 +277,7 @@ public class Elevator implements Runnable {
 		
 		// Get DatagramPacket from inputQueue
 		try {
-			System.out.println("Elevator " + this.getId() + " waiting for input packet");
+			//System.out.println("Elevator " + this.getId() + " waiting for input packet");
 			packet = this.inputBuffer.take();
 		} catch (InterruptedException e){
 			e.printStackTrace();
@@ -312,19 +313,19 @@ public class Elevator implements Runnable {
 
 			switch(MotorState.convertFromByte(p.getStatus()[0])){
 			case DOWN:
-				System.out.println("going down" );
+				System.out.println("GOING DOWN" );
 				Motor(MotorState.DOWN, packet.getSocketAddress());		//motor down and send message
 				break;
 			case OFF:
-				System.out.println("motor off" );
+				System.out.println("MOTOR OFF" );
 				Motor(MotorState.OFF, packet.getSocketAddress());		//motor off
 				break;
 			case UP:
-				System.out.println("going up" );
+				System.out.println("GOING UP" );
 				Motor(MotorState.UP, packet.getSocketAddress());		//motor up and send message
 				break;
 			default:
-				System.out.println("Invalid type");
+				System.err.println("Invalid type");
 				break;
 			}
 		} else if (p.getSubSystem() == SubsystemType.DOOR) {
@@ -333,14 +334,14 @@ public class Elevator implements Runnable {
 			switch(DoorState.convertFromByte(p.getStatus()[0])){
 			case OPEN:
 				door = true;		//door open and send message
-				System.out.println("door opened  " );
+				System.out.println("DOOR OPENED  " );
 				break;
 			case CLOSED:
 				door = false;		//door closed and send message
-				System.out.println("door closed " );
+				System.out.println("DOOR CLOSED " );
 				break;
 			default:
-				System.out.println("Invalid State");
+				System.err.println("Invalid State");
 				break;
 			}
 		} else if (p.getSubSystem() == SubsystemType.LOCATION){
@@ -379,9 +380,12 @@ public class Elevator implements Runnable {
 		sendPacket.setPort(SocketPort.SCHEDULER_LISTENER.getValue());
 
 
-		System.out.println("Elevator: Sending packet...");
-
-		printDatagramPacket(sendPacket, "s");
+		//System.out.println("Elevator: Sending packet...");
+		
+		if (printDebug) {
+			printDatagramPacket(sendPacket, "s");
+		}
+		
 
 		try {
 			this.sendSocket.send(this.sendPacket);
@@ -390,7 +394,7 @@ public class Elevator implements Runnable {
 			System.exit(1);
 		}
 
-		System.out.println("Elevator: packet sent \n");
+		//System.out.println("Elevator: packet sent \n");
 	}
 
 
@@ -399,10 +403,12 @@ public class Elevator implements Runnable {
 
 		sendPacket = new DatagramPacket(p.getBytes(), p.getBytes().length, dp.getAddress(), SocketPort.SCHEDULER_LISTENER.getValue());
 
-		System.out.println( "Elevator: Sending packet to scheduler ");
-
-		printDatagramPacket(this.sendPacket, "s");
-
+		//System.out.println( "Elevator: Sending packet to scheduler ");
+		
+		if (printDebug) {
+			printDatagramPacket(this.sendPacket, "s");
+		}
+		
 		TimeUnit.SECONDS.sleep(1);
 
 		try {
@@ -412,7 +418,7 @@ public class Elevator implements Runnable {
 			System.exit(1);
 		}
 
-		System.out.println("Elevator: packet sent \n");
+		//System.out.println("Elevator: packet sent \n");
 
 		// We're finished, so close the sockets.
 		//sendSocket.close();
@@ -426,7 +432,7 @@ public class Elevator implements Runnable {
 	}
 	
 	public void Motor(MotorState command, SocketAddress address) throws IOException, InterruptedException{
-		System.out.println("Elevator " + id + " : I am at floor "+ currentFloor);
+		System.out.println("Elevator " + id + ": I am at floor "+ currentFloor);
 
 		if(command == MotorState.DOWN) {
 			if (currentFloor > 0){
