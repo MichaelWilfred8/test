@@ -74,8 +74,9 @@ public class Scheduler implements Runnable {
 			System.err.println(ie);
 		}
 
+		ColouredOutput.printColouredText("input packet = " + input.toString(), ColouredOutput.ANSI_YELLOW);
 		
-
+		
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
@@ -171,6 +172,14 @@ public class Scheduler implements Runnable {
 				wasIdle = true;
 			}
 			car[selectedCar].addFloor((int) p.getId());
+			
+			
+			// If elevator is already at the floor that the request originated from, send a message back to floor
+			try {
+				outputBuffer.put(new DataPacket(OriginType.SCHEDULER, (byte) car[selectedCar].getPosition(), SubsystemType.FLOORLAMP,new byte[] {car[selectedCar].getTripDir().getByte(), (byte) selectedCar}));
+			} catch (InterruptedException e) {
+				System.err.println(e);
+			}
 		}
 		else if (p.getSubSystem() == SubsystemType.INPUT){
 			selectedCar = (int)p.getStatus()[0];	// set selectedCar as the elevator which was specified in request

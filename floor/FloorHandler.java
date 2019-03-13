@@ -14,7 +14,7 @@ import Enums.OriginType;
 import Enums.SubsystemType;
 import shared.*;
 
-public class FloorHandler{
+public class FloorHandler implements Runnable {
 
 	private static FloorHandler handlerInstance = null;//singleton instance of this class
 
@@ -97,12 +97,17 @@ public class FloorHandler{
 	}
 
 	public void listen() {
-
 		while(listening) {
-
-			DataPacket input = inputBuffer.poll();
-
+			DataPacket input = new DataPacket(OriginType.SCHEDULER, (byte) 0, SubsystemType.FLOORLAMP, new byte[] {1});
+			
+			try {
+				input  = inputBuffer.take();
+			} catch (InterruptedException ie) {
+				System.err.println(ie);
+			}
+			
 			if (input != null && input.getSubSystem() == SubsystemType.FLOORLAMP) {
+				
 				//System.out.println("DATAPACKET: " + input.toString() + "\n");
 
 				Floor targetFloor = floors[input.getId()-1];
@@ -120,10 +125,10 @@ public class FloorHandler{
 		}
 	}
 
-	public static void main(String args[]){
-		FloorHandler fh = FloorHandler.getHandler();
-
-		fh.listen();
+	@Override
+	public void run() {
+		listen();
+		
 	}
 
 }

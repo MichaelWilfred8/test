@@ -33,8 +33,13 @@ public class Test{
 	
 	public void runTest() {
 
-		String fileToParse = "test.csv"; //Input file which needs to be parsed, change * to the path of the csv file
+		String fileToParse = "schedulerTest.csv"; //Input file which needs to be parsed, change * to the path of the csv file
 		String [][] testLines = getFile(fileToParse); //test strings from .csv
+		
+		Thread fhThread = new Thread(handler);
+		fhThread.start();
+		
+		
 		try {
 			organizer(testLines, handler);
 		} catch (InterruptedException e) {
@@ -42,7 +47,7 @@ public class Test{
 			e.printStackTrace();
 		}
 
-		handler.listen();
+		
 	}
 
 	public String[][] getFile(String fileName) {//returns an array of strings containing the lines of the .csv

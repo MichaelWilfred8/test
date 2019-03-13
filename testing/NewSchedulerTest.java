@@ -42,6 +42,6 @@ public class NewSchedulerTest {
 		}
 		
 		
-		testThread.start();
+		//testThread.start();
 	}
 }

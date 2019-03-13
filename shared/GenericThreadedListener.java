@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
@@ -87,7 +89,8 @@ public class GenericThreadedListener implements Runnable {
 		}
 		System.out.println("Length: " + p.getLength());							// Print length of data in DatagramPacket
 		System.out.println("Data (String): " + new DataPacket(p.getData()).toString()); // Print the data in the packet as a String
-		System.out.println("Data (bytes): " + Arrays.toString(p.getData()) + "\n");		// Print the data in the packet as hex bytes
+		System.out.println("Data (bytes): " + Arrays.toString(p.getData()));		// Print the data in the packet as hex bytes
+		System.out.println("At time " + LocalDateTime.now().toString());
 		System.out.println();
 	}
 	

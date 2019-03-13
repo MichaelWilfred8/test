@@ -31,6 +31,7 @@ package elevator;
 
 import java.io.*;
 import java.net.*;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -417,6 +418,7 @@ public class Elevator implements Runnable {
 		
 		p = new DataPacket(packet.getData());
 		
+		System.out.println("At time " + LocalDateTime.now().toString());
 		
 		// If the DataPacket has an Error as the OriginType
 		if(p.getOrigin() == OriginType.ERROR)//Error packets
