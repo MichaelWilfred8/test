@@ -1,5 +1,6 @@
 package scheduler;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.BlockingQueue;
 
 import Enums.Direction;
@@ -64,6 +65,7 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
+		ColouredOutput.printColouredText("current time =  " + LocalDateTime.now().toString(), ColouredOutput.ANSI_YELLOW);
 		ColouredOutput.printColouredText("inputBuffer = " + this.inputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
 		//System.out.println("Car[0] = " + car[0].toString());
 		

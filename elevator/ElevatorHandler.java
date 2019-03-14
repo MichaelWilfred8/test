@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -183,7 +184,7 @@ public class ElevatorHandler implements Runnable {
 				DataPacket dp = new DataPacket(data);
 				int id = dp.getId();
 				elevator = findElevator(id);
-				System.out.println("\nCalling elevator " + id);
+				System.out.println("\nCalling elevator " + id + " at " + LocalDateTime.now().toString());
 				
 				// Add message to the queue
 				//elevator.inputBuffer.add(dp);

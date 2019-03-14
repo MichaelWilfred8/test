@@ -46,8 +46,8 @@ public class FloorHandler implements Runnable {
 		this.inputBuffer = new ArrayBlockingQueue<DataPacket>(21);
 		this.outputBuffer = new ArrayBlockingQueue<DataPacket>(21);
 
-		floorSender = new GenericThreadedSender(outputBuffer, ELEVATOR_PORT_NUMBER, SCHEDULER_PORT_NUMBER, FLOOR_PORT_NUMBER);		
-		floorListener = new GenericThreadedListener(inputBuffer, new InetSocketAddress(SocketPort.FLOOR_LISTENER.getValue()).getPort());
+		floorSender = new GenericThreadedSender(outputBuffer, ELEVATOR_PORT_NUMBER, SCHEDULER_PORT_NUMBER, FLOOR_PORT_NUMBER, false);		
+		floorListener = new GenericThreadedListener(inputBuffer, new InetSocketAddress(SocketPort.FLOOR_LISTENER.getValue()).getPort(), false);
 
 		Thread sender = new Thread(floorSender);
 		Thread receiver = new Thread(floorListener);
