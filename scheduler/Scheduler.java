@@ -134,7 +134,9 @@ public class Scheduler implements Runnable {
 		for(int i = 0; i < car.length; ++i){
 			if (car[i].isInoperable()) {
 				// Do not use elevator i since it is out of operation
-			} 
+			} else if (car[i].getIdle()) {
+				
+			}
 			// Check if direction for request is up
 			else if (dir == Direction.UP){
 				// If car is below the given floor and is traveling up
