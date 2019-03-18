@@ -440,7 +440,10 @@ public class Elevator implements Runnable {
 				break;
 
 			}
-
+			
+			// Send the error to the scheduler
+			this.sendDataPacket(new DataPacket(OriginType.ELEVATOR, (byte) this.id, SubsystemType.ERROR, p.getStatus()), this.schedulerAddress);
+			
 		}
 		else if(p.getSubSystem() == SubsystemType.MOTOR) {
 			//case of motor

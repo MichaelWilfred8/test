@@ -94,7 +94,7 @@ public class Scheduler implements Runnable {
 
 
 		// If the input came from an elevator
-		if (input.getOrigin() == OriginType.ELEVATOR){
+		else if (input.getOrigin() == OriginType.ELEVATOR){
 			this.printAllCarStatus("Before");
 			try {
 				ColouredOutput.printColouredText("Updating elevatorStatus of car " + (int) input.getId(), ColouredOutput.ANSI_YELLOW);
@@ -186,7 +186,7 @@ public class Scheduler implements Runnable {
 				this.downRequests.add((int) p.getId());
 			}
 			
-			car[selectedCar].addFloor((int) p.getId());
+			//car[selectedCar].addFloor((int) p.getId());
 			
 			
 			// If elevator is already at the floor that the request originated from, send a message back to floor
@@ -321,7 +321,8 @@ public class Scheduler implements Runnable {
 				car[(int) p.getId()].findNextDestination();
 				// remove the floorButtonLight for this floor
 				car[(int) p.getId()].setFloorButtonLight(p.getStatus()[0], false);
-			}
+			} // Check if car direction
+			else if ()
 		}
 		
 		//ColouredOutput.printColouredText("Input packet = " + p.toString(), ColouredOutput.ANSI_GREEN);
