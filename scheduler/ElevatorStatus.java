@@ -6,6 +6,7 @@ import java.util.TreeSet;
 
 import Enums.*;
 import shared.*;
+import testing.ColouredOutput;
 
 // Class for the scheduler to hold information about the elevator and its current position
 
@@ -257,11 +258,17 @@ public class ElevatorStatus {
 	 * @param floor		Floor to be added to the set of floors for this elevator to visit
 	 */
 	public void addFloor(int floor){
-		//System.out.println("Floor " + floor + " added to list for elevator " + this.id);
-		ColouredOutput.printColouredText("Floor " + floor + " added to list for elevator " + this.id, ColouredOutput.ANSI_GREEN);
-		this.setIdle(false); 								// Set elevator to not be idle
-		this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
-		this.nextDestination = this.getNextFloor();			// set the next destination floor
+		// Test if the floor given is the same floor that the elevator is currently at
+		if (floor == this.getPosition()){
+			ColouredOutput.printColouredText("Elevator " + this.id + " already at Floor " + floor + ", not adding request", ColouredOutput.ANSI_PURPLE_BACKGROUND);
+		} else {
+			//System.out.println("Floor " + floor + " added to list for elevator " + this.id);
+			ColouredOutput.printColouredText("Floor " + floor + " added to list for elevator " + this.id, ColouredOutput.ANSI_PURPLE_BACKGROUND);
+			this.setIdle(false); 								// Set elevator to not be idle
+			this.floorsToVisit.add((Integer.valueOf(floor)));	// Add the new floor to the sorted set
+			this.nextDestination = this.getNextFloor();			// set the next destination floor
+		}
+		
 	}
 
 
@@ -422,14 +429,7 @@ public class ElevatorStatus {
 			return true;
 		}
 	}
-
-	/**
-	 * Print red message in console
-	 * @param msg message to print
-	 */
-	private static void printRedMessage (String msg){
-		System.err.println("\n" + msg + "\n");
-	}
+	
 
 	/**
 	 * Take a message from the elevator and use it to update the state in elevatorState
@@ -437,16 +437,17 @@ public class ElevatorStatus {
 	 * @param p	DataPacket from the elevator
 	 */
 	public void update(DataPacket p){
-		System.out.println("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n");
+		ColouredOutput.printColouredText("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n", ColouredOutput.ANSI_CYAN_BACKGROUND);
+		//System.out.println("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n");
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
-				//ColouredOutput.printColouredText("motor was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
+				ColouredOutput.printColouredText("motor was updated to " + this.getMotorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("motor was updated to " + this.getMotorState());
 				break;
 			case DOOR:	// Door state is to be updated
 				this.setDoorState(DoorState.convertFromByte(p.getStatus()[0]));
-				//ColouredOutput.printColouredText("door was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
+				ColouredOutput.printColouredText("door was updated to " + this.getDoorState(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("door was updated to " + this.getDoorState());
 				break;
 			case CARLAMP:	// Car Lamp State is to be updated
@@ -454,7 +455,7 @@ public class ElevatorStatus {
 				break;
 			case LOCATION:	// Location is to be updated
 				this.setPosition((int) p.getStatus()[0]);
-				//ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
+				ColouredOutput.printColouredText("position in elevatorStatus was updated to " + this.getPosition(), ColouredOutput.ANSI_CYAN);
 				//System.out.println("position in elevatorStatus was updated to " + this.getPosition());
 				//printRedMessage("position in elevatorStatus was updated to " + this.getPosition());
 				break;
@@ -462,6 +463,7 @@ public class ElevatorStatus {
 				// TODO: configure this !
 				this.toggleInoperable();
 				ColouredOutput.printColouredText("car " + this.getId() + " had its error toggled to " + this.isInoperable(), ColouredOutput.ANSI_RED_BACKGROUND);
+				//System.out.println("car " + this.getId() + " had its error toggled to " + this.isInoperable());
 				//this.setError(p.getStatus());
 				break;
 			default:
