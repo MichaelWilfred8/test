@@ -138,7 +138,7 @@ public class Test{
 		Date date = null;	//Variables used to compare timestamps
 		Date date1 = null;
 
-		for(int i=0;i<x.length-1;i++) {
+		for(int i=0;i<x.length-2;i++) {
 			try {
 				date = dateFormat.parse(x[i][0]);
 				date1 = dateFormat.parse(x[i+1][0]);
