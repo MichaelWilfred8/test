@@ -1,23 +1,25 @@
 package scheduler;
 
 import java.time.LocalDateTime;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 
-import Enums.Direction;
-import Enums.DoorState;
-import Enums.MotorState;
-import Enums.OriginType;
-import Enums.SubsystemType;
+import Enums.*;
 import shared.DataPacket;
 import testing.ColouredOutput;
 
 // TODO: Add state where elevator is at first floor waiting with doors open for elevator to visit
 
 // BUG: Elevator is getting messages twice, and this messes everything up
+// TODO: Add list for up requests and down requests
+
 public class Scheduler implements Runnable {
 
 	BlockingQueue<DataPacket> inputBuffer, outputBuffer;
 	public ElevatorStatus car[];
+	SortedSet<Integer> upRequests, downRequests;
+	
 
 	//private static final int FLOOR_INDEX = 17;
 	private static final int DIR_INDEX = 16;
@@ -40,6 +42,9 @@ public class Scheduler implements Runnable {
 		for(int i = 0; i < numElevators; ++i){
 			this.car[i] = new ElevatorStatus(1, MotorState.OFF, DoorState.OPEN, numFloors, i);
 		}
+		
+		this.upRequests = new TreeSet<Integer>();
+		this.downRequests = new TreeSet<Integer>();
 	}
 
 
@@ -173,6 +178,14 @@ public class Scheduler implements Runnable {
 				//ColouredOutput.printColouredText("setting wasIdle true", ColouredOutput.ANSI_BLACK);
 				wasIdle = true;
 			}
+			
+			// Check if the request was an up request or a down request, and add it to the sorted set
+			if (p.getStatus()[DIR_INDEX] == Direction.UP.getByte()) {
+				this.upRequests.add((int) p.getId());
+			} else if (p.getStatus()[DIR_INDEX] == Direction.DOWN.getByte()) {
+				this.downRequests.add((int) p.getId());
+			}
+			
 			car[selectedCar].addFloor((int) p.getId());
 			
 			
