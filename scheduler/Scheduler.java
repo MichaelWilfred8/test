@@ -132,9 +132,11 @@ public class Scheduler implements Runnable {
 
 		// Cycle through all elevators
 		for(int i = 0; i < car.length; ++i){
-			if (car[i].isInoperable()){
+			if (car[i].isInoperable()) {
 				// Do not use elevator i since it is out of operation
-			} else if (dir == Direction.UP){
+			} 
+			// Check if direction for request is up
+			else if (dir == Direction.UP){
 				// If car is below the given floor and is traveling up
 				if ((car[i].getPosition() < floor) && (car[i].getTripDir() == Direction.UP)){
 					// If car is above the current best candidate
@@ -142,7 +144,8 @@ public class Scheduler implements Runnable {
 						carNum = i;
 					}
 				}
-
+				
+			// Check if direction for request is down
 			} else if (dir == Direction.DOWN){
 				// If car is above the given floor and is traveling down
 				if ((car[i].getPosition() > floor) && (car[i].getTripDir() == Direction.DOWN)){
@@ -151,6 +154,8 @@ public class Scheduler implements Runnable {
 						carNum = i;
 					}
 				}
+			
+			// Check if elevator is idle
 			}
 
 		}
@@ -186,7 +191,10 @@ public class Scheduler implements Runnable {
 				this.downRequests.add((int) p.getId());
 			}
 			
+			// TODO: figure out the add floor thing first
 			//car[selectedCar].addFloor((int) p.getId());
+			
+			
 			
 			
 			// If elevator is already at the floor that the request originated from, send a message back to floor

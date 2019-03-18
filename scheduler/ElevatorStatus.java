@@ -439,6 +439,7 @@ public class ElevatorStatus {
 	public void update(DataPacket p){
 		ColouredOutput.printColouredText("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n", ColouredOutput.ANSI_CYAN_BACKGROUND);
 		//System.out.println("Updating elevatorState of car " + this.id + " with " + p.toString() + "\n");
+		
 		switch(p.getSubSystem()){
 			case MOTOR:	// Motor is to be updated
 				this.setMotorState(MotorState.convertFromByte(p.getStatus()[0]));
