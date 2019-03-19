@@ -5,6 +5,7 @@
 package floor;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
@@ -74,7 +75,7 @@ public class Floor {
 			e.printStackTrace();
 		}
 
-		System.out.println("Floor "+ floorNumber +" placed item in send queue\n");
+		//System.out.println("Floor "+ floorNumber +" placed item in send queue\n");
 	}
 
 	/**
@@ -145,7 +146,7 @@ public class Floor {
 	 * send all requests for floor to scheduler
 	 */
 	public void purgeRequests() {
-		System.out.println("Floor " + floorNumber + " is purging");
+		//System.out.println("Floor " + floorNumber + " is purging");
 		ByteArrayOutputStream output = new ByteArrayOutputStream();//output can be dynamically written to
 		output.write(targetElevator);
 		output.write(requestCount);
@@ -172,7 +173,7 @@ public class Floor {
 
 		if(!floorButtons[message.getStatus()[16]-1].getState()) {//if the button indicating the direction the elevator travelling is not yet on
 			floorButtons[message.getStatus()[16]-1].toggle();//switch it on
-			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " button on.");
+			System.out.println(LocalDateTime.now().toString() + ": Floor " + floorNumber + " is toggling it's " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " button on.");
 			//System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " is now " + floorButtons[message.getStatus()[16]-1].getStateString());	
 		}
 
@@ -200,18 +201,18 @@ public class Floor {
 		
 
 		floorLamps[lampTrigger].toggle();
-		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
-		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
+		System.out.println(LocalDateTime.now().toString() + ": Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp on.");
+		//System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
 
 		floorButtons[lampTrigger].toggle();
-		System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[lampTrigger].getDirection().toString() + " button off.");
-		System.out.println("Floor button facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
+		System.out.println(LocalDateTime.now().toString() + ": Floor " + floorNumber + " is toggling it's " + floorButtons[lampTrigger].getDirection().toString() + " button off.");
+		//System.out.println("Floor button facing " + floorButtons[lampTrigger].getDirection().toString() + " is now " + floorButtons[lampTrigger].getStateString());
 
 		purgeRequests();
 
 		floorLamps[lampTrigger].toggle();
-		System.out.println("Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp off.");
-		System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
+		System.out.println(LocalDateTime.now().toString() + ": Floor " + floorNumber + " is toggling it's " + floorLamps[lampTrigger].getDirection().toString() + " lamp off.");
+		//System.out.println("Floor lamp facing " + floorLamps[lampTrigger].getDirection().toString() + " is now " + floorLamps[lampTrigger].getStateString());
 
 	}
 

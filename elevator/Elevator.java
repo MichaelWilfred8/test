@@ -444,7 +444,7 @@ public class Elevator implements Runnable {
 		}
 		else if(p.getSubSystem() == SubsystemType.MOTOR) {
 			//case of motor
-			System.out.println("SUBSYSTEM IS MOTOR  " );
+			System.out.print("SUBSYSTEM IS MOTOR  " );
 
 			switch(MotorState.convertFromByte(p.getStatus()[0])){
 			case DOWN:
@@ -464,7 +464,7 @@ public class Elevator implements Runnable {
 				break;
 			}
 		} else if (p.getSubSystem() == SubsystemType.DOOR) {
-			System.out.println("SUBSYSTEM IS DOOR  " );
+			System.out.print("SUBSYSTEM IS DOOR  " );
 
 			switch(DoorState.convertFromByte(p.getStatus()[0])){
 			case OPEN:
@@ -480,10 +480,10 @@ public class Elevator implements Runnable {
 				break;
 			}
 		} else if (p.getSubSystem() == SubsystemType.LOCATION){
-			System.out.println("SUBSYSTEM IS LOCATION  " );
+			System.out.print("SUBSYSTEM IS LOCATION  " );
 			sendLocation(packet);
 		} else if (p.getSubSystem() == SubsystemType.INPUT){
-			System.out.println("SUBSYSTEM IS INPUT");
+			System.out.print("SUBSYSTEM IS INPUT");
 			setFloorLight(p);
 		}
 		
