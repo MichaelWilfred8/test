@@ -219,6 +219,8 @@ public class Scheduler implements Runnable {
 			returnPacket.setSubSystem(SubsystemType.DOOR);
 			returnPacket.setStatus(new byte[] {DoorState.CLOSED.getByte()});
 			
+			System.out.println("Sending " + returnPacket.toString() + " at " + LocalDateTime.now().toString());
+			
 			// Add packet to output queue and exit
 			try {
 				this.outputBuffer.put(returnPacket);
