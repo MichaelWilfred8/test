@@ -182,37 +182,6 @@ public class SchedulerTest implements Runnable {
 	}
 	
 	
-	/**
-	 * Create a request to be sent to the scheduler
-	 * @param request String containing request information (time, floor, direction)
-	 */
-	/*public void newRequest(String[] request) {
-		
-		DataPacket message = requestElevator(request);
-		DataPacket destination = destinationRequest(request);
-
-		if(!floorButtons[message.getStatus()[16]-1].getState()) {//if the button indicating the direction the elevator travelling is not yet on
-			floorButtons[message.getStatus()[16]-1].toggle();//switch it on
-			System.out.println("Floor " + floorNumber + " is toggling it's " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " button on.");
-			System.out.println("Floor "+ floorNumber +" lamp facing " + floorButtons[message.getStatus()[16]-1].getDirection().toString() + " is now " + floorButtons[message.getStatus()[16]-1].getStateString());	
-		}
-
-		if(!requested) {//if no request has been made for this floor
-			sendRequest(message);//request an elevator
-			if (requests[destination.getStatus()[17]]==-1){//if there is not already a destination request
-				requests[destination.getStatus()[17]] = 1;//indicate that the floor @ requests[i] is a destination
-				requestCount++;
-			}
-			requested = true;//a request now has been made
-		}else {
-			if (requests[destination.getStatus()[17]]==-1){//if there is not already a destination request
-				requests[destination.getStatus()[17]] = 1;//indicate that the floor @ requests[i] is a destination
-				requestCount++;
-			}
-		}
-	}*/
-	
-	
 	public void organizer(String x [][]) throws InterruptedException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 		System.out.println(x[0][0]);

@@ -130,13 +130,11 @@ public class Scheduler implements Runnable {
 	private int findNearestElevator(int floor, Direction dir){
 		int carNum = 0;	// Current best candidate to serve the request
 
-		// Cycle through all elevators
+		// Cycle through all elevators to find nearest that is travelling in same direction
 		for(int i = 0; i < car.length; ++i){
 			if (car[i].isInoperable()) {
 				// Do not use elevator i since it is out of operation
-			} else if (car[i].getIdle()) {
-				
-			}
+			} 
 			// Check if direction for request is up
 			else if (dir == Direction.UP){
 				// If car is below the given floor and is traveling up
@@ -193,6 +191,9 @@ public class Scheduler implements Runnable {
 				this.downRequests.add((int) p.getId());
 			}
 			
+			ColouredOutput.printColouredText("request = " + p.toString(), ColouredOutput.ANSI_BLACK);
+			ColouredOutput.printColouredText("upRequests = " + this.upRequests.toString(), ColouredOutput.ANSI_BLACK);
+			ColouredOutput.printColouredText("downRequests = " + this.downRequests.toString(), ColouredOutput.ANSI_BLACK);
 			// TODO: figure out the add floor thing first
 			//car[selectedCar].addFloor((int) p.getId());
 			
@@ -242,41 +243,117 @@ public class Scheduler implements Runnable {
 		
 		return;
 	}
+	
+	
+	/**
+	 * Get the next destination floor above the current floor
+	 * @param s			The SortedSet object to search
+	 * @param position	The position to find the nearest destination floor above
+	 * @return The closest floor above the elevator's current floor that is to be visited. Returns null if there are no floors to be visited above
+	 */
+	private Integer getNextDestFloorAbove(SortedSet<Integer> s, int position){
+		SortedSet<Integer> tempSet;	// Temporary set to store head sets and tail sets
 
+		tempSet = s.tailSet(position); // Create a set of all floors to be visited above this current floor
+
+		// If there are no floors to visit above this current floor then return null
+		if(tempSet.isEmpty()){
+			return null;
+		} else {
+			return tempSet.first();	// Return the closest floor to be visited that is above the current floor
+		}
+	}
+
+
+	/**
+	 * Get the next destination floor below the current floor
+	 * @param s			The SortedSet object to search
+	 * @param position	The position to find the nearest destination floor below
+	 * @return The closest floor below the elevator's current floor that is to be visited. Returns null if there are no floors to be visited below
+	 */
+	private Integer getNextDestFloorBelow(SortedSet<Integer> s, int position){
+		SortedSet<Integer> tempSet;	// Temporary set to store head sets and tail sets
+
+		tempSet = s.headSet(position); // Create a set of all floors to be visited above this current floor
+
+		// If there are no floors to visit above this current floor then return null
+		if(tempSet.isEmpty()){
+			return null;
+		} else {
+			return tempSet.last();	// Return the closest floor to be visited that is above the current floor
+		}
+	}
+	
+	/**
+	 * Test if the elevator is at a floor with an active request
+	 * @param carIndex	The index of the car to be tested
+	 * @param position	The position of the car to be tested
+	 * @return
+	 */
+	private boolean atRequestFloor(int carIndex) {
+		if (this.car[carIndex].getTripDir() == Direction.UP) {
+			Integer nextAbove = this.getNextDestFloorAbove(this.upRequests, car[carIndex].getPosition());
+			
+			if (nextAbove == null) {
+				System.out.println("next above is null");
+				return false;
+			}
+			if (nextAbove == car[carIndex].getPosition()) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if (this.car[carIndex].getTripDir() == Direction.DOWN) {
+			Integer nextBelow = this.getNextDestFloorAbove(this.upRequests, car[carIndex].getPosition());
+			
+			if (nextBelow == null) {
+				System.out.println("next above is null");
+				return false;
+			}
+			
+			if (nextBelow == car[carIndex].getPosition()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Send the next step in the process back to the elevator
 	 * @param 	p	The DataPacket retrieved from the inputBuffer
 	 */
 	private void sendNextStep(DataPacket p) {
+		int carID = (int) p.getId();
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Create a DataPacket to return to the elevator.
 		//ColouredOutput.printColouredText("In sendNextStep", ColouredOutput.ANSI_GREEN);
 		ColouredOutput.printColouredText("sendNextStep car = " + car[(int) p.getId()].toString(), ColouredOutput.ANSI_GREEN);
 		//System.out.println("car = " + car[(int) p.getId()].toString());
 
 
-		if(car[(int) p.getId()].testIfIdle()){
+		if(car[carID].testIfIdle()){
 			//ColouredOutput.printColouredText("elevator idle!", ColouredOutput.ANSI_GREEN);
 			//System.out.println("elevator idle!");
 			// TODO: Update something here for when elevator is idle for long period of time?
-			car[(int) p.getId()].setIdle(true);		// Set the elevator as being idle
+			car[carID].setIdle(true);		// Set the elevator as being idle
 
 		} else {
 			//ColouredOutput.printColouredText("elevator not idle", ColouredOutput.ANSI_GREEN);
 			//System.out.println("elevator not idle");
-			car[(int) p.getId()].setIdle(false);	// Set the elevator as not being idle
+			car[carID].setIdle(false);	// Set the elevator as not being idle
 		}
 
 		// Test if the elevator is idle
-		if (car[(int) p.getId()].getIdle()) {
+		if (car[carID].getIdle()) {
 			// do nothing since elevator is idle
 			//ColouredOutput.printColouredText("Elevator idle, doing nothing", ColouredOutput.ANSI_GREEN);
 			//System.out.println("Elevator idle, doing nothing");
 		}
-		else if (car[(int) p.getId()].isInoperable() == true){
+		else if (car[carID].isInoperable() == true){
 			// Do nothing since the elevator is inoperable
-			//ColouredOutput.printColouredText("Elevator " + (int) p.getId() + " is inoperable", ColouredOutput.ANSI_GREEN);
-			//System.out.println("Elevator " + (int) p.getId() + " is inoperable");
+			//ColouredOutput.printColouredText("Elevator " + carID + " is inoperable", ColouredOutput.ANSI_GREEN);
+			//System.out.println("Elevator " + carID + " is inoperable");
 		}
 		// If the echo was from the motor system
 		else if (p.getSubSystem() == SubsystemType.MOTOR) {
@@ -287,7 +364,7 @@ public class Scheduler implements Runnable {
 				returnPacket.setSubSystem(SubsystemType.DOOR);
 				returnPacket.setStatus(new byte[] {DoorState.OPEN.getByte()});
 				try {
-					outputBuffer.put(new DataPacket(OriginType.SCHEDULER, (byte) car[(int) p.getId()].getPosition(), SubsystemType.FLOORLAMP,new byte[] {car[(int) p.getId()].getTripDir().getByte(),p.getId()}));
+					outputBuffer.put(new DataPacket(OriginType.SCHEDULER, (byte) car[carID].getPosition(), SubsystemType.FLOORLAMP,new byte[] {car[carID].getTripDir().getByte(),p.getId()}));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -300,11 +377,11 @@ public class Scheduler implements Runnable {
 				// TODO: make sure elevator is going in correct direction
 				// send new motor direction to the elevator
 				// If elevator is on an upwards trip
-				if(car[(int) p.getId()].getTripDir() == Direction.UP) {
+				if(car[carID].getTripDir() == Direction.UP) {
 					returnPacket.setSubSystem(SubsystemType.MOTOR);
 					returnPacket.setStatus(new byte[] {MotorState.UP.getByte()});
 				} // If elevator is on a downwards trip
-				else if (car[(int) p.getId()].getTripDir() == Direction.DOWN) {
+				else if (car[carID].getTripDir() == Direction.DOWN) {
 					returnPacket.setSubSystem(SubsystemType.MOTOR);
 					returnPacket.setStatus(new byte[] {MotorState.DOWN.getByte()});
 				}
@@ -318,21 +395,35 @@ public class Scheduler implements Runnable {
 		} // If the packet is the current location of the elevator
 		else if (p.getSubSystem() == SubsystemType.LOCATION) {
 			//ColouredOutput.printColouredText("testing if car is at destination", ColouredOutput.ANSI_GREEN);
-			//ColouredOutput.printColouredText("p.getStatus[0] = " + p.getStatus()[0] + " car[(int) p.getId()].getNextDestination() = " + car[(int) p.getId()].getNextDestination(), ColouredOutput.ANSI_GREEN);
+			//ColouredOutput.printColouredText("p.getStatus[0] = " + p.getStatus()[0] + " car[carID].getNextDestination() = " + car[carID].getNextDestination(), ColouredOutput.ANSI_GREEN);
 			//System.out.println("testing if car is at destination");
-			//System.out.println("p.getStatus[0] = " + p.getStatus()[0] + " car[(int) p.getId()].getNextDestination() = " + car[(int) p.getId()].getNextDestination());
+			//System.out.println("p.getStatus[0] = " + p.getStatus()[0] + " car[carID].getNextDestination() = " + car[carID].getNextDestination());
 			// if car has reached destination
-			if ((int) p.getStatus()[0] == car[(int) p.getId()].getNextDestination()) {
+			if ((int) p.getStatus()[0] == car[carID].getNextDestination()) {
 				// set the return packet to turn off the motor
 				returnPacket.setSubSystem(SubsystemType.MOTOR);
 				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
 
 				// remove this destination from the list of destinations for the car to visit
-				car[(int) p.getId()].findNextDestination();
+				car[carID].findNextDestination();
 				// remove the floorButtonLight for this floor
-				car[(int) p.getId()].setFloorButtonLight(p.getStatus()[0], false);
-			} // Check if car direction
-			else if ()
+				car[carID].setFloorButtonLight(p.getStatus()[0], false);
+			} 
+			
+			// Test if elevator is at a floor with an active request
+			else if (atRequestFloor(carID)) {
+				// If true, stop the elevator
+				// set the return packet to turn off the motor
+				returnPacket.setSubSystem(SubsystemType.MOTOR);
+				returnPacket.setStatus(new byte[] {MotorState.OFF.getByte()});
+				
+				// Remove the request from its list
+				if (car[carID].getTripDir() == Direction.UP) {
+					this.upRequests.remove(car[carID].getPosition());
+				} else if (car[carID].getTripDir() == Direction.DOWN) {
+					this.downRequests.remove(car[carID].getPosition());
+				}
+			}
 		}
 		
 		//ColouredOutput.printColouredText("Input packet = " + p.toString(), ColouredOutput.ANSI_GREEN);
