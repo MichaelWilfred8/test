@@ -70,8 +70,8 @@ public class Scheduler implements Runnable {
 	 * Handle an input from the inputBuffer
 	 */
 	private void handleInput(){
-		ColouredOutput.printColouredText("current time =  " + LocalDateTime.now().toString(), ColouredOutput.ANSI_YELLOW);
-		ColouredOutput.printColouredText("inputBuffer = " + this.inputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
+		//ColouredOutput.printColouredText("current time =  " + LocalDateTime.now().toString(), ColouredOutput.ANSI_YELLOW);
+		//ColouredOutput.printColouredText("inputBuffer = " + this.inputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
 		//System.out.println("Car[0] = " + car[0].toString());
 		
 		DataPacket input = new DataPacket(null, (byte) 0, null, null);
@@ -80,14 +80,15 @@ public class Scheduler implements Runnable {
 		} catch (InterruptedException ie) {
 			System.err.println(ie);
 		}
-
-		ColouredOutput.printColouredText("input packet = " + input.toString(), ColouredOutput.ANSI_YELLOW);
+		
+		System.out.println("\n" + LocalDateTime.now().toString() + ": Received " + input.toString());
+		//ColouredOutput.printColouredText("input packet = " + input.toString(), ColouredOutput.ANSI_YELLOW);
 		
 		
 		// If the input was a request from a floor
 		if(input.getOrigin() == OriginType.FLOOR){
 			if ((input.getSubSystem() == SubsystemType.REQUEST) || (input.getSubSystem() == SubsystemType.INPUT)) {
-				ColouredOutput.printColouredText("Handling new request", ColouredOutput.ANSI_YELLOW);
+				//ColouredOutput.printColouredText("Handling new request", ColouredOutput.ANSI_YELLOW);
 				this.handleNewRequest(input); 	// Send request to handleNewRequest
 			}
 		}
@@ -97,7 +98,7 @@ public class Scheduler implements Runnable {
 		if (input.getOrigin() == OriginType.ELEVATOR){
 			this.printAllCarStatus("Before");
 			try {
-				ColouredOutput.printColouredText("Updating elevatorStatus of car " + (int) input.getId(), ColouredOutput.ANSI_YELLOW);
+				//.printColouredText("Updating elevatorStatus of car " + (int) input.getId(), ColouredOutput.ANSI_YELLOW);
 				this.car[(int) input.getId()].update(input);	// Update the elevatorStatus with the input
 			} catch(ArrayIndexOutOfBoundsException e){
 				e.printStackTrace();
@@ -105,17 +106,17 @@ public class Scheduler implements Runnable {
 			}
 
 			this.sendNextStep(input);						// Find the next step for the elevator to do and send it
-			this.printAllCarStatus("After");
+			//this.printAllCarStatus("After");
 		}
 		
-		ColouredOutput.printColouredText("Output = " + this.outputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
+		//ColouredOutput.printColouredText("Output = " + this.outputBuffer.toString(), ColouredOutput.ANSI_YELLOW);
 		
 	}
 	
 	
 	private void printAllCarStatus(String prefix) {
 		for(int i = 0; i < car.length; ++i) {
-			ColouredOutput.printColouredText(prefix + " Car[" + i + "] = " + car[i].toString() + "\n", ColouredOutput.ANSI_YELLOW);
+			//ColouredOutput.printColouredText(prefix + " Car[" + i + "] = " + car[i].toString() + "\n", ColouredOutput.ANSI_YELLOW);
 		}
 	}
 
@@ -241,7 +242,7 @@ public class Scheduler implements Runnable {
 	private void sendNextStep(DataPacket p) {
 		DataPacket returnPacket = new DataPacket(OriginType.SCHEDULER, p.getId(), null, null); // Create a DataPacket to return to the elevator.
 		//ColouredOutput.printColouredText("In sendNextStep", ColouredOutput.ANSI_GREEN);
-		ColouredOutput.printColouredText("sendNextStep car = " + car[(int) p.getId()].toString(), ColouredOutput.ANSI_GREEN);
+		//ColouredOutput.printColouredText("sendNextStep car = " + car[(int) p.getId()].toString(), ColouredOutput.ANSI_GREEN);
 		//System.out.println("car = " + car[(int) p.getId()].toString());
 
 
@@ -333,6 +334,7 @@ public class Scheduler implements Runnable {
 		if ((returnPacket.getSubSystem() != null) && (returnPacket.getStatus() != null)) {
 			try {
 				//ColouredOutput.printColouredText("Sending next step " + returnPacket.toString(), ColouredOutput.ANSI_GREEN_BACKGROUND);
+				System.out.println("Sending " + returnPacket.toString() + " at " + LocalDateTime.now().toString());
 				outputBuffer.add(returnPacket);
 			} catch (IllegalStateException ise) {
 				ise.printStackTrace();
@@ -351,5 +353,8 @@ public class Scheduler implements Runnable {
 			handleInput();
 		}
 	}
+	
+	
+	
 
 }

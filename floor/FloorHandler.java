@@ -81,7 +81,7 @@ public class FloorHandler implements Runnable {
 	}
 
 	public void createRequest(String[] input) {
-		System.out.println("Input = " + Arrays.toString(input));
+		//System.out.println("Input = " + Arrays.toString(input));
 		if (input[2].equalsIgnoreCase("ERROR")) {//if an error is sent from the .csv file
 			byte[] errorPacketContents = {(byte) Integer.parseInt(input[3]), 1};//adds the byte of the integer representation of the Enum of the system that has failed
 			DataPacket errorPacket = new DataPacket(OriginType.ELEVATOR, (byte) Integer.parseInt(input[1]),SubsystemType.ERROR, errorPacketContents); //forms error packet to be sent
