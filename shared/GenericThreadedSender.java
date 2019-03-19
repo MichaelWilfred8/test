@@ -145,7 +145,16 @@ public class GenericThreadedSender implements Runnable {
 				if (tempPacket.getOrigin() == OriginType.SCHEDULER || tempPacket.getOrigin() == OriginType.ERROR){		// If the data is for an elevator and originated from the scheduler or an error
 					this.sendPacket.setSocketAddress(elevatorAddress);		// Send to the elevatorHandler
 					try {
-						this.sendPacket.setAddress(InetAddress.getLocalHost());
+						if(tempPacket.getOrigin() == OriginType.SCHEDULER)
+						{
+							System.out.println("Scheduler sending to Elevator");
+							this.sendPacket.setAddress(InetAddress.getLocalHost());
+						}
+						else
+						{
+							System.out.println("Test sending to Elevator");
+							this.sendPacket.setAddress(InetAddress.getByName("134.117.59.64")); //IP address of PC running Elevator and Scheduler
+						}
 					} catch (UnknownHostException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -163,7 +172,7 @@ public class GenericThreadedSender implements Runnable {
 				if (tempPacket.getOrigin() == OriginType.FLOOR){				// If the data is for a floor and originated from a floor
 					this.sendPacket.setSocketAddress(schedulerAddress);			// Send to the scheduler
 					try {
-						this.sendPacket.setAddress(InetAddress.getLocalHost());
+						this.sendPacket.setAddress(InetAddress.getByName("134.117.59.64")); //IP address of PC running Elevator and Scheduler
 					} catch (UnknownHostException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -171,7 +180,7 @@ public class GenericThreadedSender implements Runnable {
 				} else if (tempPacket.getOrigin() == OriginType.SCHEDULER){		// If the data is for a floor and originated from an elevator
 					this.sendPacket.setSocketAddress(floorAddress);				// Send to the floor handler
 					try {
-						this.sendPacket.setAddress(InetAddress.getLocalHost());
+						this.sendPacket.setAddress(InetAddress.getByName("134.117.59.65")); //IP address of PC running Floor
 					} catch (UnknownHostException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
